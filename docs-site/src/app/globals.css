@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@erp/miniapp-ui/styles.css";
+
+/* Scan library sources so Button/Input/… utility classes are generated.
+ * Paths are relative to this file: docs-site/src/app/globals.css */
+@source "../../../src/**/*.{ts,tsx}";
+@source "../../../dist/**/*.{js,cjs}";
+@source "../../**/*.{ts,tsx}";

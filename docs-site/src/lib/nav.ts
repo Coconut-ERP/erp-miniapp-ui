@@ -1,0 +1,56 @@
+export type NavItem = { label: string; href: string };
+
+export const NAV: { title: string; items: NavItem[] }[] = [
+  {
+    title: "Foundations",
+    items: [
+      { label: "Colors", href: "/foundations/colors" },
+      { label: "Typography", href: "/foundations/typography" },
+      { label: "Spacing & radius", href: "/foundations/spacing" },
+    ],
+  },
+  {
+    title: "Components",
+    items: [
+      { label: "Accordion", href: "/components/accordion" },
+      { label: "Alert", href: "/components/alert" },
+      { label: "Alert Dialog", href: "/components/alert-dialog" },
+      { label: "Avatar", href: "/components/avatar" },
+      { label: "Badge", href: "/components/badge" },
+      { label: "Button", href: "/components/button" },
+      { label: "Card", href: "/components/card" },
+      { label: "Checkbox", href: "/components/checkbox" },
+      { label: "Dialog", href: "/components/dialog" },
+      { label: "Drawer", href: "/components/drawer" },
+      { label: "Dropdown Menu", href: "/components/dropdown-menu" },
+      { label: "Empty", href: "/components/empty" },
+      { label: "Field", href: "/components/field" },
+      { label: "Input", href: "/components/input" },
+      { label: "Label", href: "/components/label" },
+      { label: "Pagination", href: "/components/pagination" },
+      { label: "Popover", href: "/components/popover" },
+      { label: "Radio Group", href: "/components/radio-group" },
+      { label: "Scroll Area", href: "/components/scroll-area" },
+      { label: "Select", href: "/components/select" },
+      { label: "Separator", href: "/components/separator" },
+      { label: "Skeleton", href: "/components/skeleton" },
+      { label: "Spinner", href: "/components/spinner" },
+      { label: "Switch", href: "/components/switch" },
+      { label: "Table", href: "/components/table" },
+      { label: "Tabs", href: "/components/tabs" },
+      { label: "Textarea", href: "/components/textarea" },
+      { label: "Toast", href: "/components/toast" },
+      { label: "Tooltip", href: "/components/tooltip" },
+    ],
+  },
+  {
+    title: "Patterns",
+    items: [
+      { label: "Confirm Dialog", href: "/patterns/confirm-dialog" },
+      { label: "Dashboard / Stats", href: "/patterns/dashboard" },
+      { label: "Page Header", href: "/patterns/page-header" },
+      { label: "Search Field", href: "/patterns/search-field" },
+      { label: "States", href: "/patterns/states" },
+    ],
+  },
+];
