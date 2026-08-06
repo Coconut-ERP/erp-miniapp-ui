@@ -1,19 +1,19 @@
 # ERP MiniApp UI — TODO
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Now
 
-_All roadmap phases 1–10 are complete for v0.1.0._ Next work is iterative improvement (long-term backlog).
+_v0.2.0 released._ Next work is iterative improvement (long-term backlog).
 
 ## Up next (long-term)
 
-- [ ] Publish GitHub Release `miniapp-ui-v0.1.0` with tarball
 - [ ] Migrate `miniapp-hr` onto `@erp/miniapp-ui`
-- [ ] Charts / Data Grid / Calendar / Command / i18n / dark mode (see ROADMAP long-term)
+- [ ] Data Grid / Calendar / Command / i18n (see ROADMAP long-term)
 
 ## Done
 
+- [x] Publish GitHub Release `v0.2.0` with tarball
 - [x] Project docs + AGENTS.md
 - [x] Phase 1 — Foundation
 - [x] Phase 2 — Design foundations

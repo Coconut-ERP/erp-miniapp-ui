@@ -2,26 +2,25 @@
 
 Design system and UI library for ERP mini apps.
 
-> Status: **Phase 3 complete** — foundations + component library. Patterns next (Phase 4).  
-> See [ROADMAP.md](./ROADMAP.md) for the full plan.
+> Status: **v0.2.0** — foundations, components, patterns, charts, docs-site.  
+> See [ROADMAP.md](./ROADMAP.md) / [CHANGELOG.md](./CHANGELOG.md).
 
 ## Install
 
-Published as a GitHub Release tarball (same channel as `erp-sdk`):
+Published as a GitHub Release tarball (not on npm):
 
 ```bash
-npm install https://github.com/Coconut-ERP/erp-sdk/releases/download/miniapp-ui-v0.1.0/erp-miniapp-ui-0.1.0.tgz
+npm install https://github.com/Coconut-ERP/erp-miniapp-ui/releases/download/v0.2.0/erp-miniapp-ui-0.2.0.tgz
 ```
 
-Local development from this monorepo:
+Local development:
 
 ```bash
-cd packages/miniapp-ui
 npm install
 npm run build
 npm pack
 # then in your mini app:
-# npm install ../path/to/erp-miniapp-ui-0.1.0.tgz
+# npm install ../path/to/erp-miniapp-ui-0.2.0.tgz
 ```
 
 ## Peer requirements

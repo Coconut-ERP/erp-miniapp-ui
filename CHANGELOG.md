@@ -7,6 +7,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-07
+
 ### Added
 
 - `SortableList` pattern — HTML5 drag-and-drop reorder (handle + ArrowUp/Down); no DnD dependency
@@ -18,6 +20,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Sheet, Collapsible, Breadcrumb, Progress, Slider, Toggle, Toggle Group, Hover Card, Aspect Ratio
 - `useIsMobile` hook (sidebar breakpoint helper)
 - Shell layout CSS vars: `--shell-inset`, `--sidenav-width`, `--topbar-height`
+- Server-safe `cn` export via `@erp/miniapp-ui/cn`
 
 ### Changed
 
@@ -30,7 +33,6 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - Preserve `"use client"` in built `dist/index.*` so Next.js App Router can import UI from Server Components without `createContext` RSC errors
-- Export server-safe `cn` via `@erp/miniapp-ui/cn` (main barrel stays client-only)
 - Sidebar collapse: drive width from state + `overflow-hidden` so icon/offcanvas modes clip correctly in embedded demos
 
 ## [0.1.0] - 2026-08-05
