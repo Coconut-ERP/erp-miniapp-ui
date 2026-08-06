@@ -4,6 +4,14 @@
   "description": "Design system and UI library for ERP mini apps",
   "type": "module",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Coconut-ERP/erp-miniapp-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Coconut-ERP/erp-miniapp-ui/issues"
+  },
+  "homepage": "https://github.com/Coconut-ERP/erp-miniapp-ui#readme",
   "sideEffects": [
     "**/*.css"
   ],

@@ -1,0 +1,154 @@
+name: Release
+
+# @erp/miniapp-ui is never published to npm. A release is a tarball attached to a
+# GitHub Release, which every package manager can install from a URL.
+#
+#   git tag v0.1.0 && git push --follow-tags   → builds, verifies, publishes
+#   Actions ▸ Release ▸ Run workflow           → dry run, tarball as an artifact
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the tag matches package.json
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $pkg"
+            echo "::error::run \`npm version $tag --no-git-tag-version\`, commit, then re-tag"
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Pack
+        id: pack
+        run: |
+          rm -f ./*.tgz
+          npm pack
+          tgz="$(ls erp-miniapp-ui-*.tgz)"
+          echo "tgz=$tgz" >> "$GITHUB_OUTPUT"
+          echo "packed $tgz ($(du -h "$tgz" | cut -f1))"
+          tar -tzf "$tgz" | head -40
+          for path in \
+            package/dist/index.js \
+            package/dist/index.cjs \
+            package/dist/index.d.ts \
+            package/dist/styles/globals.css \
+            package/README.md \
+            package/CHANGELOG.md
+          do
+            tar -tzf "$tgz" | grep -qx "$path" || {
+              echo "::error::tarball missing $path"
+              exit 1
+            }
+          done
+
+      # Smoke-test the packed tarball — not the working tree. dist/ must be
+      # present and both module formats must resolve, with no build step on the
+      # consumer's side. Peers (react / react-dom) are installed explicitly.
+      - name: Smoke test with npm
+        run: |
+          tgz="$PWD/${{ steps.pack.outputs.tgz }}"
+          dir="$(mktemp -d)"
+          cd "$dir"
+          npm init -y > /dev/null
+          npm install "$tgz" react@19 react-dom@19
+          node --input-type=module -e "
+            import * as m from '@erp/miniapp-ui';
+            if (typeof m.cn !== 'function') throw new Error('missing cn');
+            if (typeof m.Button === 'undefined') throw new Error('missing Button');
+            console.log('npm esm ok');
+          "
+          node -e "
+            const m = require('@erp/miniapp-ui');
+            if (typeof m.cn !== 'function') throw new Error('missing cn');
+            if (typeof m.Button === 'undefined') throw new Error('missing Button');
+            console.log('npm cjs ok');
+          "
+          test -f node_modules/@erp/miniapp-ui/dist/index.d.ts || { echo "missing types"; exit 1; }
+          test -f node_modules/@erp/miniapp-ui/dist/styles/globals.css || { echo "missing styles.css"; exit 1; }
+          node -e "
+            const pkg = require('./node_modules/@erp/miniapp-ui/package.json');
+            if (!pkg.exports || !pkg.exports['./styles.css']) throw new Error('missing styles.css export');
+            console.log('npm styles export ok');
+          "
+
+      - name: Smoke test with bun
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          export PATH="$HOME/.bun/bin:$PATH"
+          tgz="$PWD/${{ steps.pack.outputs.tgz }}"
+          dir="$(mktemp -d)"
+          cd "$dir"
+          echo '{"name":"smoke","type":"module"}' > package.json
+          bun add "file:$tgz" react@19 react-dom@19
+          bun -e "
+            import { cn, Button } from '@erp/miniapp-ui';
+            if (typeof cn !== 'function') throw new Error('missing cn');
+            if (typeof Button === 'undefined') throw new Error('missing Button');
+            console.log('bun esm ok');
+          "
+          test -f node_modules/@erp/miniapp-ui/dist/styles/globals.css || { echo "missing styles.css"; exit 1; }
+
+      - name: Upload the tarball as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.tgz }}
+          path: ${{ steps.pack.outputs.tgz }}
+          if-no-files-found: error
+
+      - name: Publish the GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tgz="${{ steps.pack.outputs.tgz }}"
+          url="https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/${tgz}"
+          cat > notes.md <<EOF
+          Not published to npm — install the tarball below with any package manager.
+
+          \`\`\`bash
+          npm install $url
+          bun add $url
+          pnpm add $url
+          yarn add $url
+          \`\`\`
+
+          In \`package.json\`:
+
+          \`\`\`json
+          { "dependencies": { "@erp/miniapp-ui": "$url" } }
+          \`\`\`
+
+          Peer requirements: React 19+, Tailwind CSS v4 in the consuming app.
+          Import styles once: \`import "@erp/miniapp-ui/styles.css"\`.
+          EOF
+          gh release create "$GITHUB_REF_NAME" "$tgz" \
+            --title "@erp/miniapp-ui ${GITHUB_REF_NAME}" \
+            --notes-file notes.md
+          echo "published $url"
