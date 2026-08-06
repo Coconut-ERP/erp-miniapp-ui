@@ -19,10 +19,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
+  AspectRatio,
   Avatar,
   AvatarFallback,
   AvatarImage,
   Badge,
+  BarChart,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
   Button,
   Card,
   CardContent,
@@ -31,6 +39,9 @@ import {
   CardHeader,
   CardTitle,
   Checkbox,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -38,6 +49,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DonutChart,
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -58,8 +70,12 @@ import {
   Field,
   FieldDescription,
   FieldLabel,
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
   Input,
   Label,
+  LineChart,
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -69,6 +85,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Progress,
   RadioGroup,
   RadioGroupItem,
   ScrollArea,
@@ -78,7 +95,26 @@ import {
   SelectTrigger,
   SelectValue,
   Separator,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
   Skeleton,
+  Slider,
   Spinner,
   Switch,
   Table,
@@ -92,11 +128,16 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
+  Toggle,
+  ToggleGroup,
+  ToggleGroupItem,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@erp/miniapp-ui";
+import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
+import { SidebarIconDemo, SidebarOffcanvasDemo } from "@/components/sidebar-demo";
 import type { DocSpec } from "@/lib/doc-types";
 
 function ControlledCheckbox() {
@@ -270,6 +311,23 @@ export const componentDocs: Record<string, DocSpec> = {
     ],
   },
 
+  "aspect-ratio": {
+    title: "Aspect Ratio",
+    description: "Keep media at a fixed width-to-height ratio.",
+    importLine: `import { AspectRatio } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "16:9",
+        code: `<AspectRatio ratio={16 / 9} className="overflow-hidden rounded-lg bg-muted" />`,
+        className: "w-full max-w-md",
+        render: () => (
+          <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-lg bg-muted" />
+        ),
+      },
+    ],
+    api: ["AspectRatio"],
+  },
+
   avatar: {
     title: "Avatar",
     description: "User or entity image with fallback initials.",
@@ -295,6 +353,107 @@ export const componentDocs: Record<string, DocSpec> = {
       },
     ],
     api: ["Avatar", "AvatarImage", "AvatarFallback", "AvatarBadge", "AvatarGroup"],
+  },
+
+  "bar-chart": {
+    title: "Bar Chart",
+    description: "Config-driven vertical bar chart for dashboards — pass categories + series only.",
+    importLine: `import { BarChart } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Grouped series",
+        code: `<BarChart
+  categories={["Jan", "Feb", "Mar", "Apr"]}
+  series={[
+    { name: "Expected", data: [40, 55, 48, 52], className: "bg-muted-foreground/30" },
+    { name: "Generated", data: [32, 61, 50, 58], className: "bg-primary" },
+  ]}
+  showLegend
+  height={160}
+/>`,
+        className: "items-stretch w-full max-w-lg",
+        render: () => (
+          <BarChart
+            categories={["Jan", "Feb", "Mar", "Apr"]}
+            series={[
+              { name: "Expected", data: [40, 55, 48, 52], className: "bg-muted-foreground/30" },
+              { name: "Generated", data: [32, 61, 50, 58], className: "bg-primary" },
+            ]}
+            showLegend
+            height={160}
+            aria-label="Leads by month"
+            className="w-full"
+          />
+        ),
+      },
+      {
+        title: "Highlight index",
+        code: `<BarChart
+  categories={["Mon", "Tue", "Wed", "Thu"]}
+  series={[{ data: [92, 88, 70, 95], className: "bg-primary/70" }]}
+  highlightIndex={2}
+  highlightClassName="bg-warning"
+  height={128}
+/>`,
+        className: "items-stretch w-full max-w-md",
+        render: () => (
+          <BarChart
+            categories={["Mon", "Tue", "Wed", "Thu"]}
+            series={[{ data: [92, 88, 70, 95], className: "bg-primary/70" }]}
+            highlightIndex={2}
+            highlightClassName="bg-warning"
+            height={128}
+            aria-label="Daily totals"
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    api: ["BarChart", "BarChartProps", "BarChartSeries"],
+  },
+
+  breadcrumb: {
+    title: "Breadcrumb",
+    description: "Hierarchical navigation trail for the current page.",
+    importLine: `import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem><BreadcrumbLink href="#">Home</BreadcrumbLink></BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem><BreadcrumbPage>Settings</BreadcrumbPage></BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>`,
+        render: () => (
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#">HR</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Employees</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        ),
+      },
+    ],
+    api: [
+      "Breadcrumb",
+      "BreadcrumbList",
+      "BreadcrumbItem",
+      "BreadcrumbLink",
+      "BreadcrumbPage",
+      "BreadcrumbSeparator",
+      "BreadcrumbEllipsis",
+    ],
   },
 
   badge: {
@@ -599,6 +758,32 @@ export const componentDocs: Record<string, DocSpec> = {
     api: ["Checkbox"],
   },
 
+  collapsible: {
+    title: "Collapsible",
+    description: "Show and hide a section of content.",
+    importLine: `import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<Collapsible>
+  <CollapsibleTrigger asChild><Button variant="outline">Toggle</Button></CollapsibleTrigger>
+  <CollapsibleContent className="pt-2 text-sm text-muted-foreground">Hidden until open.</CollapsibleContent>
+</Collapsible>`,
+        render: () => (
+          <Collapsible className="w-full max-w-sm">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline">Toggle details</Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 text-sm text-muted-foreground">
+              Extra content revealed when open.
+            </CollapsibleContent>
+          </Collapsible>
+        ),
+      },
+    ],
+    api: ["Collapsible", "CollapsibleTrigger", "CollapsibleContent"],
+  },
+
   dialog: {
     title: "Dialog",
     description: "Modal overlay for focused tasks without leaving the page.",
@@ -639,6 +824,51 @@ export const componentDocs: Record<string, DocSpec> = {
       "DialogFooter",
       "DialogClose",
     ],
+  },
+
+  "donut-chart": {
+    title: "Donut Chart",
+    description: "Ring chart with optional center content and legend.",
+    importLine: `import { DonutChart } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "With center + legend",
+        code: `<DonutChart
+  segments={[
+    { label: "Engineering", value: 420, color: "var(--primary)", className: "bg-primary" },
+    { label: "Sales", value: 260, color: "var(--muted-foreground)", className: "bg-muted-foreground" },
+    { label: "Support", value: 180, color: "var(--success)", className: "bg-success" },
+  ]}
+  center={<>…</>}
+  showLegend
+/>`,
+        className: "items-stretch w-full max-w-md",
+        render: () => (
+          <DonutChart
+            segments={[
+              { label: "Engineering", value: 420, color: "var(--primary)", className: "bg-primary" },
+              {
+                label: "Sales",
+                value: 260,
+                color: "var(--muted-foreground)",
+                className: "bg-muted-foreground",
+              },
+              { label: "Support", value: 180, color: "var(--success)", className: "bg-success" },
+            ]}
+            center={
+              <>
+                <span className="text-2xl font-bold tabular-nums">860</span>
+                <span className="text-[11px] text-muted-foreground">Employees</span>
+              </>
+            }
+            showLegend
+            aria-label="Employees by department"
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    api: ["DonutChart", "DonutChartProps", "DonutChartSegment"],
   },
 
   drawer: {
@@ -773,6 +1003,32 @@ export const componentDocs: Record<string, DocSpec> = {
     api: ["Field", "FieldLabel", "FieldDescription", "FieldError", "FieldGroup", "…"],
   },
 
+  "hover-card": {
+    title: "Hover Card",
+    description: "Rich preview content shown on hover or focus.",
+    importLine: `import { HoverCard, HoverCardTrigger, HoverCardContent } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<HoverCard>
+  <HoverCardTrigger asChild><Button variant="link">@erp</Button></HoverCardTrigger>
+  <HoverCardContent>Mini app design system.</HoverCardContent>
+</HoverCard>`,
+        render: () => (
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Button variant="link">@erp/miniapp-ui</Button>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-64">
+              Design system and UI primitives for ERP mini apps.
+            </HoverCardContent>
+          </HoverCard>
+        ),
+      },
+    ],
+    api: ["HoverCard", "HoverCardTrigger", "HoverCardContent"],
+  },
+
   input: {
     title: "Input",
     description: "Single-line text field for forms. Showcase types, disabled, and invalid states.",
@@ -851,6 +1107,35 @@ export const componentDocs: Record<string, DocSpec> = {
     api: ["Label"],
   },
 
+  "line-chart": {
+    title: "Line Chart",
+    description: "Simple line / sparkline for trends inside cards.",
+    importLine: `import { LineChart } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Trend",
+        code: `<LineChart
+  data={[980, 1020, 1100, 1080, 1198, 1248]}
+  categories={["Jan", "Feb", "Mar", "Apr", "May", "Jun"]}
+  stroke="var(--primary)"
+  fill="var(--primary)"
+/>`,
+        className: "items-stretch w-full max-w-md",
+        render: () => (
+          <LineChart
+            data={[980, 1020, 1100, 1080, 1198, 1248]}
+            categories={["Jan", "Feb", "Mar", "Apr", "May", "Jun"]}
+            stroke="var(--primary)"
+            fill="var(--primary)"
+            aria-label="6-month trend"
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    api: ["LineChart", "LineChartProps"],
+  },
+
   pagination: {
     title: "Pagination",
     description: "Navigate multi-page result sets.",
@@ -921,6 +1206,21 @@ export const componentDocs: Record<string, DocSpec> = {
       },
     ],
     api: ["Popover", "PopoverTrigger", "PopoverContent", "PopoverAnchor"],
+  },
+
+  progress: {
+    title: "Progress",
+    description: "Linear progress indicator for determinate loading.",
+    importLine: `import { Progress } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<Progress value={60} className="w-64" />`,
+        className: "w-full max-w-sm",
+        render: () => <Progress value={60} className="w-full" />,
+      },
+    ],
+    api: ["Progress"],
   },
 
   "radio-group": {
@@ -1035,6 +1335,82 @@ export const componentDocs: Record<string, DocSpec> = {
     api: ["Separator"],
   },
 
+  sheet: {
+    title: "Sheet",
+    description: "Side panel overlay for secondary flows and mobile navigation.",
+    importLine: `import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<Sheet>
+  <SheetTrigger asChild><Button variant="outline">Open</Button></SheetTrigger>
+  <SheetContent>
+    <SheetHeader>
+      <SheetTitle>Panel</SheetTitle>
+      <SheetDescription>Secondary content.</SheetDescription>
+    </SheetHeader>
+  </SheetContent>
+</Sheet>`,
+        render: () => (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline">Open sheet</Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Filters</SheetTitle>
+                <SheetDescription>Adjust filters without leaving the page.</SheetDescription>
+              </SheetHeader>
+            </SheetContent>
+          </Sheet>
+        ),
+      },
+    ],
+    api: [
+      "Sheet",
+      "SheetTrigger",
+      "SheetContent",
+      "SheetHeader",
+      "SheetTitle",
+      "SheetDescription",
+      "SheetFooter",
+      "SheetClose",
+    ],
+  },
+
+  sidebar: {
+    title: "Sidebar",
+    description: "Collapsible application sidebar with desktop rail and mobile sheet.",
+    importLine: `import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, SidebarTrigger } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Collapsible (icon)",
+        description: "Click the trigger (or press Ctrl/⌘+B) to collapse to icons and expand again.",
+        code: `<SidebarProvider>
+  <Sidebar collapsible="icon">
+    <SidebarHeader>…</SidebarHeader>
+    <SidebarContent>…</SidebarContent>
+  </Sidebar>
+  <SidebarInset>
+    <header>
+      <SidebarTrigger />
+    </header>
+  </SidebarInset>
+</SidebarProvider>`,
+        className: "w-full items-stretch justify-start overflow-hidden p-0",
+        render: () => <SidebarIconDemo />,
+      },
+      {
+        title: "Offcanvas",
+        description: "Fully hides the sidebar when collapsed (desktop).",
+        code: `<Sidebar collapsible="offcanvas" />`,
+        className: "w-full items-stretch justify-start overflow-hidden p-0",
+        render: () => <SidebarOffcanvasDemo />,
+      },
+    ],
+    api: ["SidebarProvider", "Sidebar", "SidebarInset", "SidebarTrigger", "useSidebar", "…"],
+  },
+
   skeleton: {
     title: "Skeleton",
     description: "Placeholder pulse while content loads.",
@@ -1054,6 +1430,21 @@ export const componentDocs: Record<string, DocSpec> = {
       },
     ],
     api: ["Skeleton"],
+  },
+
+  slider: {
+    title: "Slider",
+    description: "Range control for numeric values.",
+    importLine: `import { Slider } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<Slider defaultValue={[40]} max={100} step={1} className="w-64" />`,
+        className: "w-full max-w-sm",
+        render: () => <Slider defaultValue={[40]} max={100} step={1} className="w-full" />,
+      },
+    ],
+    api: ["Slider"],
   },
 
   spinner: {
@@ -1213,6 +1604,58 @@ toast("Event created");`,
       },
     ],
     api: ["Toaster", "toast (from sonner)"],
+  },
+
+  toggle: {
+    title: "Toggle",
+    description: "Pressable on/off control for formatting and view options.",
+    importLine: `import { Toggle } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<Toggle aria-label="Bold"><BoldIcon /></Toggle>`,
+        render: () => (
+          <>
+            <Toggle aria-label="Bold">
+              <BoldIcon />
+            </Toggle>
+            <Toggle aria-label="Italic" variant="outline">
+              <ItalicIcon />
+            </Toggle>
+          </>
+        ),
+      },
+    ],
+    api: ["Toggle", "toggleVariants"],
+  },
+
+  "toggle-group": {
+    title: "Toggle Group",
+    description: "Group of mutually exclusive or multi-select toggles.",
+    importLine: `import { ToggleGroup, ToggleGroupItem } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Basic",
+        code: `<ToggleGroup type="multiple">
+  <ToggleGroupItem value="bold" aria-label="Bold"><BoldIcon /></ToggleGroupItem>
+  …
+</ToggleGroup>`,
+        render: () => (
+          <ToggleGroup type="multiple">
+            <ToggleGroupItem value="bold" aria-label="Bold">
+              <BoldIcon />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="italic" aria-label="Italic">
+              <ItalicIcon />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="underline" aria-label="Underline">
+              <UnderlineIcon />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+    ],
+    api: ["ToggleGroup", "ToggleGroupItem"],
   },
 
   tooltip: {

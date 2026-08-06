@@ -29,6 +29,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./cn": {
+      "types": "./dist/cn.d.ts",
+      "import": "./dist/cn.js",
+      "require": "./dist/cn.cjs"
+    },
     "./styles.css": "./dist/styles/globals.css"
   },
   "scripts": {

@@ -4,8 +4,10 @@ Patterns compose primitives into reusable flows. Prefer these over one-off layou
 
 | Pattern | Doc | Code |
 | --- | --- | --- |
+| App Sidebar | [app-sidebar.md](./app-sidebar.md) | `AppSidebar` |
 | Forms | [forms.md](./forms.md) | `FormStack`, `Field`, `Input` |
 | Search | [search.md](./search.md) | `SearchField` |
+| Sortable list | [sortable-list.md](./sortable-list.md) | `SortableList` |
 | CRUD | [crud.md](./crud.md) | composition |
 | Table | [table.md](./table.md) | `Table`, `Pagination` |
 | Filter | [filter.md](./filter.md) | `Drawer` + fields |

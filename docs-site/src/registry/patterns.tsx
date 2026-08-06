@@ -14,9 +14,35 @@ import {
   SearchField,
   StatisticCard,
 } from "@erp/miniapp-ui";
+import { AppSidebarDemo } from "@/components/app-sidebar-demo";
+import { SortableListDemo } from "@/components/sortable-list-demo";
 import type { DocSpec } from "@/lib/doc-types";
 
 export const patternDocs: Record<string, DocSpec> = {
+  "app-sidebar": {
+    title: "App Sidebar",
+    description:
+      "Dreams-aligned nav rail — pass items + activeId; library handles active styles and nested groups.",
+    importLine: `import { AppSidebar, type AppSidebarItem } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Items + activeId",
+        code: `<AppSidebar
+  items={[
+    { id: "main", label: "Main", type: "section" },
+    { id: "dashboard", label: "Dashboard", icon: <LayoutDashboardIcon />, children: […] },
+    // …
+  ]}
+  activeId="hrm"
+  onItemSelect={(item) => setActiveId(item.id)}
+/>`,
+        className: "items-stretch w-full",
+        render: () => <AppSidebarDemo />,
+      },
+    ],
+    api: ["AppSidebar", "AppSidebarItem", "AppSidebarProps"],
+  },
+
   "confirm-dialog": {
     title: "Confirm Dialog",
     description: "Destructive or costly actions with an explicit confirm step.",
@@ -129,6 +155,31 @@ export const patternDocs: Record<string, DocSpec> = {
       },
     ],
     api: ["SearchField"],
+  },
+
+  "sortable-list": {
+    title: "Sortable List",
+    description: "Reorder a list via drag handle (HTML5 DnD) or ArrowUp/ArrowDown.",
+    importLine: `import { SortableList } from "@erp/miniapp-ui";`,
+    demos: [
+      {
+        title: "Drag handle",
+        code: `<SortableList
+  items={stages}
+  getId={(s) => s.id}
+  onReorder={setStages}
+  renderItem={(stage, { dragHandleProps }) => (
+    <>
+      <span {...dragHandleProps}><GripVerticalIcon /></span>
+      <span>{stage.name}</span>
+    </>
+  )}
+/>`,
+        className: "items-stretch w-full",
+        render: () => <SortableListDemo />,
+      },
+    ],
+    api: ["SortableList", "SortableListProps", "SortableDragHandleProps"],
   },
 
   states: {

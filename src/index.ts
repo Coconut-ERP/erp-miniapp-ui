@@ -158,8 +158,68 @@ export {
   PaginationNext,
   PaginationPrevious,
 } from "./components/ui/pagination";
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetOverlay,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
+} from "./components/ui/sheet";
+export {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./components/ui/collapsible";
+export {
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./components/ui/breadcrumb";
+export { Progress } from "./components/ui/progress";
+export { Slider } from "./components/ui/slider";
+export { Toggle, toggleVariants } from "./components/ui/toggle";
+export { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
+export { HoverCard, HoverCardContent, HoverCardTrigger } from "./components/ui/hover-card";
+export { AspectRatio } from "./components/ui/aspect-ratio";
+export {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from "./components/ui/sidebar";
+export { useIsMobile } from "./hooks/use-mobile";
 
 export {
+  AppSidebar,
   ConfirmDialog,
   DashboardCard,
   EmptyState,
@@ -171,5 +231,21 @@ export {
   PageHeader,
   PermissionState,
   SearchField,
+  SortableList,
   StatisticCard,
 } from "./components/patterns";
+export type {
+  AppSidebarItem,
+  AppSidebarProps,
+  SortableDragHandleProps,
+  SortableListProps,
+} from "./components/patterns";
+
+export { BarChart, DonutChart, LineChart } from "./components/charts";
+export type {
+  BarChartProps,
+  BarChartSeries,
+  DonutChartProps,
+  DonutChartSegment,
+  LineChartProps,
+} from "./components/charts";

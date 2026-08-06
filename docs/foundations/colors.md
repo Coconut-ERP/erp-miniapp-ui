@@ -27,8 +27,15 @@ Semantic color tokens cho surface, text, action, status. Tất cả map qua `:ro
 | Border | `--border` | Dividers, card edges |
 | Input | `--input` | Form control borders |
 | Ring | `--ring` | Focus rings |
+| Sidebar | `--sidebar` / `--sidebar-foreground` | Sidebar surface |
+| Sidebar primary | `--sidebar-primary` / `--sidebar-primary-foreground` | Active / brand in sidebar |
+| Sidebar accent | `--sidebar-accent` / `--sidebar-accent-foreground` | Hover / selected menu |
+| Sidebar border | `--sidebar-border` | Sidebar dividers |
+| Sidebar ring | `--sidebar-ring` | Sidebar focus rings |
 
-Values are **oklch**. Primary ≈ `oklch(0.49 0.14 258)`.
+Values are hex aligned to ERP shell (`#0284c7` ocean primary, `#2f3a4b` title). **Default = light**. Add `class="dark"` on `<html>` for dark surfaces — theme toggle only; component sizes stay the same.
+
+Layout tokens: `--shell-inset` (12px), `--sidenav-width` (242px), `--topbar-height` (56px), `--radius` (6px / `rounded-md`).
 
 ## Tailwind usage
 

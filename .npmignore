@@ -1,0 +1,10 @@
+# Keep published / file: installs lean (Yarn still copies parent without this).
+docs-site
+node_modules
+src
+.ai
+.github
+*.tgz
+*.log
+.tsup
+.tmp-shadcn

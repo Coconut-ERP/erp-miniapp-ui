@@ -27,8 +27,9 @@ packages/miniapp-ui/
 ├── src/
 │   ├── index.ts               # Public barrel — only stable exports
 │   ├── components/
-│   │   ├── ui/                # Primitives (Button, Input, …)
+│   │   ├── ui/                # Primitives (Button, Input, Sidebar, …)
 │   │   └── patterns/          # Composed patterns (FormLayout, …) — Phase 4
+│   ├── hooks/                 # Shared hooks (useIsMobile, …)
 │   ├── lib/                   # cn(), shared helpers (no app domain)
 │   └── styles/
 │       └── globals.css        # Design tokens + base layers

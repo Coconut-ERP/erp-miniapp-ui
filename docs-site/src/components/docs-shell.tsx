@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cn } from "@erp/miniapp-ui";
+import { cn } from "@erp/miniapp-ui/cn";
 import { NAV } from "@/lib/nav";
 
 export function DocsShell({

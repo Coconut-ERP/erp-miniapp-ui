@@ -9,7 +9,29 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- (ready for next iteration)
+- `SortableList` pattern — HTML5 drag-and-drop reorder (handle + ArrowUp/Down); no DnD dependency
+- Charts: `BarChart`, `DonutChart`, `LineChart` — config-driven dashboard charts (no app-side SVG/bar markup)
+- `AppSidebar` pattern — Dreams ERP nav (`type: "section"`, nested groups, `renderLink` / footer)
+- `StatisticCard` trend props (`trend`, `trendLabel`) for KPI cards
+- `Progress` `indicatorClassName` for multi-color bars
+- Sidebar compound component (`SidebarProvider`, menu primitives, `useSidebar`) + sidebar design tokens
+- Sheet, Collapsible, Breadcrumb, Progress, Slider, Toggle, Toggle Group, Hover Card, Aspect Ratio
+- `useIsMobile` hook (sidebar breakpoint helper)
+- Shell layout CSS vars: `--shell-inset`, `--sidenav-width`, `--topbar-height`
+
+### Changed
+
+- Primary brand color: ocean blue `#0284c7` (was Dreams teal `#0f766e`); accent / ring / sidebar-primary follow
+- Design tokens follow Dreams ERP **light** layout by default; optional `html.dark`
+- Component anatomy aligned to Dreams: `Button` h-9, `Input` h-9 `rounded-md`, `Badge` `rounded-md`, `Card` `rounded-md`
+- `AppSidebar` menu paddings/active states match Dreams sidebar CSS (not “dark-only” restyle)
+- `PageHeader` / `StatisticCard` typography tuned to dashboard density
+
+### Fixed
+
+- Preserve `"use client"` in built `dist/index.*` so Next.js App Router can import UI from Server Components without `createContext` RSC errors
+- Export server-safe `cn` via `@erp/miniapp-ui/cn` (main barrel stays client-only)
+- Sidebar collapse: drive width from state + `overflow-hidden` so icon/offcanvas modes clip correctly in embedded demos
 
 ## [0.1.0] - 2026-08-05
 

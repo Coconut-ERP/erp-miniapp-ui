@@ -1,6 +1,6 @@
 # ERP MiniApp UI — TODO
 
-Last updated: 2026-08-05
+Last updated: 2026-08-06
 
 ## Now
 
@@ -10,8 +10,7 @@ _All roadmap phases 1–10 are complete for v0.1.0._ Next work is iterative impr
 
 - [ ] Publish GitHub Release `miniapp-ui-v0.1.0` with tarball
 - [ ] Migrate `miniapp-hr` onto `@erp/miniapp-ui`
-- [ ] Live component previews in docs-site
-- [ ] Charts / Data Grid / i18n / dark mode (see ROADMAP long-term)
+- [ ] Charts / Data Grid / Calendar / Command / i18n / dark mode (see ROADMAP long-term)
 
 ## Done
 
@@ -26,3 +25,5 @@ _All roadmap phases 1–10 are complete for v0.1.0._ Next work is iterative impr
 - [x] Phase 8 — Docs site (Next.js showcase)
 - [x] Phase 9 — miniapp-ui-kit
 - [x] Phase 10 — Release pipeline docs
+- [x] Add Sidebar + missing shadcn primitives (Sheet, Collapsible, Breadcrumb, Progress, Slider, Toggle, Toggle Group, Hover Card, Aspect Ratio)
+- [x] Add `AppSidebar` pattern (soft nav UI; `items` + `activeId` API)

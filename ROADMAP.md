@@ -436,4 +436,5 @@ Phase 1 (minimum); full value after Phase 3+.
 | --- | --- |
 | 2026-08-05 | Phases 1–10 completed: package, foundations, components, patterns, recipes, conventions, AI skills, Next.js docs-site, miniapp-ui-kit, release pipeline |
 | 2026-08-06 | Removed obsolete `docs-site-md-archive` (old VitePress markdown); AGENTS.md clarified (library + docs-site only) |
+| 2026-08-06 | Added Sidebar + Sheet, Collapsible, Breadcrumb, Progress, Slider, Toggle, Toggle Group, Hover Card, Aspect Ratio |
 |

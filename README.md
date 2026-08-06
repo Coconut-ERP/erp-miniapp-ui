@@ -33,7 +33,8 @@ npm pack
 
 ```tsx
 import "@erp/miniapp-ui/styles.css";
-import { Button, cn } from "@erp/miniapp-ui";
+import { Button } from "@erp/miniapp-ui";
+import { cn } from "@erp/miniapp-ui/cn"; // server-safe; also re-exported from main (client)
 
 export function Actions() {
   return (
@@ -44,6 +45,8 @@ export function Actions() {
   );
 }
 ```
+
+> **Next.js App Router:** UI components ship with `"use client"`. Import `cn` from `@erp/miniapp-ui/cn` when calling it from a Server Component.
 
 ### Tailwind v4 consumer CSS
 
@@ -60,7 +63,7 @@ Adjust the `@source` path if your CSS file lives elsewhere.
 
 CSS variables are defined on `:root` (oklch). Mapped into Tailwind via `@theme inline` inside `styles.css`. Documented in Phase 2 (`docs/foundations/`).
 
-Light mode only — matches the ERP portal shell.
+Default visual language follows **Dreams ERP** component anatomy (spacing, radius, sidebar, controls). Theme default is **light**; use `html.dark` for dark surfaces. Matching dark mode alone is not enough — sizes and structure must match the template.
 
 ## Scripts
 
