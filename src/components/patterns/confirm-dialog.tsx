@@ -14,6 +14,14 @@ import {
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 
+/**
+ * Ready-made AlertDialog for confirming an action, with an optional trigger
+ * and a destructive style for irreversible actions.
+ *
+ * Do: pass `destructive` for delete/remove-style confirmations.
+ * Don't: omit `trigger` and also leave `open`/`onOpenChange` unset — the
+ * dialog needs one of the two ways to be shown.
+ */
 export function ConfirmDialog({
   trigger,
   title,

@@ -5,6 +5,10 @@ import type * as React from "react";
 import { Input } from "../ui/input";
 import { cn } from "../../lib/utils";
 
+/**
+ * Text input pre-configured for search: `type="search"` with a leading
+ * search icon. Accepts all Input props.
+ */
 export function SearchField({
   className,
   inputClassName,
