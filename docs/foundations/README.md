@@ -2,16 +2,8 @@
 
 Nền tảng Design System của `@erp/miniapp-ui`. Mọi component, pattern và recipe phải tuân theo các tài liệu này và khớp với CSS variables trong `src/styles/globals.css`.
 
-| Topic | File |
-| --- | --- |
-| Colors | [colors.md](./colors.md) |
-| Typography | [typography.md](./typography.md) |
-| Spacing | [spacing.md](./spacing.md) |
-| Radius | [radius.md](./radius.md) |
-| Elevation / shadow | [elevation.md](./elevation.md) |
-| Animation | [animation.md](./animation.md) |
-| Responsive | [responsive.md](./responsive.md) |
-| Accessibility | [accessibility.md](./accessibility.md) |
+See these topics in Storybook under "Foundations": Colors, Typography, Spacing, Radius,
+Elevation / shadow, Animation, Responsive, Accessibility.
 
 ## Principles
 
