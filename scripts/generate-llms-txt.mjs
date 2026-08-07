@@ -5,7 +5,14 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 function firstJSDocLine(source) {
-  const match = source.match(/\/\*\*([\s\S]*?)\*\//);
+  // Match JSDoc immediately before export function (prioritized for components)
+  let match = source.match(/\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*\n\s*export\s+(?:async\s+)?function\s/);
+
+  // Fallback: match JSDoc before any function (for non-exported functions)
+  if (!match) {
+    match = source.match(/\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*\n\s*(?:async\s+)?function\s/);
+  }
+
   if (!match) return null;
   const lines = match[1]
     .split("\n")

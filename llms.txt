@@ -43,18 +43,18 @@
 - tooltip — (no JSDoc yet — run the component-docs skill)
 
 ## Components (patterns)
-- app-sidebar — Stable id used with `activeId`.
+- app-sidebar — Dreams ERP–aligned application sidebar.
 - confirm-dialog — (no JSDoc yet — run the component-docs skill)
-- date-picker — date-fns format string (default `PPP`)
-- layout — Percent change, e.g. 3.64 or -4.35
+- date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker pattern).
+- layout — (no JSDoc yet — run the component-docs skill)
 - search-field — (no JSDoc yet — run the component-docs skill)
-- sortable-list — Accessible name for the drag handle (default: "Drag to reorder")
+- sortable-list — Vertical sortable list — HTML5 drag-and-drop via a handle.
 - states — (no JSDoc yet — run the component-docs skill)
 
 ## Components (charts)
-- bar-chart — Legend label
-- donut-chart — CSS color for the ring stroke (required for SVG)
-- line-chart — Y values in category order
+- bar-chart — (no JSDoc yet — run the component-docs skill)
+- donut-chart — (no JSDoc yet — run the component-docs skill)
+- line-chart — (no JSDoc yet — run the component-docs skill)
 
 ## Foundations
 - accessibility — Mini apps phải dùng được bằng bàn phím, reader, và đủ tương phản trong portal sáng.
