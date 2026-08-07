@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
+/**
+ * Toast notification host, styled to match library tokens. Mount once near
+ * the app root, then trigger toasts anywhere with `toast(...)` from the
+ * `sonner` package.
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner

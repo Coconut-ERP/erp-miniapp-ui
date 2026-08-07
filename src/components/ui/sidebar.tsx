@@ -53,6 +53,15 @@ function useSidebar() {
   return context
 }
 
+/**
+ * Root context provider for the Sidebar composite: tracks expanded/
+ * collapsed state (desktop) and open/closed state (mobile sheet), persists
+ * state to a cookie, and wires the `Cmd/Ctrl+B` toggle shortcut. Wrap the
+ * whole app shell in this, then render Sidebar + SidebarInset as siblings
+ * inside it.
+ *
+ * Do: read/toggle state elsewhere via the `useSidebar()` hook.
+ */
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -151,6 +160,12 @@ function SidebarProvider({
   )
 }
 
+/**
+ * Collapsible application sidebar shell — renders as an off-canvas Sheet on
+ * mobile automatically. Compose with SidebarHeader/Content/Footer,
+ * SidebarGroup, and SidebarMenu/SidebarMenuItem/SidebarMenuButton for
+ * navigation. Must be rendered inside a SidebarProvider.
+ */
 function Sidebar({
   side = "left",
   variant = "sidebar",
