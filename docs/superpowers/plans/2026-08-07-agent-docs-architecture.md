@@ -674,6 +674,14 @@ git commit -m "docs(miniapp-ui): migrate crud recipe to Storybook MDX (pilot)"
   `"<FolderTitle>/<PageTitle>"`, e.g. `"Conventions/Folder structure"`,
   `"Foundations/Colors"`, `"Patterns/Empty"`).
 
+**Amendment (found in Task 7 review, 2026-08-07):** Task 7's pilot used `"Recipes/CRUD"` —
+`CRUD` is a known acronym kept fully uppercase. That's the only example available, so the
+general rule for the other 54 files (few of which are acronyms) needs to be explicit:
+Title-Case the filename by replacing hyphens with spaces and capitalizing each word (e.g.
+`filter-drawer` → `"Filter Drawer"`, `error-handling` → `"Error Handling"`), **except**
+keep a segment fully uppercase if it's a known acronym/initialism already used elsewhere in
+this codebase's docs (`CRUD`, `API`, `UI`). When in doubt, Title-Case it.
+
 For each file below: read the existing `.md`, wrap its content in an `.mdx` file with a
 `<Meta title="…">` block following Task 7's exact shape, rewrite any relative link to
 another doc folder (grep for `](../` to find them) into a Storybook path link
