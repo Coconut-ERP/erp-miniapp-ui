@@ -85,7 +85,7 @@ natively while the content stays host-agnostic. `AGENTS.md` gets one line pointi
 read `AGENTS.md`. Created using the `skill-creator` skill, not hand-written.
 
 **Scope:** assumes the component already exists and is exported from `src/index.ts` — it
-only produces docs, it does not scaffold a component. Applies to both
+only produces docs, it does not scaffold a component. Applies to
 `src/components/ui/*.tsx`, `src/components/patterns/*.tsx`, and `src/components/charts/*.tsx`.
 
 **Steps:**

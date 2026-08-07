@@ -2,7 +2,7 @@
 
 Patterns compose primitives into reusable flows. Prefer these over one-off layouts.
 
-Code-backed patterns (still plain docs in this folder, pending Task 9):
+Code-backed patterns (still plain docs in this folder, pending hand-deletion after review, see ADR-002):
 
 | Pattern | Doc | Code |
 | --- | --- | --- |

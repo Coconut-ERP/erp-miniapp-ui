@@ -13,6 +13,7 @@ _v0.2.1 released._ Next work is iterative improvement (long-term backlog).
 
 ## Done
 
+- [x] Agent docs architecture (ADR-002): Storybook + `@storybook/addon-mcp`, JSDoc on all 50 components, generated `llms.txt`, prose docs migrated to MDX, `component-docs` skill
 - [x] Publish GitHub Release `v0.2.1` with tarball (`Calendar` / `DatePicker`)
 - [x] Publish GitHub Release `v0.2.0` with tarball
 - [x] Add `Calendar` + `DatePicker` / `DateRangePicker` (shadcn composition)

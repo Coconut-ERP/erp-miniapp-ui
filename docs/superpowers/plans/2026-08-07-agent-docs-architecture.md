@@ -10,6 +10,9 @@
 
 **Spec:** [docs/adr/002-agent-docs-architecture.md](../../adr/002-agent-docs-architecture.md) — read it before starting; this plan implements it section by section.
 
+> Executed 2026-08-07 — all 9 tasks complete; progress/review history tracked in
+> `.superpowers/sdd/` (gitignored, not part of this commit).
+
 ## Global Constraints
 
 - Stack is locked: React 19, Tailwind CSS 4, Radix UI, CVA, lucide-react, light mode only (`AGENTS.md`).

@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 dist/
 *.tgz
+storybook-static/
 
 # Next.js (docs-site)
 docs-site/.next/
