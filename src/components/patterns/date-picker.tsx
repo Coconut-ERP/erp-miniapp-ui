@@ -30,7 +30,9 @@ export type DatePickerProps = {
 };
 
 /**
- * Single-date picker — Popover + Calendar composition (shadcn Date Picker pattern).
+ * Single-date picker — Popover + Calendar composition (shadcn Date Picker
+ * pattern). Controlled via `value`/`onChange`, or uncontrolled via
+ * `defaultValue`.
  */
 export function DatePicker({
   value: valueProp,
@@ -113,7 +115,8 @@ export type DateRangePickerProps = {
 export type { DateRange };
 
 /**
- * Date range picker — Popover + Calendar `mode="range"`.
+ * Date range picker — Popover + Calendar `mode="range"`. Controlled via
+ * `value`/`onChange`, or uncontrolled via `defaultValue`.
  */
 export function DateRangePicker({
   value: valueProp,

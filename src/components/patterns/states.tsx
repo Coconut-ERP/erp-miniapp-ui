@@ -16,6 +16,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Spinner } from "../ui/spinner";
 import { cn } from "../../lib/utils";
 
+/** Stack of skeleton placeholders for a loading list (`rows` count). */
 export function LoadingRows({ rows = 3, className }: { rows?: number; className?: string }) {
   return (
     <div className={cn("space-y-3", className)}>
@@ -26,6 +27,11 @@ export function LoadingRows({ rows = 3, className }: { rows?: number; className?
   );
 }
 
+/**
+ * Centered spinner + label for a loading section.
+ *
+ * A11y: rendered with `role="status"` so the loading state is announced.
+ */
 export function LoadingBlock({
   label = "Loading",
   className,
@@ -44,6 +50,11 @@ export function LoadingBlock({
   );
 }
 
+/**
+ * Destructive Alert for a failed request, showing the error message and an
+ * optional Retry button. Pass the caught `error` (Error, string, or
+ * unknown) and it derives a display message.
+ */
 export function ErrorState({
   error,
   title = "Something went wrong",
@@ -74,6 +85,11 @@ export function ErrorState({
   );
 }
 
+/**
+ * Empty composition for a list/section with no data: icon, title,
+ * optional description, and optional action. NotFoundState and
+ * PermissionState are thin presets of this.
+ */
 export function EmptyState({
   icon: Icon = InboxIcon,
   title,
@@ -101,6 +117,7 @@ export function EmptyState({
   );
 }
 
+/** EmptyState preset for a missing/removed resource (404-style). */
 export function NotFoundState({
   title = "Not found",
   description = "This resource does not exist or was removed.",
@@ -113,6 +130,7 @@ export function NotFoundState({
   return <EmptyState icon={SearchXIcon} title={title} description={description} action={action} />;
 }
 
+/** EmptyState preset for a permission-denied / access-restricted view. */
 export function PermissionState({
   title = "Permission required",
   description = "You do not have access to this action.",
