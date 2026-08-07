@@ -44,3 +44,6 @@ coverage/
 
 # Subagent-driven-development workspace (scratch, not shipped)
 .superpowers/
+
+# Local dev-tooling scratch (browser preview launch config)
+.claude/

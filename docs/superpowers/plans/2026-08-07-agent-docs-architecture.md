@@ -39,15 +39,15 @@
 
 ```json
 "devDependencies": {
-    "@storybook/addon-docs": "^9",
-    "@storybook/addon-mcp": "^9",
-    "@storybook/react-vite": "^9",
+    "@storybook/addon-docs": "^10",
+    "@storybook/addon-mcp": "^0.7",
+    "@storybook/react-vite": "^10",
     "@tailwindcss/vite": "^4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "storybook": "^9",
+    "storybook": "^10",
     "tailwindcss": "^4",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4"
@@ -56,6 +56,16 @@
 
 (Keep the existing entries; this only adds `storybook`, `@storybook/react-vite`,
 `@storybook/addon-docs`, `@storybook/addon-mcp`, `@tailwindcss/vite`, `tailwindcss`.)
+
+**Amendment (found during Task 1 execution, 2026-08-07):** the original plan pinned
+`storybook`/`@storybook/react-vite`/`@storybook/addon-docs` to `^9`. `@storybook/addon-mcp`
+(all published 0.x versions) declares `peerDependencies` support for `storybook ^9.1.16` but
+in practice imports `importModule` from `storybook/internal/common`, which only exists from
+`storybook@10.0.0` onward — every `9.x` release fails to boot with a `CriticalPresetLoadError`.
+`storybook@10.5.7` is the current `latest` dist-tag (not canary/alpha), with matching `10.x`
+releases of `react-vite`/`addon-docs`. Versions above are corrected to `^10` /
+`@storybook/addon-mcp: ^0.7` (that package versions independently, never had a `9.x` line)
+accordingly — this is the version set to install, not the original `^9` block.
 
 - [ ] **Step 2: Add scripts to `package.json`**
 
@@ -314,8 +324,17 @@ git commit -m "chore(miniapp-ui): ship llms.txt and prose docs in the npm tarbal
 
 ## Task 4: `llms.txt` generator
 
+**Amendment (found during Task 3, 2026-08-07):** Task 1's `build` script already chains
+`node ./scripts/generate-llms-txt.mjs`, and Task 3's own verification step (`npm run
+pack:check`) triggers `prepack` → `build`, so it would hard-fail with `ENOENT` without a
+file at that path. The Task 3 implementer created a 3-line placeholder there (logs a
+placeholder message, no side effects) so Task 3's own required check could pass. Ruling:
+keep the stub — Task 4 below still **overwrites it in full** with the real implementation;
+treat the "Create" in the Files section as "overwrite the existing placeholder," not a
+from-scratch file.
+
 **Files:**
-- Create: `scripts/generate-llms-txt.mjs`
+- Create (overwrite the Task 3 placeholder): `scripts/generate-llms-txt.mjs`
 
 **Interfaces:**
 - Consumes: JSDoc comments in `src/components/{ui,patterns,charts}/*.tsx` (Task 2's pattern),
@@ -325,6 +344,19 @@ git commit -m "chore(miniapp-ui): ship llms.txt and prose docs in the npm tarbal
 
 - [ ] **Step 1: Create `scripts/generate-llms-txt.mjs`**
 
+**Amendment (found in Task 4 review, fix round 1, 2026-08-07):** the original regex below
+matched the *first* `/** */` block in the file, which for `app-sidebar`, `date-picker`,
+`layout`, `sortable-list`, `bar-chart`, `donut-chart`, `line-chart` is a prop-level JSDoc
+comment above an interior type field, not the component's own summary — producing nonsense
+entries like `app-sidebar — Stable id used with activeId.` in `llms.txt`. A first fix attempt
+(anchoring a non-greedy `[\s\S]*?` to require `function` right after `*/`) was still capable
+of backtracking across an intervening `*/`/`/**` pair and capturing text spanning multiple
+blocks. The actual fix uses `(?:[^*]|\*(?!\/))*`, which cannot cross a `*/` boundary at all —
+the capture group can only ever match within one comment block — plus a two-tier match
+(prefer the block immediately before `export function`, fall back to any `function`, so
+`Button`'s `function Button(...) { }` + separate `export { Button }` at file-end still
+resolves correctly). The corrected function below is what Task 4 actually implements:
+
 ```js
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
@@ -333,7 +365,12 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 function firstJSDocLine(source) {
-  const match = source.match(/\/\*\*([\s\S]*?)\*\//);
+  let match = source.match(
+    /\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*\n\s*export\s+(?:async\s+)?function\s/,
+  );
+  if (!match) {
+    match = source.match(/\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*\n\s*(?:async\s+)?function\s/);
+  }
   if (!match) return null;
   const lines = match[1]
     .split("\n")
