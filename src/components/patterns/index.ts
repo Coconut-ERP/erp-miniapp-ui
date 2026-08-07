@@ -11,6 +11,13 @@ export { SearchField } from "./search-field";
 export { ConfirmDialog } from "./confirm-dialog";
 export { AppSidebar, type AppSidebarItem, type AppSidebarProps } from "./app-sidebar";
 export {
+  DatePicker,
+  DateRangePicker,
+  type DatePickerProps,
+  type DateRangePickerProps,
+  type DateRange,
+} from "./date-picker";
+export {
   SortableList,
   type SortableDragHandleProps,
   type SortableListProps,

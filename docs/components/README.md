@@ -13,6 +13,7 @@ Catalog of `@erp/miniapp-ui` primitives. Each page follows: Purpose, Import, Pro
 | [Bar Chart](./bar-chart.md) | `bar-chart` |
 | [Breadcrumb](./breadcrumb.md) | `breadcrumb` |
 | [Button](./button.md) | `button` |
+| [Calendar](./calendar.md) | `calendar` |
 | [Card](./card.md) | `card` |
 | [Checkbox](./checkbox.md) | `checkbox` |
 | [Collapsible](./collapsible.md) | `collapsible` |

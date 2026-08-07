@@ -138,6 +138,7 @@ import {
 } from "@erp/miniapp-ui";
 import { BoldIcon, ItalicIcon, UnderlineIcon } from "lucide-react";
 import { SidebarIconDemo, SidebarOffcanvasDemo } from "@/components/sidebar-demo";
+import { CalendarDemo } from "@/components/date-picker-demo";
 import type { DocSpec } from "@/lib/doc-types";
 
 function ControlledCheckbox() {
@@ -662,6 +663,22 @@ export const componentDocs: Record<string, DocSpec> = {
       "Disabled buttons are not focusable (pointer-events-none + opacity).",
     ],
     api: ["Button", "buttonVariants"],
+  },
+
+  calendar: {
+    title: "Calendar",
+    description: "Month grid for selecting a day or range (react-day-picker).",
+    importLine: `import { Calendar } from "@erp/miniapp-ui";`,
+    related: [{ label: "Date Picker", href: "/patterns/date-picker" }],
+    demos: [
+      {
+        title: "Single",
+        code: `<Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />`,
+        className: "items-start",
+        render: () => <CalendarDemo />,
+      },
+    ],
+    api: ["Calendar", "CalendarDayButton"],
   },
 
   card: {

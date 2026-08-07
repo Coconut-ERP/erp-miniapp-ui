@@ -190,6 +190,7 @@ export { Toggle, toggleVariants } from "./components/ui/toggle";
 export { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
 export { HoverCard, HoverCardContent, HoverCardTrigger } from "./components/ui/hover-card";
 export { AspectRatio } from "./components/ui/aspect-ratio";
+export { Calendar, CalendarDayButton } from "./components/ui/calendar";
 export {
   Sidebar,
   SidebarContent,
@@ -222,6 +223,8 @@ export {
   AppSidebar,
   ConfirmDialog,
   DashboardCard,
+  DatePicker,
+  DateRangePicker,
   EmptyState,
   ErrorState,
   FormStack,
@@ -237,6 +240,9 @@ export {
 export type {
   AppSidebarItem,
   AppSidebarProps,
+  DatePickerProps,
+  DateRangePickerProps,
+  DateRange,
   SortableDragHandleProps,
   SortableListProps,
 } from "./components/patterns";

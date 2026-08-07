@@ -16,6 +16,11 @@ import {
 } from "@erp/miniapp-ui";
 import { AppSidebarDemo } from "@/components/app-sidebar-demo";
 import { SortableListDemo } from "@/components/sortable-list-demo";
+import {
+  DatePickerDemo,
+  DatePickerDobDemo,
+  DateRangePickerDemo,
+} from "@/components/date-picker-demo";
 import type { DocSpec } from "@/lib/doc-types";
 
 export const patternDocs: Record<string, DocSpec> = {
@@ -114,6 +119,38 @@ export const patternDocs: Record<string, DocSpec> = {
       },
     ],
     api: ["StatisticCard", "DashboardCard"],
+  },
+
+  "date-picker": {
+    title: "Date Picker",
+    description:
+      "Popover + Calendar — pass value/onChange; single date or range (shadcn composition).",
+    importLine: `import { DatePicker, DateRangePicker } from "@erp/miniapp-ui";`,
+    related: [
+      { label: "Calendar", href: "/components/calendar" },
+      { label: "Popover", href: "/components/popover" },
+    ],
+    demos: [
+      {
+        title: "Basic",
+        code: `<DatePicker value={date} onChange={setDate} placeholder="Pick a date" />`,
+        className: "items-stretch w-full max-w-xs",
+        render: () => <DatePickerDemo />,
+      },
+      {
+        title: "Date of birth (dropdown)",
+        code: `<DatePicker captionLayout="dropdown" fromYear={1960} toYear={2026} />`,
+        className: "items-stretch w-full max-w-xs",
+        render: () => <DatePickerDobDemo />,
+      },
+      {
+        title: "Range",
+        code: `<DateRangePicker value={range} onChange={setRange} numberOfMonths={2} />`,
+        className: "items-stretch w-full max-w-sm",
+        render: () => <DateRangePickerDemo />,
+      },
+    ],
+    api: ["DatePicker", "DateRangePicker", "DatePickerProps", "DateRangePickerProps", "DateRange"],
   },
 
   "page-header": {
