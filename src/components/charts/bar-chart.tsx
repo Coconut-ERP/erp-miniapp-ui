@@ -23,6 +23,16 @@ export type BarChartProps = {
   "aria-label"?: string;
 };
 
+/**
+ * Lightweight CSS/div-based bar chart for dashboards — one or more series
+ * (grouped bars) across shared `categories`, no charting dependency.
+ *
+ * A11y: rendered with `role="img"` and `aria-label`; each bar also carries a
+ * native `title` tooltip.
+ *
+ * Don't: use for large datasets or interactive tooltips/zoom — this is a
+ * simple presentational chart, not a full charting library.
+ */
 export function BarChart({
   categories,
   series,
