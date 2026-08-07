@@ -58,6 +58,19 @@ export function Actions() {
 
 Adjust the `@source` path if your CSS file lives elsewhere.
 
+## For AI agents
+
+- `llms.txt` (shipped in this package) is a one-file overview of every component and doc
+  page — read it first.
+- `dist/index.d.ts` carries JSDoc for every exported component (Purpose / A11y / Do-Don't) —
+  readable with zero network access, e.g. via editor hover or `cat
+  node_modules/@erp/miniapp-ui/dist/index.d.ts`.
+- `docs/foundations/`, `docs/conventions/`, `docs/patterns/`, `docs/recipes/` (shipped as
+  `.mdx`) ship inside this package for the same zero-network reason.
+- If this org has hosted a live Storybook instance for `@erp/miniapp-ui`, its `/mcp` endpoint
+  gives richer, always-current querying (props, live examples, tests) — add it to your
+  agent's MCP config. Ask your team for the URL; none is hard-coded here.
+
 ## Design tokens
 
 CSS variables are defined on `:root` (oklch). Mapped into Tailwind via `@theme inline` inside `styles.css`. Documented in Phase 2 (`docs/foundations/`).
