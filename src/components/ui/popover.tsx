@@ -4,6 +4,15 @@ import { Popover as PopoverPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Non-modal floating panel anchored to a trigger, for supplementary controls
+ * or content (filters, small forms). Compose with PopoverTrigger and
+ * PopoverContent; use PopoverAnchor to anchor to a different element than
+ * the trigger.
+ *
+ * A11y: closes on Escape or outside click; focus is managed by Radix but,
+ * unlike Dialog, does not trap focus.
+ */
 function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
