@@ -45,5 +45,7 @@ coverage/
 # Subagent-driven-development workspace (scratch, not shipped)
 .superpowers/
 
-# Local dev-tooling scratch (browser preview launch config)
-.claude/
+# Local dev-tooling scratch (browser preview launch config) — but .claude/skills/ is a
+# real deliverable (symlinked into .agent/skills/, see ADR-002), keep that tracked
+.claude/*
+!.claude/skills/
