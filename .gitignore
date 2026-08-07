@@ -41,3 +41,6 @@ coverage/
 *.local
 .turbo/
 .cache/
+
+# Subagent-driven-development workspace (scratch, not shipped)
+.superpowers/
