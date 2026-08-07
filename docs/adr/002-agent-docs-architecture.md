@@ -118,8 +118,8 @@ to `component-docs` as the final step of creating a component — nothing else i
 - `stories` glob covers `src/components/**/*.stories.tsx` (§1 code-backed) and
   `docs/{foundations,conventions,patterns,recipes}/**/*.mdx` (§1 prose-only).
 - New `package.json` scripts: `storybook` (dev server, serves `/mcp`), `build-storybook`
-  (static build — used for CI/visual verification; **may or may not** serve `/mcp`, see Open
-  item below).
+  (static build — used for CI/visual verification; does **not** serve `/mcp`, confirmed below —
+  hosting `/mcp` requires the long-running dev process).
 - README gets a "For AI agents" section pointing at `llms.txt` and explaining how to add the
   MCP endpoint once one is hosted (left as an explicit placeholder, not a guessed URL).
 
@@ -176,8 +176,9 @@ the tooling that makes such hosting possible.
   15 move to `.mdx`. No file is left behind in the old location once Phase D/E finish.
 - New standing devDependencies: `storybook`, `@storybook/react-vite`, `@storybook/addon-docs`,
   `@storybook/addon-mcp`.
-- New operational responsibility: keeping a Storybook instance reachable if the MCP path is
-  to work for any consumer repo (see Open item).
+- New operational responsibility: keeping a long-running `storybook dev` instance reachable
+  if the MCP path is to work for any consumer repo — a static `build-storybook` deploy cannot
+  serve `/mcp` (confirmed above).
 - `package.json` → `files` must include `llms.txt`, `docs/foundations/`, `docs/conventions/`,
   `docs/patterns/`, and `docs/recipes/` (all `.mdx` after Phase D) so the zero-infra fallback
   keeps working for every prose category, not just recipes, even after the MCP path exists.
