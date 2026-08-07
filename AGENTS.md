@@ -70,6 +70,10 @@ Load from [`.ai/skills/`](./.ai/skills/README.md):
 
 Optional: `accessibility-review.md`, `performance-review.md`, `refactor.md`.
 
+Agents without native skill support (Codex, Cursor, …) should also read
+[`.agent/skills/`](./.agent/skills/) directly — it holds the same skills in a host-agnostic
+location; `.claude/skills/` symlinks into it for Claude Code's native discovery.
+
 ## Commands
 
 ```bash

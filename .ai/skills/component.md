@@ -9,3 +9,5 @@ Rules:
 4. Include a11y: labels, focus rings, keyboard.
 5. Add docs if extending the library itself (Phase 3 template sections).
 6. **App feature components** (domain cards, list rows, form sections) live in the mini app under `src/components/features/`, not inside `*-page.tsx` and not as a forked `components/ui`. Example: `FactoryOverviewCard` receives typed props and composes `DashboardCard` / `StatisticCard` / `Badge` from the library.
+7. After implementing, run the `component-docs` skill (`.agent/skills/component-docs/`) to
+   add JSDoc + a Storybook story before considering the component done.
