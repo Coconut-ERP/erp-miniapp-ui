@@ -2,6 +2,13 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Multi-line text input that grows with content (`field-sizing: content`).
+ * A thin styled wrapper around the native `<textarea>`.
+ *
+ * A11y: pair with Label (via `htmlFor`/`id`); set `aria-invalid` for the
+ * destructive validation style.
+ */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
