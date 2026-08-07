@@ -4,6 +4,13 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Trail of links showing the user's location in a hierarchy. Compose with
+ * BreadcrumbList/BreadcrumbItem/BreadcrumbLink/BreadcrumbPage/BreadcrumbSeparator.
+ *
+ * A11y: rendered in a `<nav aria-label="breadcrumb">`; the current page uses
+ * BreadcrumbPage with `aria-current="page"` instead of a link.
+ */
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
 }
