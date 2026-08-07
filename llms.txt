@@ -1,60 +1,60 @@
 # @erp/miniapp-ui — LLM overview
 
 ## Components (ui)
-- accordion — Vertically stacked set of collapsible sections; compose with
-- alert-dialog — Modal dialog that interrupts the user to confirm a destructive or
-- alert — Static, inline banner for surfacing a status, warning, or error message
-- aspect-ratio — Constrains a child (typically an image or video) to a fixed width/height
-- avatar — Circular user/entity image with a text fallback, shown while the image
+- accordion — Vertically stacked set of collapsible sections; compose with AccordionItem/AccordionTrigger/AccordionContent.
+- alert-dialog — Modal dialog that interrupts the user to confirm a destructive or significant action before it proceeds. Compose with AlertDialogTrigger, AlertDialogContent, AlertDialogHeader/Footer, and AlertDialogAction/Cancel.
+- alert — Static, inline banner for surfacing a status, warning, or error message near related content. Compose with AlertTitle/AlertDescription/AlertAction.
+- aspect-ratio — Constrains a child (typically an image or video) to a fixed width/height ratio via the `ratio` prop, avoiding layout shift while content loads.
+- avatar — Circular user/entity image with a text fallback, shown while the image loads or fails. Compose with AvatarImage/AvatarFallback, and optionally AvatarBadge (status dot) or wrap several in AvatarGroup.
 - badge — Small inline label for status, category, or count.
-- breadcrumb — Trail of links showing the user's location in a hierarchy. Compose with
+- breadcrumb — Trail of links showing the user's location in a hierarchy. Compose with BreadcrumbList/BreadcrumbItem/BreadcrumbLink/BreadcrumbPage/BreadcrumbSeparator.
 - button — Primary interactive control for actions and navigation.
-- calendar — Date picker grid built on `react-day-picker`. Supports `mode="single"`,
-- card — Container for grouping related content and actions. Compose with
+- calendar — Date picker grid built on `react-day-picker`. Supports `mode="single"`, `"multiple"`, or `"range"` selection (see `DayPickerProps`).
+- card — Container for grouping related content and actions. Compose with CardHeader/CardTitle/CardDescription/CardAction/CardContent/CardFooter.
 - checkbox — Tri-state input for toggling a single value on/off (or indeterminate).
-- collapsible — Show/hide a section of content triggered by a control, with open state
-- dialog — Modal overlay for focused tasks or content that interrupts the current
-- drawer — Panel that slides in from an edge of the screen (`side`: right/left/top/
-- dropdown-menu — Menu of actions/options revealed by a trigger. Compose with
-- empty — Placeholder state for a list/section with no data (empty search results,
-- field — Layout wrapper for a single form control plus its label/description/error,
-- hover-card — Rich preview shown on hover/focus of a trigger (e.g. a user mention),
-- input — Single-line text input. A thin styled wrapper around the native `<input>`
-- label — Accessible label for a form control. Clicking it focuses/activates the
-- pagination — Page-number navigation for splitting long lists across pages. Compose
-- popover — Non-modal floating panel anchored to a trigger, for supplementary controls
-- progress — Horizontal bar showing completion progress toward a task, 0-100 via
-- radio-group — Set of mutually exclusive options; exactly one RadioGroupItem can be
-- scroll-area — Scrollable viewport with custom, cross-browser-consistent scrollbars
-- select — Dropdown for choosing one value from a list, styled to replace the native
+- collapsible — Show/hide a section of content triggered by a control, with open state either controlled or uncontrolled. Compose with CollapsibleTrigger and CollapsibleContent.
+- dialog — Modal overlay for focused tasks or content that interrupts the current flow. Compose with DialogTrigger, DialogContent, DialogHeader/Footer, DialogTitle/Description.
+- drawer — Panel that slides in from an edge of the screen (`side`: right/left/top/ bottom) for supplementary content or forms, without leaving the page context. Compose with DrawerTrigger, DrawerContent, DrawerHeader/Footer.
+- dropdown-menu — Menu of actions/options revealed by a trigger. Compose with DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, and DropdownMenuCheckboxItem/RadioItem/Sub for richer menus.
+- empty — Placeholder state for a list/section with no data (empty search results, empty inbox, etc). Compose with EmptyHeader/EmptyMedia/EmptyTitle/ EmptyDescription/EmptyContent (for a call-to-action button).
+- field — Layout wrapper for a single form control plus its label/description/error, with vertical, horizontal, or responsive orientation. Compose with FieldLabel, FieldContent, FieldDescription, FieldError; group several with FieldGroup/FieldSet/FieldLegend, or separate groups with FieldSeparator.
+- hover-card — Rich preview shown on hover/focus of a trigger (e.g. a user mention), without requiring a click. Compose with HoverCardTrigger/HoverCardContent.
+- input — Single-line text input. A thin styled wrapper around the native `<input>` — pass any native `type` (text, email, password, file, …).
+- label — Accessible label for a form control. Clicking it focuses/activates the associated control (via `htmlFor` + matching `id`, or by wrapping it).
+- pagination — Page-number navigation for splitting long lists across pages. Compose with PaginationContent, PaginationItem, PaginationLink (mark the current page with `isActive`), PaginationPrevious/Next, and PaginationEllipsis.
+- popover — Non-modal floating panel anchored to a trigger, for supplementary controls or content (filters, small forms). Compose with PopoverTrigger and PopoverContent; use PopoverAnchor to anchor to a different element than the trigger.
+- progress — Horizontal bar showing completion progress toward a task, 0-100 via `value`.
+- radio-group — Set of mutually exclusive options; exactly one RadioGroupItem can be selected at a time. Compose with RadioGroupItem.
+- scroll-area — Scrollable viewport with custom, cross-browser-consistent scrollbars (rather than native OS scrollbars). Ships its own ScrollBar; renders one automatically for vertical content.
+- select — Dropdown for choosing one value from a list, styled to replace the native `<select>`. Compose with SelectTrigger/SelectValue, SelectContent, and SelectItem (optionally grouped with SelectGroup/SelectLabel).
 - separator — Visual divider between content, horizontal or vertical via `orientation`.
-- sheet — Panel that slides in from an edge of the screen (`side`: right/left/top/
-- sidebar — Root context provider for the Sidebar composite: tracks expanded/
-- skeleton — Pulsing placeholder shape shown while content is loading. Size it with
-- slider — Drag control for selecting one value, or a range with two thumbs when
-- sonner — Toast notification host, styled to match library tokens. Mount once near
-- spinner — Indeterminate loading indicator (spinning icon). Size via `className`
+- sheet — Panel that slides in from an edge of the screen (`side`: right/left/top/ bottom) over the page content, for details or forms tied to the current context. Compose with SheetTrigger, SheetContent, SheetHeader/Footer.
+- sidebar — Root context provider for the Sidebar composite: tracks expanded/ collapsed state (desktop) and open/closed state (mobile sheet), persists state to a cookie, and wires the `Cmd/Ctrl+B` toggle shortcut. Wrap the whole app shell in this, then render Sidebar + SidebarInset as siblings inside it.
+- skeleton — Pulsing placeholder shape shown while content is loading. Size it with `className` to match what it stands in for.
+- slider — Drag control for selecting one value, or a range with two thumbs when `value`/`defaultValue` has two entries.
+- sonner — Toast notification host, styled to match library tokens. Mount once near the app root, then trigger toasts anywhere with `toast(...)` from the `sonner` package.
+- spinner — Indeterminate loading indicator (spinning icon). Size via `className` (`size-4` default).
 - switch — Binary on/off toggle, typically for an immediately-applied setting.
-- table — Styled `<table>` wrapper with a horizontal-scroll container. Compose with
-- tabs — Switches between panels of content under a shared set of triggers.
-- textarea — Multi-line text input that grows with content (`field-sizing: content`).
-- toggle-group — Group of Toggle buttons for single or multiple selection (set `type` on
+- table — Styled `<table>` wrapper with a horizontal-scroll container. Compose with TableHeader/TableBody/TableFooter, TableRow, TableHead/TableCell, and optional TableCaption.
+- tabs — Switches between panels of content under a shared set of triggers. Compose with TabsList (`variant`: "default" | "line"), TabsTrigger, and TabsContent — match each trigger's `value` to a content panel's `value`.
+- textarea — Multi-line text input that grows with content (`field-sizing: content`). A thin styled wrapper around the native `<textarea>`.
+- toggle-group — Group of Toggle buttons for single or multiple selection (set `type` on the underlying Radix root: "single" | "multiple"). Compose with ToggleGroupItem; `variant`/`size` set on the group cascade to items.
 - toggle — Two-state (on/off) button, e.g. for a formatting option like bold/italic.
-- tooltip — Small text label shown on hover/focus of a trigger, for brief supplementary
+- tooltip — Small text label shown on hover/focus of a trigger, for brief supplementary info (not for essential content). Compose with TooltipTrigger and TooltipContent; wrap the subtree in a single TooltipProvider once (it controls shared show/hide delay).
 
 ## Components (patterns)
-- app-sidebar — Dreams ERP–aligned application sidebar.
-- confirm-dialog — Ready-made AlertDialog for confirming an action, with an optional trigger
-- date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker
-- layout — Page-level heading row: title + optional description on the left,
-- search-field — Text input pre-configured for search: `type="search"` with a leading
-- sortable-list — Vertical sortable list — HTML5 drag-and-drop via a handle.
+- app-sidebar — Dreams ERP–aligned application sidebar. Pass `items` (+ optional `type: "section"`) and `activeId`; spacing/active styles stay in the library.
+- confirm-dialog — Ready-made AlertDialog for confirming an action, with an optional trigger and a destructive style for irreversible actions.
+- date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker pattern). Controlled via `value`/`onChange`, or uncontrolled via `defaultValue`.
+- layout — Page-level heading row: title + optional description on the left, action buttons on the right (stacks on mobile).
+- search-field — Text input pre-configured for search: `type="search"` with a leading search icon. Accepts all Input props.
+- sortable-list — Vertical sortable list — HTML5 drag-and-drop via a handle. Apps pass items + `onReorder`; no third-party DnD dependency.
 - states — Stack of skeleton placeholders for a loading list (`rows` count).
 
 ## Components (charts)
-- bar-chart — Lightweight CSS/div-based bar chart for dashboards — one or more series
-- donut-chart — Lightweight SVG donut/ring chart for showing proportions of a whole, with
-- line-chart — Lightweight SVG sparkline/trend chart — a single-series polyline with an
+- bar-chart — Lightweight CSS/div-based bar chart for dashboards — one or more series (grouped bars) across shared `categories`, no charting dependency.
+- donut-chart — Lightweight SVG donut/ring chart for showing proportions of a whole, with an optional centered label and legend.
+- line-chart — Lightweight SVG sparkline/trend chart — a single-series polyline with an optional area fill, scaled to fit its viewBox.
 
 ## Foundations
 - accessibility — Mini apps phải dùng được bằng bàn phím, reader, và đủ tương phản trong portal sáng.
@@ -67,22 +67,22 @@
 - typography — Hệ chữ thống nhất, đọc tốt trên portal ERP (desktop + mobile webview).
 
 ## Conventions
-- accessibility — Follow [foundations/accessibility](/?path=/docs/foundations-accessibility--docs). PR checklist in review.md.
-- api — - Browser talks to **your** mini-app API routes; API keys stay server-side.
+- accessibility — Follow [foundations/accessibility](/?path=/docs/foundations-accessibility--docs). PR checklist in review.mdx.
+- api — Browser talks to **your** mini-app API routes; API keys stay server-side.
 - constants — Static, serializable values used by pages and shell. Prefer `src/constants/*.ts`.
 - empty — See [patterns/empty](/?path=/docs/patterns-empty--docs). Distinguish empty vs error vs forbidden.
 - error-handling — Load → `ErrorState`. Mutation → toast + field errors. Permission → `PermissionState`.
 - folder — Recommended mini-app layout:
-- hooks — - Data hooks wrap React Query (or app equivalent).
-- imports — ```ts
+- hooks — Data hooks wrap React Query (or app equivalent).
+- imports — Do not deep-import package internals.
 - lib — Shared non-UI code under `src/lib/`.
 - loading — See [patterns/loading](/?path=/docs/patterns-loading--docs).
-- naming — - Components: PascalCase files only if local feature components; library stays kebab-case files.
+- naming — Components: PascalCase files only if local feature components; library stays kebab-case files.
 - pages — `page.tsx` stays a **Server Component**. Do not put `"use client"` on route files.
-- performance — - Import only what you use from `@erp/miniapp-ui` (ESM tree-shake).
-- react-query — - Query keys: `[resource, params]`.
-- review — - [ ] Uses `@erp/miniapp-ui` — no forked Button/Input
-- state — - Server state: React Query.
+- performance — Import only what you use from `@erp/miniapp-ui` (ESM tree-shake).
+- react-query — Query keys: `[resource, params]`.
+- review — Uses `@erp/miniapp-ui` — no forked Button/Input
+- state — Server state: React Query.
 - styling — Rules for mini apps consuming `@erp/miniapp-ui`. Library internals follow the same
 
 ## Patterns (guides)
@@ -96,8 +96,8 @@
 - error — Use `ErrorState` with optional `onRetry`. Toast (`sonner`) for mutation failures that keep the form mounted.
 - filter — Multi-field filters that would crowd the toolbar.
 - forms — Collecting or editing structured data.
-- list-detail — - Mobile: list page → detail page/route.
-- loading — | Situation | Pattern |
+- list-detail — Mobile: list page → detail page/route.
+- loading — Reserve layout height to avoid jump.
 - not-found — `NotFoundState` for missing ids / deep links.
 - pagination — Server- or client-paged collections.
 - permission — `PermissionState` when IAM/scopes deny the view or action.

@@ -4,6 +4,23 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// Join JSDoc lines until the first blank line (end of the "Purpose" paragraph),
+// or a recognized sub-section marker if there's no blank line before it.
+function firstParagraph(lines) {
+  const paragraph = [];
+  let started = false;
+  for (const line of lines) {
+    if (line === "") {
+      if (started) break;
+      continue; // skip leading blank lines before the paragraph starts
+    }
+    if (/^(A11y|Do|Don't):/.test(line)) break;
+    started = true;
+    paragraph.push(line);
+  }
+  return paragraph.join(" ").trim() || null;
+}
+
 function firstJSDocLine(source) {
   // Match JSDoc immediately before export function (prioritized for components)
   let match = source.match(/\/\*\*((?:[^*]|\*(?!\/))*)\*\/\s*\n\s*export\s+(?:async\s+)?function\s/);
@@ -14,11 +31,8 @@ function firstJSDocLine(source) {
   }
 
   if (!match) return null;
-  const lines = match[1]
-    .split("\n")
-    .map((line) => line.replace(/^\s*\*\s?/, "").trim())
-    .filter(Boolean);
-  return lines[0] ?? null;
+  const lines = match[1].split("\n").map((line) => line.replace(/^\s*\*\s?/, "").trim());
+  return firstParagraph(lines);
 }
 
 function componentEntries(dir) {
@@ -39,8 +53,16 @@ function firstMarkdownParagraph(source) {
   const titleIndex = lines.findIndex((line) => line.startsWith("# "));
   for (let i = titleIndex + 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line && !line.startsWith("#") && !line.startsWith("import ") && !line.startsWith("<Meta")) {
-      return line;
+    if (
+      line &&
+      !line.startsWith("#") &&
+      !line.startsWith("import ") &&
+      !line.startsWith("<Meta") &&
+      !line.startsWith("```") &&
+      !line.startsWith("|") &&
+      !line.startsWith("<")
+    ) {
+      return line.replace(/^-\s*(\[[ x]\]\s*)?/, "");
     }
   }
   return "(no description)";
