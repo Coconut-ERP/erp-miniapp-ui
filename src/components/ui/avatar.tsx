@@ -5,6 +5,11 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Circular user/entity image with a text fallback, shown while the image
+ * loads or fails. Compose with AvatarImage/AvatarFallback, and optionally
+ * AvatarBadge (status dot) or wrap several in AvatarGroup.
+ */
 function Avatar({
   className,
   size = "default",

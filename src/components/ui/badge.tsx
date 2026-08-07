@@ -24,6 +24,13 @@ const badgeVariants = cva(
   },
 );
 
+/**
+ * Small inline label for status, category, or count.
+ *
+ * Do: keep text short (a word or two, or a number).
+ * Don't: use for interactive actions — pair with a link/button via `asChild`
+ * only when the whole badge itself is the trigger.
+ */
 function Badge({
   className,
   variant = "default",
