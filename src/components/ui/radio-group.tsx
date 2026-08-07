@@ -4,6 +4,13 @@ import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Set of mutually exclusive options; exactly one RadioGroupItem can be
+ * selected at a time. Compose with RadioGroupItem.
+ *
+ * A11y: arrow keys move selection between items; pair each item with a
+ * Label (via `htmlFor`/`id`).
+ */
 function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
   return (
     <RadioGroupPrimitive.Root

@@ -5,6 +5,11 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Scrollable viewport with custom, cross-browser-consistent scrollbars
+ * (rather than native OS scrollbars). Ships its own ScrollBar; renders one
+ * automatically for vertical content.
+ */
 function ScrollArea({
   className,
   children,
