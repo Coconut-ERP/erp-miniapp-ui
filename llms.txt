@@ -1,0 +1,125 @@
+# @erp/miniapp-ui — LLM overview
+
+## Components (ui)
+- accordion — (no JSDoc yet — run the component-docs skill)
+- alert-dialog — (no JSDoc yet — run the component-docs skill)
+- alert — (no JSDoc yet — run the component-docs skill)
+- aspect-ratio — (no JSDoc yet — run the component-docs skill)
+- avatar — (no JSDoc yet — run the component-docs skill)
+- badge — (no JSDoc yet — run the component-docs skill)
+- breadcrumb — (no JSDoc yet — run the component-docs skill)
+- button — Primary interactive control for actions and navigation.
+- calendar — (no JSDoc yet — run the component-docs skill)
+- card — (no JSDoc yet — run the component-docs skill)
+- checkbox — (no JSDoc yet — run the component-docs skill)
+- collapsible — (no JSDoc yet — run the component-docs skill)
+- dialog — (no JSDoc yet — run the component-docs skill)
+- drawer — (no JSDoc yet — run the component-docs skill)
+- dropdown-menu — (no JSDoc yet — run the component-docs skill)
+- empty — (no JSDoc yet — run the component-docs skill)
+- field — (no JSDoc yet — run the component-docs skill)
+- hover-card — (no JSDoc yet — run the component-docs skill)
+- input — (no JSDoc yet — run the component-docs skill)
+- label — (no JSDoc yet — run the component-docs skill)
+- pagination — (no JSDoc yet — run the component-docs skill)
+- popover — (no JSDoc yet — run the component-docs skill)
+- progress — (no JSDoc yet — run the component-docs skill)
+- radio-group — (no JSDoc yet — run the component-docs skill)
+- scroll-area — (no JSDoc yet — run the component-docs skill)
+- select — (no JSDoc yet — run the component-docs skill)
+- separator — (no JSDoc yet — run the component-docs skill)
+- sheet — (no JSDoc yet — run the component-docs skill)
+- sidebar — (no JSDoc yet — run the component-docs skill)
+- skeleton — (no JSDoc yet — run the component-docs skill)
+- slider — (no JSDoc yet — run the component-docs skill)
+- sonner — (no JSDoc yet — run the component-docs skill)
+- spinner — (no JSDoc yet — run the component-docs skill)
+- switch — (no JSDoc yet — run the component-docs skill)
+- table — (no JSDoc yet — run the component-docs skill)
+- tabs — (no JSDoc yet — run the component-docs skill)
+- textarea — (no JSDoc yet — run the component-docs skill)
+- toggle-group — (no JSDoc yet — run the component-docs skill)
+- toggle — (no JSDoc yet — run the component-docs skill)
+- tooltip — (no JSDoc yet — run the component-docs skill)
+
+## Components (patterns)
+- app-sidebar — Stable id used with `activeId`.
+- confirm-dialog — (no JSDoc yet — run the component-docs skill)
+- date-picker — date-fns format string (default `PPP`)
+- layout — Percent change, e.g. 3.64 or -4.35
+- search-field — (no JSDoc yet — run the component-docs skill)
+- sortable-list — Accessible name for the drag handle (default: "Drag to reorder")
+- states — (no JSDoc yet — run the component-docs skill)
+
+## Components (charts)
+- bar-chart — Legend label
+- donut-chart — CSS color for the ring stroke (required for SVG)
+- line-chart — Y values in category order
+
+## Foundations
+- accessibility — Mini apps phải dùng được bằng bàn phím, reader, và đủ tương phản trong portal sáng.
+- animation — Motion hỗ trợ hierarchy và feedback, không trang trí.
+- colors — Semantic color tokens cho surface, text, action, status. Tất cả map qua `:root` → `@theme inline` → utility Tailwind (`bg-primary`, `text-destructive`, …).
+- elevation — Phân tầng bề mặt bằng màu + border trước; shadow dùng sparingly cho overlay.
+- radius — Bo góc thống nhất cho control, card và overlay.
+- responsive — Mini apps chạy trong ERP shell: desktop sidebar + mobile webview. Layout phải dùng được cả hai.
+- spacing — Nhịp khoảng cách nhất quán giữa layout, form và list.
+- typography — Hệ chữ thống nhất, đọc tốt trên portal ERP (desktop + mobile webview).
+
+## Conventions
+- accessibility — Follow [foundations/accessibility.md](../foundations/accessibility.md). PR checklist in review.md.
+- api — - Browser talks to **your** mini-app API routes; API keys stay server-side.
+- constants — Static, serializable values used by pages and shell. Prefer `src/constants/*.ts`.
+- empty — See [patterns/empty.md](../patterns/empty.md). Distinguish empty vs error vs forbidden.
+- error-handling — Load → `ErrorState`. Mutation → toast + field errors. Permission → `PermissionState`.
+- folder — Recommended mini-app layout:
+- hooks — - Data hooks wrap React Query (or app equivalent).
+- imports — ```ts
+- lib — Shared non-UI code under `src/lib/`.
+- loading — See [patterns/loading.md](../patterns/loading.md).
+- naming — - Components: PascalCase files only if local feature components; library stays kebab-case files.
+- pages — `page.tsx` stays a **Server Component**. Do not put `"use client"` on route files.
+- performance — - Import only what you use from `@erp/miniapp-ui` (ESM tree-shake).
+- react-query — - Query keys: `[resource, params]`.
+- review — - [ ] Uses `@erp/miniapp-ui` — no forked Button/Input
+- state — - Server state: React Query.
+- styling — Rules for mini apps consuming `@erp/miniapp-ui`. Library internals follow the same
+
+## Patterns (guides)
+- app-sidebar — Dreams ERP–aligned application navigation. Pass a nav list (`items` + `activeId`) — the library owns spacing, section titles, and active styles so mini apps stay in sync.
+- confirmation — Irreversible or costly actions (delete, reject, revoke).
+- crud — List → create/edit/delete domain records.
+- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](../recipes/chart-page.md)).
+- date-picker — Pick a single date or a date range via Popover + Calendar ([shadcn Date Picker](https://ui.shadcn.com/docs/components/base/date-picker) composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
+- dialog — Short, focused tasks without leaving the page.
+- empty — `EmptyState` when the collection is legitimately empty (not an error).
+- error — Use `ErrorState` with optional `onRetry`. Toast (`sonner`) for mutation failures that keep the form mounted.
+- filter — Multi-field filters that would crowd the toolbar.
+- forms — Collecting or editing structured data.
+- list-detail — - Mobile: list page → detail page/route.
+- loading — | Situation | Pattern |
+- not-found — `NotFoundState` for missing ids / deep links.
+- pagination — Server- or client-paged collections.
+- permission — `PermissionState` when IAM/scopes deny the view or action.
+- search — Filtering a list by free text.
+- sortable-list — Vertical list reordering via HTML5 drag-and-drop (handle only). No third-party DnD package.
+- table — Dense tabular data with clear columns.
+- upload — Native `input type="file"` styled via `Button asChild` + `Label`, or dropzone in the app.
+- wizard — `Tabs` (controlled step index) or numbered header + `FormStack` per step + Back/Next `Button`s.
+
+## Recipes
+- approve-request — Approve a pending request with optional note.
+- chart-page — Compose dashboard charts from `@erp/miniapp-ui` — **do not** hand-roll bar/donut/line markup in the mini app.
+- create-user — Admin creates a user record.
+- crud — Full list + create + edit + delete for one object.
+- data-table — `Table` + `SearchField` + `Pagination` + row actions via `DropdownMenu`.
+- delete-user — Destructive delete with `ConfirmDialog`.
+- edit-user — Edit existing user; prefill form from loader.
+- filter-drawer — Toolbar `Button` opens `Drawer` with filter `FormStack`; Apply writes URL/query state.
+- login — Authenticate the mini-app user (initData or form) and land on home.
+- profile — View/edit the current user profile.
+- reject-request — Reject with required reason.
+- report-page — `PageHeader` + date filters + `StatisticCard` row + export `Button`.
+- search-page — `SearchField` + results list + empty/loading/error states.
+- setting-page — Grouped settings with `Tabs` or accordion sections; save per section or global Save.
+- upload-file — See [patterns/upload.md](../patterns/upload.md). Show filename + progress + toast.
