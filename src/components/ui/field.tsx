@@ -65,6 +65,15 @@ const fieldVariants = cva("group/field flex w-full gap-2 data-[invalid=true]:tex
   },
 });
 
+/**
+ * Layout wrapper for a single form control plus its label/description/error,
+ * with vertical, horizontal, or responsive orientation. Compose with
+ * FieldLabel, FieldContent, FieldDescription, FieldError; group several with
+ * FieldGroup/FieldSet/FieldLegend, or separate groups with FieldSeparator.
+ *
+ * A11y: rendered with `role="group"`; FieldError uses `role="alert"` so
+ * validation messages are announced.
+ */
 function Field({
   className,
   orientation = "vertical",

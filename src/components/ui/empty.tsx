@@ -3,6 +3,11 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Placeholder state for a list/section with no data (empty search results,
+ * empty inbox, etc). Compose with EmptyHeader/EmptyMedia/EmptyTitle/
+ * EmptyDescription/EmptyContent (for a call-to-action button).
+ */
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

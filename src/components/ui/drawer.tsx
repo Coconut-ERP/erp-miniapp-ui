@@ -7,6 +7,14 @@ import type * as React from "react";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
 
+/**
+ * Panel that slides in from an edge of the screen (`side`: right/left/top/
+ * bottom) for supplementary content or forms, without leaving the page
+ * context. Compose with DrawerTrigger, DrawerContent, DrawerHeader/Footer.
+ *
+ * A11y: traps focus while open and closes on Escape/overlay click (via Radix
+ * Dialog primitive under the hood).
+ */
 function Drawer({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="drawer" {...props} />;
 }

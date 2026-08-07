@@ -6,6 +6,17 @@ import type * as React from "react";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
 
+/**
+ * Modal overlay for focused tasks or content that interrupts the current
+ * flow. Compose with DialogTrigger, DialogContent, DialogHeader/Footer,
+ * DialogTitle/Description.
+ *
+ * A11y: traps focus while open, closes on Escape/overlay click, and returns
+ * focus to the trigger on close (all via Radix). DialogTitle is required for
+ * screen readers even if visually hidden.
+ *
+ * Don't: use for destructive-action confirmation — prefer AlertDialog.
+ */
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
