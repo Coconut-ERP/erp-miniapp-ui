@@ -123,13 +123,20 @@ to `component-docs` as the final step of creating a component — nothing else i
 - README gets a "For AI agents" section pointing at `llms.txt` and explaining how to add the
   MCP endpoint once one is hosted (left as an explicit placeholder, not a guessed URL).
 
-### Open item — verify before relying on the MCP path in production
+### Resolved — static build `/mcp` support
 
-`@storybook/addon-mcp` is documented against `storybook dev` (a live process). Whether a
-static `storybook build` output continues to serve `/mcp` is unconfirmed as of this writing.
-This must be tested as an explicit implementation task (Rollout Phase C). If static build
-does **not** serve `/mcp`, a long-running `storybook dev`-mode process must be hosted
-instead of a static deploy.
+Tested 2026-08-07: `npm run storybook` (dev server, port 6006) responds on `POST /mcp` with a
+`200` JSON-RPC `tools/list` result (`preview-stories`, `get-storybook-story-instructions`,
+`get-changed-stories`, `get-stories-by-component`, `list-all-documentation`,
+`get-documentation`, `get-documentation-for-story`). The `npm run build-storybook` output
+(`storybook-static/`), served via `npx serve storybook-static -l 6007`, returns a plain `404`
+on the same `POST /mcp` request — no MCP route exists in the static output.
+
+Conclusion: static hosting is **not** sufficient. `/mcp` is only served by the live
+`storybook dev` process (it registers the endpoint on its dev middleware server; `storybook
+build` never emits one). Hosting the MCP path in production requires running a long-running
+`storybook dev`-mode process — a static deploy of `storybook-static/` can serve the docs UI
+but cannot serve `/mcp`.
 
 Separately: Storybook needs component **source** to run, so only one centrally hosted
 instance can ever serve `/mcp` — a consumer repo cannot spin up its own Storybook from just
