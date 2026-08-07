@@ -1,60 +1,60 @@
 # @erp/miniapp-ui — LLM overview
 
 ## Components (ui)
-- accordion — (no JSDoc yet — run the component-docs skill)
-- alert-dialog — (no JSDoc yet — run the component-docs skill)
-- alert — (no JSDoc yet — run the component-docs skill)
-- aspect-ratio — (no JSDoc yet — run the component-docs skill)
-- avatar — (no JSDoc yet — run the component-docs skill)
-- badge — (no JSDoc yet — run the component-docs skill)
-- breadcrumb — (no JSDoc yet — run the component-docs skill)
+- accordion — Vertically stacked set of collapsible sections; compose with
+- alert-dialog — Modal dialog that interrupts the user to confirm a destructive or
+- alert — Static, inline banner for surfacing a status, warning, or error message
+- aspect-ratio — Constrains a child (typically an image or video) to a fixed width/height
+- avatar — Circular user/entity image with a text fallback, shown while the image
+- badge — Small inline label for status, category, or count.
+- breadcrumb — Trail of links showing the user's location in a hierarchy. Compose with
 - button — Primary interactive control for actions and navigation.
-- calendar — (no JSDoc yet — run the component-docs skill)
-- card — (no JSDoc yet — run the component-docs skill)
-- checkbox — (no JSDoc yet — run the component-docs skill)
-- collapsible — (no JSDoc yet — run the component-docs skill)
-- dialog — (no JSDoc yet — run the component-docs skill)
-- drawer — (no JSDoc yet — run the component-docs skill)
-- dropdown-menu — (no JSDoc yet — run the component-docs skill)
-- empty — (no JSDoc yet — run the component-docs skill)
-- field — (no JSDoc yet — run the component-docs skill)
-- hover-card — (no JSDoc yet — run the component-docs skill)
-- input — (no JSDoc yet — run the component-docs skill)
-- label — (no JSDoc yet — run the component-docs skill)
-- pagination — (no JSDoc yet — run the component-docs skill)
-- popover — (no JSDoc yet — run the component-docs skill)
-- progress — (no JSDoc yet — run the component-docs skill)
-- radio-group — (no JSDoc yet — run the component-docs skill)
-- scroll-area — (no JSDoc yet — run the component-docs skill)
-- select — (no JSDoc yet — run the component-docs skill)
-- separator — (no JSDoc yet — run the component-docs skill)
-- sheet — (no JSDoc yet — run the component-docs skill)
-- sidebar — (no JSDoc yet — run the component-docs skill)
-- skeleton — (no JSDoc yet — run the component-docs skill)
-- slider — (no JSDoc yet — run the component-docs skill)
-- sonner — (no JSDoc yet — run the component-docs skill)
-- spinner — (no JSDoc yet — run the component-docs skill)
-- switch — (no JSDoc yet — run the component-docs skill)
-- table — (no JSDoc yet — run the component-docs skill)
-- tabs — (no JSDoc yet — run the component-docs skill)
-- textarea — (no JSDoc yet — run the component-docs skill)
-- toggle-group — (no JSDoc yet — run the component-docs skill)
-- toggle — (no JSDoc yet — run the component-docs skill)
-- tooltip — (no JSDoc yet — run the component-docs skill)
+- calendar — Date picker grid built on `react-day-picker`. Supports `mode="single"`,
+- card — Container for grouping related content and actions. Compose with
+- checkbox — Tri-state input for toggling a single value on/off (or indeterminate).
+- collapsible — Show/hide a section of content triggered by a control, with open state
+- dialog — Modal overlay for focused tasks or content that interrupts the current
+- drawer — Panel that slides in from an edge of the screen (`side`: right/left/top/
+- dropdown-menu — Menu of actions/options revealed by a trigger. Compose with
+- empty — Placeholder state for a list/section with no data (empty search results,
+- field — Layout wrapper for a single form control plus its label/description/error,
+- hover-card — Rich preview shown on hover/focus of a trigger (e.g. a user mention),
+- input — Single-line text input. A thin styled wrapper around the native `<input>`
+- label — Accessible label for a form control. Clicking it focuses/activates the
+- pagination — Page-number navigation for splitting long lists across pages. Compose
+- popover — Non-modal floating panel anchored to a trigger, for supplementary controls
+- progress — Horizontal bar showing completion progress toward a task, 0-100 via
+- radio-group — Set of mutually exclusive options; exactly one RadioGroupItem can be
+- scroll-area — Scrollable viewport with custom, cross-browser-consistent scrollbars
+- select — Dropdown for choosing one value from a list, styled to replace the native
+- separator — Visual divider between content, horizontal or vertical via `orientation`.
+- sheet — Panel that slides in from an edge of the screen (`side`: right/left/top/
+- sidebar — Root context provider for the Sidebar composite: tracks expanded/
+- skeleton — Pulsing placeholder shape shown while content is loading. Size it with
+- slider — Drag control for selecting one value, or a range with two thumbs when
+- sonner — Toast notification host, styled to match library tokens. Mount once near
+- spinner — Indeterminate loading indicator (spinning icon). Size via `className`
+- switch — Binary on/off toggle, typically for an immediately-applied setting.
+- table — Styled `<table>` wrapper with a horizontal-scroll container. Compose with
+- tabs — Switches between panels of content under a shared set of triggers.
+- textarea — Multi-line text input that grows with content (`field-sizing: content`).
+- toggle-group — Group of Toggle buttons for single or multiple selection (set `type` on
+- toggle — Two-state (on/off) button, e.g. for a formatting option like bold/italic.
+- tooltip — Small text label shown on hover/focus of a trigger, for brief supplementary
 
 ## Components (patterns)
 - app-sidebar — Dreams ERP–aligned application sidebar.
-- confirm-dialog — (no JSDoc yet — run the component-docs skill)
-- date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker pattern).
-- layout — (no JSDoc yet — run the component-docs skill)
-- search-field — (no JSDoc yet — run the component-docs skill)
+- confirm-dialog — Ready-made AlertDialog for confirming an action, with an optional trigger
+- date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker
+- layout — Page-level heading row: title + optional description on the left,
+- search-field — Text input pre-configured for search: `type="search"` with a leading
 - sortable-list — Vertical sortable list — HTML5 drag-and-drop via a handle.
-- states — (no JSDoc yet — run the component-docs skill)
+- states — Stack of skeleton placeholders for a loading list (`rows` count).
 
 ## Components (charts)
-- bar-chart — (no JSDoc yet — run the component-docs skill)
-- donut-chart — (no JSDoc yet — run the component-docs skill)
-- line-chart — (no JSDoc yet — run the component-docs skill)
+- bar-chart — Lightweight CSS/div-based bar chart for dashboards — one or more series
+- donut-chart — Lightweight SVG donut/ring chart for showing proportions of a whole, with
+- line-chart — Lightweight SVG sparkline/trend chart — a single-series polyline with an
 
 ## Foundations
 - accessibility — Mini apps phải dùng được bằng bàn phím, reader, và đủ tương phản trong portal sáng.
@@ -67,16 +67,16 @@
 - typography — Hệ chữ thống nhất, đọc tốt trên portal ERP (desktop + mobile webview).
 
 ## Conventions
-- accessibility — Follow [foundations/accessibility.md](../foundations/accessibility.md). PR checklist in review.md.
+- accessibility — Follow [foundations/accessibility](/?path=/docs/foundations-accessibility--docs). PR checklist in review.md.
 - api — - Browser talks to **your** mini-app API routes; API keys stay server-side.
 - constants — Static, serializable values used by pages and shell. Prefer `src/constants/*.ts`.
-- empty — See [patterns/empty.md](../patterns/empty.md). Distinguish empty vs error vs forbidden.
+- empty — See [patterns/empty](/?path=/docs/patterns-empty--docs). Distinguish empty vs error vs forbidden.
 - error-handling — Load → `ErrorState`. Mutation → toast + field errors. Permission → `PermissionState`.
 - folder — Recommended mini-app layout:
 - hooks — - Data hooks wrap React Query (or app equivalent).
 - imports — ```ts
 - lib — Shared non-UI code under `src/lib/`.
-- loading — See [patterns/loading.md](../patterns/loading.md).
+- loading — See [patterns/loading](/?path=/docs/patterns-loading--docs).
 - naming — - Components: PascalCase files only if local feature components; library stays kebab-case files.
 - pages — `page.tsx` stays a **Server Component**. Do not put `"use client"` on route files.
 - performance — - Import only what you use from `@erp/miniapp-ui` (ESM tree-shake).
@@ -89,7 +89,7 @@
 - app-sidebar — Dreams ERP–aligned application navigation. Pass a nav list (`items` + `activeId`) — the library owns spacing, section titles, and active styles so mini apps stay in sync.
 - confirmation — Irreversible or costly actions (delete, reject, revoke).
 - crud — List → create/edit/delete domain records.
-- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](../recipes/chart-page.md)).
+- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](/?path=/docs/recipes-chart-page--docs)).
 - date-picker — Pick a single date or a date range via Popover + Calendar ([shadcn Date Picker](https://ui.shadcn.com/docs/components/base/date-picker) composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
 - dialog — Short, focused tasks without leaving the page.
 - empty — `EmptyState` when the collection is legitimately empty (not an error).
@@ -122,4 +122,4 @@
 - report-page — `PageHeader` + date filters + `StatisticCard` row + export `Button`.
 - search-page — `SearchField` + results list + empty/loading/error states.
 - setting-page — Grouped settings with `Tabs` or accordion sections; save per section or global Save.
-- upload-file — See [patterns/upload.md](../patterns/upload.md). Show filename + progress + toast.
+- upload-file — See [patterns/upload](/?path=/docs/patterns-upload--docs). Show filename + progress + toast.
