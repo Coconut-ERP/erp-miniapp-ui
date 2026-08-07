@@ -15,7 +15,7 @@ import { Toaster as Sonner, type ToasterProps } from "sonner";
  * the app root, then trigger toasts anywhere with `toast(...)` from the
  * `sonner` package.
  */
-const Toaster = ({ ...props }: ToasterProps) => {
+function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
       theme="light"
@@ -39,6 +39,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
       {...props}
     />
   );
-};
+}
 
 export { Toaster };
