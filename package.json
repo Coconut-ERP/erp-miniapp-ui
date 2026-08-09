@@ -21,9 +21,7 @@
     "CHANGELOG.md",
     "llms.txt",
     "docs/foundations",
-    "docs/conventions",
-    "docs/patterns",
-    "docs/recipes"
+    "docs/patterns"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

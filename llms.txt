@@ -57,39 +57,21 @@
 - line-chart — Lightweight SVG sparkline/trend chart — a single-series polyline with an optional area fill, scaled to fit its viewBox.
 
 ## Foundations
-- accessibility — Mini apps phải dùng được bằng bàn phím, reader, và đủ tương phản trong portal sáng.
-- animation — Motion hỗ trợ hierarchy và feedback, không trang trí.
-- colors — Semantic color tokens cho surface, text, action, status. Tất cả map qua `:root` → `@theme inline` → utility Tailwind (`bg-primary`, `text-destructive`, …).
-- elevation — Phân tầng bề mặt bằng màu + border trước; shadow dùng sparingly cho overlay.
-- radius — Bo góc thống nhất cho control, card và overlay.
-- responsive — Mini apps chạy trong ERP shell: desktop sidebar + mobile webview. Layout phải dùng được cả hai.
-- spacing — Nhịp khoảng cách nhất quán giữa layout, form và list.
-- typography — Hệ chữ thống nhất, đọc tốt trên portal ERP (desktop + mobile webview).
-
-## Conventions
-- accessibility — Follow [foundations/accessibility](/docs/foundations-accessibility--docs). PR checklist in review.mdx.
-- api — Browser talks to **your** mini-app API routes; API keys stay server-side.
-- constants — Static, serializable values used by pages and shell. Prefer `src/constants/*.ts`.
-- empty — See [patterns/empty](/docs/patterns-empty--docs). Distinguish empty vs error vs forbidden.
-- error-handling — Load → `ErrorState`. Mutation → toast + field errors. Permission → `PermissionState`.
-- folder — Recommended mini-app layout:
-- hooks — Data hooks wrap React Query (or app equivalent).
-- imports — Do not deep-import package internals.
-- lib — Shared non-UI code under `src/lib/`.
-- loading — See [patterns/loading](/docs/patterns-loading--docs).
-- naming — Components: PascalCase files only if local feature components; library stays kebab-case files.
-- pages — `page.tsx` stays a **Server Component**. Do not put `"use client"` on route files.
-- performance — Import only what you use from `@erp/miniapp-ui` (ESM tree-shake).
-- react-query — Query keys: `[resource, params]`.
-- review — Uses `@erp/miniapp-ui` — no forked Button/Input
-- state — Server state: React Query.
-- styling — Rules for mini apps consuming `@erp/miniapp-ui`. Library internals follow the same
+- accessibility — Mini apps must be usable with a keyboard, a screen reader, and sufficient contrast in a
+- animation — Motion supports hierarchy and feedback, not decoration.
+- colors — Semantic color tokens for surface, text, action, status. All map through `:root` → `@theme inline` → Tailwind utilities (`bg-primary`, `text-destructive`, …).
+- elevation — Layer surfaces with color + border first; use shadow sparingly, for overlays only.
+- radius — Consistent corner radius for controls, cards, and overlays.
+- responsive — Library components run inside the ERP shell across both a desktop sidebar layout and a
+- spacing — Consistent spacing rhythm across layout, forms, and lists.
+- styling — How `@erp/miniapp-ui` components use design tokens. Library internals follow the same
+- typography — A unified type system that reads well across the ERP portal (desktop + mobile webview).
 
 ## Patterns (guides)
 - app-sidebar — Dreams ERP–aligned application navigation. Pass a nav list (`items` + `activeId`) — the library owns spacing, section titles, and active styles so mini apps stay in sync.
 - confirmation — Irreversible or costly actions (delete, reject, revoke).
 - crud — List → create/edit/delete domain records.
-- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](/docs/recipes-chart-page--docs)).
+- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](../_for-project-template/recipes/chart-page.md)).
 - date-picker — Pick a single date or a date range via Popover + Calendar ([shadcn Date Picker](https://ui.shadcn.com/docs/components/base/date-picker) composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
 - dialog — Short, focused tasks without leaving the page.
 - empty — `EmptyState` when the collection is legitimately empty (not an error).
@@ -106,20 +88,3 @@
 - table — Dense tabular data with clear columns.
 - upload — Native `input type="file"` styled via `Button asChild` + `Label`, or dropzone in the app.
 - wizard — `Tabs` (controlled step index) or numbered header + `FormStack` per step + Back/Next `Button`s.
-
-## Recipes
-- approve-request — Approve a pending request with optional note.
-- chart-page — Compose dashboard charts from `@erp/miniapp-ui` — **do not** hand-roll bar/donut/line markup in the mini app.
-- create-user — Admin creates a user record.
-- crud — Full list + create + edit + delete for one object.
-- data-table — `Table` + `SearchField` + `Pagination` + row actions via `DropdownMenu`.
-- delete-user — Destructive delete with `ConfirmDialog`.
-- edit-user — Edit existing user; prefill form from loader.
-- filter-drawer — Toolbar `Button` opens `Drawer` with filter `FormStack`; Apply writes URL/query state.
-- login — Authenticate the mini-app user (initData or form) and land on home.
-- profile — View/edit the current user profile.
-- reject-request — Reject with required reason.
-- report-page — `PageHeader` + date filters + `StatisticCard` row + export `Button`.
-- search-page — `SearchField` + results list + empty/loading/error states.
-- setting-page — Grouped settings with `Tabs` or accordion sections; save per section or global Save.
-- upload-file — See [patterns/upload](/docs/patterns-upload--docs). Show filename + progress + toast.

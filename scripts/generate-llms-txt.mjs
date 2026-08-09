@@ -86,9 +86,7 @@ const sections = [
   ["## Components (patterns)", ...componentEntries("patterns")],
   ["## Components (charts)", ...componentEntries("charts")],
   ["## Foundations", ...docEntries("foundations")],
-  ["## Conventions", ...docEntries("conventions")],
   ["## Patterns (guides)", ...docEntries("patterns")],
-  ["## Recipes", ...docEntries("recipes")],
 ];
 
 const output = `${sections.map((section) => section.join("\n")).join("\n\n")}\n`;
