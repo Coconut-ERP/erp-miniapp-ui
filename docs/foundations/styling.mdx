@@ -1,0 +1,26 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundations/Styling" />
+
+# Styling
+
+How `@erp/miniapp-ui` components use design tokens. Library internals follow the same
+token rules documented in [foundations/colors](/docs/foundations-colors--docs).
+
+## Library components
+
+Use semantic Tailwind tokens mapped from the design system:
+
+| Use | Classes |
+| --- | --- |
+| Page canvas | `bg-surface`, `bg-background` |
+| Text | `text-foreground`, `text-muted-foreground` |
+| Cards / panels | `bg-card`, `border-border` |
+| Actions | `bg-primary text-primary-foreground`, `variant="outline"` on `Button` |
+| Status | `text-destructive`, `text-success`, `Badge` variants |
+
+Do **not** reference design tokens via arbitrary CSS variable syntax in JSX
+(`bg-[var(--primary)]`). The utilities `bg-primary`, `text-muted-foreground`, etc.
+already wrap those variables.
+
+Do **not** add hex / oklch literals in component `className` strings.

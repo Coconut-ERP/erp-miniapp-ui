@@ -3,7 +3,7 @@
 Nền tảng Design System của `@erp/miniapp-ui`. Mọi component, pattern và recipe phải tuân theo các tài liệu này và khớp với CSS variables trong `src/styles/globals.css`.
 
 See these topics in Storybook under "Foundations": Colors, Typography, Spacing, Radius,
-Elevation / shadow, Animation, Responsive, Accessibility.
+Elevation / shadow, Animation, Responsive, Accessibility, Styling.
 
 ## Principles
 
