@@ -6,5 +6,5 @@ Full list + create + edit + delete for one object.
 
 ## Steps
 
-Follow the [CRUD pattern](/docs/patterns-crud--docs). Wire React Query (or
+Follow the [CRUD pattern](../../patterns/crud.mdx). Wire React Query (or
 equivalent) in the app layer.

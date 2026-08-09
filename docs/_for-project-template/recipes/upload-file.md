@@ -1,4 +1,4 @@
 # Recipe: Upload file
 
 ## Goal
-See [patterns/upload](/docs/patterns-upload--docs). Show filename + progress + toast.
+See [patterns/upload](../../patterns/upload.mdx). Show filename + progress + toast.

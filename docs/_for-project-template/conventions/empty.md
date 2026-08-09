@@ -1,3 +1,3 @@
 # Empty strategy
 
-See [patterns/empty](/docs/patterns-empty--docs). Distinguish empty vs error vs forbidden.
+See [patterns/empty](../../patterns/empty.mdx). Distinguish empty vs error vs forbidden.

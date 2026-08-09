@@ -2,10 +2,10 @@
 
 Engineering standards for mini apps using `@erp/miniapp-ui`.
 
-See these topics in Storybook under "Conventions":
+Topics in this folder:
 
-- Pages — `page.tsx` is server; client UI in `components/page/`; early-return
-- Styling — colors: semantic tokens for UI; inline Tailwind for app shell
-- Folder — recommended layout
-- Constants — page copy, nav, labels
-- Lib — erp / api / client / date helpers
+- [pages.md](./pages.md) — `page.tsx` is server; client UI in `components/page/`; early-return
+- [styling.md](./styling.md) — colors: semantic tokens for UI; inline Tailwind for app shell
+- [folder.md](./folder.md) — recommended layout
+- [constants.md](./constants.md) — page copy, nav, labels
+- [lib.md](./lib.md) — erp / api / client / date helpers

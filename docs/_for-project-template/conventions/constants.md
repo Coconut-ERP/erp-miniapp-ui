@@ -14,13 +14,13 @@ Static, serializable values used by pages and shell. Prefer `src/constants/*.ts`
 // src/constants/pages.ts
 export const FACTORIES_PAGE = {
   header: {
-    title: "Nhà máy",
-    description: "Danh sách nhà máy đang hoạt động…",
+    title: "Factories",
+    description: "List of active factories…",
   },
-  errorTitle: "Không tải được danh sách nhà máy",
+  errorTitle: "Failed to load factory list",
   empty: {
-    title: "Chưa có nhà máy",
-    description: "Tạo bản ghi Nhà máy trên workspace…",
+    title: "No factories yet",
+    description: "Create a Factory record in the workspace…",
   },
 } as const;
 ```

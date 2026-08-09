@@ -40,4 +40,4 @@ components/features/factory-overview-card.tsx   # one factory → DashboardCard 
 
 `*-page.tsx` stays thin: load data, branch states, layout. Feature files own presentation for one domain unit.
 
-See [pages](/docs/conventions-pages--docs), [constants](/docs/conventions-constants--docs), [lib](/docs/conventions-lib--docs).
+See [pages](./pages.md), [constants](./constants.md), [lib](./lib.md).

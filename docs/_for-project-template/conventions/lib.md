@@ -17,7 +17,7 @@ lib/
 
 1. Prefer **pure functions** with no React imports.
 2. Server-only ERP secrets stay in `lib/erp` / API routes — never import `lib/erp/app` from client components.
-3. Date helpers used by both API (`Sản xuất.Ngày`) and Assign form live in `lib/date.ts` — do not redefine `todayLocal` inside a page.
+3. Date helpers used by both API (`Production.Date`) and Assign form live in `lib/date.ts` — do not redefine `todayLocal` inside a page.
 4. Domain types stay in `domain/` (or `lib/domain/`); `lib/api` imports them, pages import hooks that call `lib/client`.
 
 ```ts
