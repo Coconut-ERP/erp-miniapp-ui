@@ -6,7 +6,8 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 ## Purpose
 
-Mini apps phải dùng được bằng bàn phím, reader, và đủ tương phản trong portal sáng.
+Mini apps must be usable with a keyboard, a screen reader, and sufficient contrast in a
+light-only portal.
 
 ## Rules (mandatory)
 
@@ -38,7 +39,7 @@ Mini apps phải dùng được bằng bàn phím, reader, và đủ tương ph�
 
 ## Component expectations
 
-Each Phase 3 component doc must include an **Accessibility** section covering keyboard, ARIA, and focus.
+Every component doc must include an **Accessibility** section covering keyboard, ARIA, and focus.
 
 ## Do
 
@@ -50,10 +51,3 @@ Each Phase 3 component doc must include an **Accessibility** section covering ke
 - Don't use `outline-none` without a visible replacement ring.
 - Don't rely on color alone for status (pair with text/icon).
 - Don't disable scrolling on `body` without restoring it after overlays close (Radix handles this when used correctly).
-
-## Review checklist (short)
-
-- [ ] Tab through the view — no traps except intentional modal traps
-- [ ] Screen-reader label present for icon buttons
-- [ ] Errors associated with fields
-- [ ] Contrast OK for text and focus ring on surfaces used
