@@ -1,0 +1,3 @@
+# Accessibility convention
+
+Follow [foundations/accessibility](/docs/foundations-accessibility--docs). PR checklist in review.mdx.
