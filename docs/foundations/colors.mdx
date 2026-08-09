@@ -6,7 +6,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 ## Purpose
 
-Semantic color tokens cho surface, text, action, status. Tất cả map qua `:root` → `@theme inline` → utility Tailwind (`bg-primary`, `text-destructive`, …).
+Semantic color tokens for surface, text, action, status. All map through `:root` → `@theme inline` → Tailwind utilities (`bg-primary`, `text-destructive`, …).
 
 ## Source of truth
 
@@ -61,7 +61,7 @@ Layout tokens: `--shell-inset` (12px), `--sidenav-width` (242px), `--topbar-heig
 - Don't introduce new brand colors in a single mini app without adding a token.
 - Don't use `dark:` as the primary theming path — light portal only.
 - Don't hard-code `oklch(...)` or hex in component class strings.
-- Don't add mini-app shell variables (`--app-sidebar`, …) or `bg-[var(--…)]` — see [conventions/styling](/docs/conventions-styling--docs).
+- Don't add mini-app shell variables (`--app-sidebar`, …) or `bg-[var(--…)]` — see [conventions/styling](../_for-project-template/conventions/styling.md).
 
 ## Dark mode
 
