@@ -57,29 +57,29 @@
 - line-chart — Lightweight SVG sparkline/trend chart — a single-series polyline with an optional area fill, scaled to fit its viewBox.
 
 ## Foundations
-- accessibility — Mini apps must be usable with a keyboard, a screen reader, and sufficient contrast in a
+- accessibility — Mini apps must be usable with a keyboard, a screen reader, and sufficient contrast in a light-only portal.
 - animation — Motion supports hierarchy and feedback, not decoration.
 - colors — Semantic color tokens for surface, text, action, status. All map through `:root` → `@theme inline` → Tailwind utilities (`bg-primary`, `text-destructive`, …).
 - elevation — Layer surfaces with color + border first; use shadow sparingly, for overlays only.
 - radius — Consistent corner radius for controls, cards, and overlays.
-- responsive — Library components run inside the ERP shell across both a desktop sidebar layout and a
+- responsive — Library components run inside the ERP shell across both a desktop sidebar layout and a mobile webview, so they share one consistent breakpoint scale.
 - spacing — Consistent spacing rhythm across layout, forms, and lists.
-- styling — How `@erp/miniapp-ui` components use design tokens. Library internals follow the same
+- styling — How `@erp/miniapp-ui` components use design tokens. Library internals follow the same token rules documented in foundations/colors.
 - typography — A unified type system that reads well across the ERP portal (desktop + mobile webview).
 
 ## Patterns (guides)
 - app-sidebar — Dreams ERP–aligned application navigation. Pass a nav list (`items` + `activeId`) — the library owns spacing, section titles, and active styles so mini apps stay in sync.
 - confirmation — Irreversible or costly actions (delete, reject, revoke).
 - crud — List → create/edit/delete domain records.
-- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](../_for-project-template/recipes/chart-page.md)).
-- date-picker — Pick a single date or a date range via Popover + Calendar ([shadcn Date Picker](https://ui.shadcn.com/docs/components/base/date-picker) composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
+- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see chart-page recipe).
+- date-picker — Pick a single date or a date range via Popover + Calendar (shadcn Date Picker composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
 - dialog — Short, focused tasks without leaving the page.
 - empty — `EmptyState` when the collection is legitimately empty (not an error).
 - error — Use `ErrorState` with optional `onRetry`. Toast (`sonner`) for mutation failures that keep the form mounted.
 - filter — Multi-field filters that would crowd the toolbar.
 - forms — Collecting or editing structured data.
-- list-detail — Mobile: list page → detail page/route.
-- loading — Reserve layout height to avoid jump.
+- list-detail — Mobile: list page → detail page/route. - Desktop: split pane — list (`ScrollArea`) + detail panel (`Card` or route outlet).
+- loading — Reserve layout height to avoid jump. - Prefer skeletons that mirror final structure.
 - not-found — `NotFoundState` for missing ids / deep links.
 - pagination — Server- or client-paged collections.
 - permission — `PermissionState` when IAM/scopes deny the view or action.

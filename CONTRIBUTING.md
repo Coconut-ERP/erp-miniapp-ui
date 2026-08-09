@@ -48,4 +48,4 @@ Examples:
 
 ## Review
 
-Use the phase **Review criteria** in `ROADMAP.md` plus `docs/conventions/review.md` once Phase 6 exists.
+Use the phase **Review criteria** in `ROADMAP.md` plus `docs/_for-project-template/conventions/review.md` once Phase 6 exists.

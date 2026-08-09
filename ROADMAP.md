@@ -207,7 +207,7 @@ Copy-ready flows for common ERP mini-app screens.
 
 ### Deliverables
 
-`docs/recipes/`:
+`docs/_for-project-template/recipes/` (moved out of library docs — see ADR-003):
 
 - [x] login, profile, crud
 - [x] approve-request, reject-request
@@ -247,7 +247,7 @@ Chuẩn hóa cách tổ chức code trong mọi Mini App dùng thư viện này.
 
 ### Deliverables
 
-`docs/conventions/`:
+`docs/_for-project-template/conventions/` (moved out of library docs — see ADR-003):
 
 - [x] folder.md, naming.md, imports.md
 - [x] hooks.md, state.md, api.md, react-query.md

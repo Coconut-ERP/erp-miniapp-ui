@@ -45,5 +45,6 @@ Four files mixed both audiences in one file: `conventions/styling.mdx`,
 - `docs/_for-project-template/` is a manual, human-driven migration step — copying its
   content into a separate template repository is explicitly out of scope for any automated
   process in this package.
-- `docs/mdx-audience-map.md`, the working document that produced this classification, is
-  deleted — its findings are now directly expressed by the folder layout.
+- `docs/mdx-audience-map.md`, an untracked working document that produced this
+  classification, was removed when this ADR was accepted (it was never in git history) —
+  its findings are now directly expressed by the folder layout.

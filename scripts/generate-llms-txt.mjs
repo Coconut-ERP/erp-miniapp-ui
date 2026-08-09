@@ -48,24 +48,43 @@ function componentEntries(dir) {
     });
 }
 
+function stripMarkdownLinks(text) {
+  return text.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+}
+
+function isMarkdownSkippableLine(line) {
+  return (
+    !line ||
+    line.startsWith("#") ||
+    line.startsWith("import ") ||
+    line.startsWith("<Meta") ||
+    line.startsWith("```") ||
+    line.startsWith("|") ||
+    line.startsWith("<")
+  );
+}
+
 function firstMarkdownParagraph(source) {
   const lines = source.split("\n");
   const titleIndex = lines.findIndex((line) => line.startsWith("# "));
+  const paragraph = [];
+  let started = false;
   for (let i = titleIndex + 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (
-      line &&
-      !line.startsWith("#") &&
-      !line.startsWith("import ") &&
-      !line.startsWith("<Meta") &&
-      !line.startsWith("```") &&
-      !line.startsWith("|") &&
-      !line.startsWith("<")
-    ) {
-      return line.replace(/^-\s*(\[[ x]\]\s*)?/, "");
+    if (!started) {
+      if (isMarkdownSkippableLine(line)) continue;
+      started = true;
+      paragraph.push(line.replace(/^-\s*(\[[ x]\]\s*)?/, ""));
+      continue;
     }
+    if (line === "") break;
+    if (line.startsWith("#") || line.startsWith("```") || line.startsWith("|") || line.startsWith("<")) {
+      break;
+    }
+    paragraph.push(line);
   }
-  return "(no description)";
+  const text = paragraph.join(" ").trim();
+  return text ? stripMarkdownLinks(text) : "(no description)";
 }
 
 function docEntries(dir) {
