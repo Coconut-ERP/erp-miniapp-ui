@@ -46,6 +46,9 @@ coverage/
 # Subagent-driven-development workspace (scratch, not shipped)
 .superpowers/
 
+# Local git worktrees (isolated feature checkouts)
+.worktrees/
+
 # Local dev-tooling scratch (browser preview launch config) — but .claude/skills/ is a
 # real deliverable (symlinked into .agent/skills/, see ADR-002), keep that tracked
 .claude/*
