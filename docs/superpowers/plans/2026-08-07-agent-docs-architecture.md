@@ -638,7 +638,7 @@ Full list + create + edit + delete for one object.
 
 ## Steps
 
-Follow the [CRUD pattern](/?path=/docs/patterns-crud--docs). Wire React Query (or
+Follow the [CRUD pattern](/docs/patterns-crud--docs). Wire React Query (or
 equivalent) in the app layer.
 ```
 
@@ -688,7 +688,7 @@ this codebase's docs (`CRUD`, `API`, `UI`). When in doubt, Title-Case it.
 For each file below: read the existing `.md`, wrap its content in an `.mdx` file with a
 `<Meta title="…">` block following Task 7's exact shape, rewrite any relative link to
 another doc folder (grep for `](../` to find them) into a Storybook path link
-(`/?path=/docs/<folder>-<name>--docs`), `git rm` the old `.md`, and check it off. This is
+(`/docs/<folder>-<name>--docs`), `git rm` the old `.md`, and check it off. This is
 mechanical and repeatable — dispatch it across multiple subagents in parallel by folder
 (one agent per row below) via `superpowers:dispatching-parallel-agents`, since each file is
 independent.
@@ -708,7 +708,7 @@ independent.
 - [ ] `search-page.md` → `.mdx`
 - [ ] `setting-page.md` → `.mdx`
 - [ ] `upload-file.md` → `.mdx` (has a relative link to `../patterns/upload.md` — rewrite to
-      `/?path=/docs/patterns-upload--docs`)
+      `/docs/patterns-upload--docs`)
 
 **`docs/conventions/` (17):**
 - [ ] `accessibility.md` → `.mdx`

@@ -41,8 +41,8 @@ export default async function Page({
 4. `useSearchParams` still needs a client child + `<Suspense>` from the server page.
 5. Providers (`QueryClientProvider`) stay in a client layout wrapper, not on every page.
 6. **Early-return render** — one branch at a time (`isLoading` → `error` → empty → success). Do not stack `isLoading ? … : null` then `error ? … : null` then `data ? … : null` (avoids overlapping stale data + error).
-7. **Copy from `constants/`** — titles, empty/error strings live in `src/constants/pages.ts` (see [constants](/?path=/docs/conventions-constants--docs)). Date helpers live in `src/lib/date.ts` (see [lib](/?path=/docs/conventions-lib--docs)).
-8. **Extract feature UI** — rich list cards / sections belong in `components/features/`, not inline in `*-page.tsx` (see [folder](/?path=/docs/conventions-folder--docs)).
+7. **Copy from `constants/`** — titles, empty/error strings live in `src/constants/pages.ts` (see [constants](/docs/conventions-constants--docs)). Date helpers live in `src/lib/date.ts` (see [lib](/docs/conventions-lib--docs)).
+8. **Extract feature UI** — rich list cards / sections belong in `components/features/`, not inline in `*-page.tsx` (see [folder](/docs/conventions-folder--docs)).
 
 ```tsx
 import { FACTORIES_PAGE } from "@/constants/pages";

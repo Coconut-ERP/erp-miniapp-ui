@@ -1,5 +1,6 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 import tailwindcss from "@tailwindcss/vite";
+import remarkGfm from "remark-gfm";
 
 const config: StorybookConfig = {
   stories: [
@@ -9,7 +10,19 @@ const config: StorybookConfig = {
     "../docs/patterns/**/*.mdx",
     "../docs/recipes/**/*.mdx",
   ],
-  addons: ["@storybook/addon-docs", "@storybook/addon-mcp"],
+  addons: [
+    {
+      name: "@storybook/addon-docs",
+      options: {
+        mdxPluginOptions: {
+          mdxCompileOptions: {
+            remarkPlugins: [remarkGfm],
+          },
+        },
+      },
+    },
+    "@storybook/addon-mcp",
+  ],
   framework: {
     name: "@storybook/react-vite",
     options: {},

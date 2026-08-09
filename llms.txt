@@ -67,16 +67,16 @@
 - typography — Hệ chữ thống nhất, đọc tốt trên portal ERP (desktop + mobile webview).
 
 ## Conventions
-- accessibility — Follow [foundations/accessibility](/?path=/docs/foundations-accessibility--docs). PR checklist in review.mdx.
+- accessibility — Follow [foundations/accessibility](/docs/foundations-accessibility--docs). PR checklist in review.mdx.
 - api — Browser talks to **your** mini-app API routes; API keys stay server-side.
 - constants — Static, serializable values used by pages and shell. Prefer `src/constants/*.ts`.
-- empty — See [patterns/empty](/?path=/docs/patterns-empty--docs). Distinguish empty vs error vs forbidden.
+- empty — See [patterns/empty](/docs/patterns-empty--docs). Distinguish empty vs error vs forbidden.
 - error-handling — Load → `ErrorState`. Mutation → toast + field errors. Permission → `PermissionState`.
 - folder — Recommended mini-app layout:
 - hooks — Data hooks wrap React Query (or app equivalent).
 - imports — Do not deep-import package internals.
 - lib — Shared non-UI code under `src/lib/`.
-- loading — See [patterns/loading](/?path=/docs/patterns-loading--docs).
+- loading — See [patterns/loading](/docs/patterns-loading--docs).
 - naming — Components: PascalCase files only if local feature components; library stays kebab-case files.
 - pages — `page.tsx` stays a **Server Component**. Do not put `"use client"` on route files.
 - performance — Import only what you use from `@erp/miniapp-ui` (ESM tree-shake).
@@ -89,7 +89,7 @@
 - app-sidebar — Dreams ERP–aligned application navigation. Pass a nav list (`items` + `activeId`) — the library owns spacing, section titles, and active styles so mini apps stay in sync.
 - confirmation — Irreversible or costly actions (delete, reject, revoke).
 - crud — List → create/edit/delete domain records.
-- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](/?path=/docs/recipes-chart-page--docs)).
+- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see [chart-page recipe](/docs/recipes-chart-page--docs)).
 - date-picker — Pick a single date or a date range via Popover + Calendar ([shadcn Date Picker](https://ui.shadcn.com/docs/components/base/date-picker) composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
 - dialog — Short, focused tasks without leaving the page.
 - empty — `EmptyState` when the collection is legitimately empty (not an error).
@@ -122,4 +122,4 @@
 - report-page — `PageHeader` + date filters + `StatisticCard` row + export `Button`.
 - search-page — `SearchField` + results list + empty/loading/error states.
 - setting-page — Grouped settings with `Tabs` or accordion sections; save per section or global Save.
-- upload-file — See [patterns/upload](/?path=/docs/patterns-upload--docs). Show filename + progress + toast.
+- upload-file — See [patterns/upload](/docs/patterns-upload--docs). Show filename + progress + toast.
