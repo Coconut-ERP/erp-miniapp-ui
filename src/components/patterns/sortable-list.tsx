@@ -48,6 +48,9 @@ export type SortableListProps<T> = {
 /**
  * Vertical sortable list — HTML5 drag-and-drop via a handle.
  * Apps pass items + `onReorder`; no third-party DnD dependency.
+ *
+ * A11y: the drag handle is keyboard operable — focus it and use
+ * ArrowUp/ArrowDown to reorder without a mouse.
  */
 export function SortableList<T>({
   items,

@@ -5,6 +5,12 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Visual divider between content, horizontal or vertical via `orientation`.
+ *
+ * A11y: `decorative` (default true) hides it from assistive tech; set to
+ * `false` only when the separator carries real semantic meaning.
+ */
 function Separator({
   className,
   orientation = "horizontal",

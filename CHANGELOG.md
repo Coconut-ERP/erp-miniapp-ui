@@ -7,6 +7,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Storybook 10 + `@storybook/addon-mcp` — live, queryable component docs (`npm run storybook`, `npm run build-storybook`)
+- JSDoc (Purpose / A11y / Do-Don't) on all 50 components, source of truth for component docs, ships in `dist/index.d.ts`
+- Generated `llms.txt` (one-file LLM overview of components, foundations, and patterns), shipped in the npm tarball
+- `component-docs` skill at `.agent/skills/` (symlinked to `.claude/skills/` for Claude Code) to keep JSDoc + Storybook stories in sync
+
+### Changed
+
+- Prose docs (`docs/foundations/`, most of `docs/patterns/`) migrated from `.md` to Storybook MDX docs pages; ship in the npm tarball
+- `docs/components/` (old per-component `.md`) removed — component docs now live as JSDoc + Storybook stories
+- Conventions and recipes reclassified as project-level docs and removed from this repo entirely; no longer ship in the npm tarball or `llms.txt` (ADR-003)
+
 ## [0.2.1] - 2026-08-07
 
 ### Added

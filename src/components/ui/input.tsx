@@ -2,6 +2,13 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Single-line text input. A thin styled wrapper around the native `<input>`
+ * — pass any native `type` (text, email, password, file, …).
+ *
+ * A11y: pair with Label (via `htmlFor`/`id`) or wrap in FieldLabel; set
+ * `aria-invalid` to trigger the destructive validation style.
+ */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input

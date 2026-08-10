@@ -24,6 +24,15 @@ export type DonutChartProps = {
   "aria-label"?: string;
 };
 
+/**
+ * Lightweight SVG donut/ring chart for showing proportions of a whole, with
+ * an optional centered label and legend.
+ *
+ * A11y: the SVG carries `role="img"` and `aria-label`.
+ *
+ * Do: pass a real `color` per segment (used for the SVG stroke); `className`
+ * only affects the legend swatch.
+ */
 export function DonutChart({
   segments,
   center,

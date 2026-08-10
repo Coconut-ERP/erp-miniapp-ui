@@ -15,8 +15,10 @@ Status legend: `[ ]` pending · `[~]` in progress · `[x]` done
 | Publish | GitHub Release tarball (same as `erp-sdk`) | No private npm registry required yet |
 | CSS | Ship `styles/globals.css` with design tokens; consumer imports it | Tokens stay versioned with components |
 | Dark mode | Out of scope (light-only, like ERP shell) | Long-term backlog |
-| Docs language | Vietnamese primary; English summaries where useful | Matches repo docs convention |
-| AI skills | `.ai/skills/` under this package + installable skill | Phase 7 |
+| Docs language | English | Standardized 2026-08-09; see docs restructure round 2 |
+| AI skills | `.agent/skills/` under this package (canonical), `.claude/skills/` symlink for Claude Code | Phase 7, revised ADR-002 |
+| Agent docs | Storybook + `@storybook/addon-mcp` + JSDoc + generated `llms.txt` | ADR-002 |
+| Docs scope | `docs/foundations/` + `docs/patterns/` only ship with the library; conventions/recipes are project-level, not library docs | ADR-003 |
 
 If any of these must change, stop and propose an ADR in `docs/adr/` before coding.
 
@@ -132,6 +134,7 @@ Components (migrate/adapt from `miniapp-hr`):
 - [x] Scroll Area
 
 Docs under `docs/components/<name>.md` with: Purpose, Import, Props, Variants, Sizes, A11y, Do/Don't, Example, API, Source.
+Later replaced by JSDoc + Storybook stories per component, and the `docs/components/*.md` files removed (see ADR-002, `component-docs` skill).
 
 ### Checklist
 
@@ -207,7 +210,8 @@ Copy-ready flows for common ERP mini-app screens.
 
 ### Deliverables
 
-`docs/recipes/`:
+Recipes were later reclassified as project-level docs, not library docs, and removed from
+this repo (see ADR-003):
 
 - [x] login, profile, crud
 - [x] approve-request, reject-request
@@ -247,7 +251,8 @@ Chuẩn hóa cách tổ chức code trong mọi Mini App dùng thư viện này.
 
 ### Deliverables
 
-`docs/conventions/`:
+Conventions were later reclassified as project-level docs, not library docs, and removed
+from this repo (see ADR-003):
 
 - [x] folder.md, naming.md, imports.md
 - [x] hooks.md, state.md, api.md, react-query.md
@@ -285,11 +290,14 @@ Skill files để AI sinh / review code theo chuẩn Senior + thư viện này.
 
 ### Deliverables
 
-`.ai/skills/`:
+`.agent/skills/` (originally `.ai/skills/`; restructured to a `.agent/` + `.claude/`
+symlink layout usable by Claude/Codex/Cursor under ADR-002, superseding the file list below):
 
 - [x] component.md, pattern.md, page.md, recipe.md, review.md
 - [x] Optional: accessibility-review.md, performance-review.md, refactor.md
 - [x] Install notes (mirror `erp skill install` pattern if useful)
+
+Current skill set (post ADR-002): `component-docs` — see `.agent/skills/component-docs/SKILL.md`.
 
 ### Checklist
 
@@ -437,4 +445,6 @@ Phase 1 (minimum); full value after Phase 3+.
 | 2026-08-05 | Phases 1–10 completed: package, foundations, components, patterns, recipes, conventions, AI skills, Next.js docs-site, miniapp-ui-kit, release pipeline |
 | 2026-08-06 | Removed obsolete `docs-site-md-archive` (old VitePress markdown); AGENTS.md clarified (library + docs-site only) |
 | 2026-08-06 | Added Sidebar + Sheet, Collapsible, Breadcrumb, Progress, Slider, Toggle, Toggle Group, Hover Card, Aspect Ratio |
+| 2026-08-07 | Agent docs architecture (ADR-002): Storybook + `@storybook/addon-mcp`, JSDoc as source of truth for all 50 components, generated `llms.txt`, prose docs migrated to Storybook MDX, `component-docs` skill added |
+| 2026-08-10 | Docs restructure round 2 (ADR-003): `docs/components/*.md` removed (JSDoc + stories are now the source of truth); conventions/recipes reclassified as project-level docs and removed from this repo; remaining docs translated to English |
 |

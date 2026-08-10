@@ -12,6 +12,15 @@ import {
 import { cn } from "../../lib/utils";
 import { Button, buttonVariants } from "./button";
 
+/**
+ * Date picker grid built on `react-day-picker`. Supports `mode="single"`,
+ * `"multiple"`, or `"range"` selection (see `DayPickerProps`).
+ *
+ * A11y: full keyboard navigation (arrow keys move focus, Enter/Space
+ * selects) inherited from react-day-picker.
+ *
+ * Do: use inside Popover/DatePicker pattern for a compact date field.
+ */
 function Calendar({
   className,
   classNames,

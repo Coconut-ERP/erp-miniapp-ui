@@ -4,6 +4,15 @@ import { Switch as SwitchPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Binary on/off toggle, typically for an immediately-applied setting.
+ *
+ * A11y: keyboard reachable and toggled with Space; pair with Label (via
+ * `htmlFor`/`id`).
+ *
+ * Don't: use for an action that needs an explicit "Save" step — prefer
+ * Checkbox inside a form for that.
+ */
 function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimitive.Root>) {
   return (
     <SwitchPrimitive.Root

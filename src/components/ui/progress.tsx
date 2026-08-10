@@ -5,6 +5,12 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Horizontal bar showing completion progress toward a task, 0-100 via
+ * `value`.
+ *
+ * A11y: exposes `role="progressbar"` with the current value (Radix).
+ */
 function Progress({
   className,
   value,

@@ -5,6 +5,12 @@ import { Checkbox as CheckboxPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Tri-state input for toggling a single value on/off (or indeterminate).
+ *
+ * A11y: keyboard reachable and toggled with Space; pair with Label (via
+ * `htmlFor`/`id`) so the label text also toggles it.
+ */
 function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
     <CheckboxPrimitive.Root

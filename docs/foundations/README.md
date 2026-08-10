@@ -1,24 +1,17 @@
 # Design foundations
 
-Nền tảng Design System của `@erp/miniapp-ui`. Mọi component, pattern và recipe phải tuân theo các tài liệu này và khớp với CSS variables trong `src/styles/globals.css`.
+Design system foundation for `@erp/miniapp-ui`. Every component and pattern must follow
+these docs and match the CSS variables in `src/styles/globals.css`.
 
-| Topic | File |
-| --- | --- |
-| Colors | [colors.md](./colors.md) |
-| Typography | [typography.md](./typography.md) |
-| Spacing | [spacing.md](./spacing.md) |
-| Radius | [radius.md](./radius.md) |
-| Elevation / shadow | [elevation.md](./elevation.md) |
-| Animation | [animation.md](./animation.md) |
-| Responsive | [responsive.md](./responsive.md) |
-| Accessibility | [accessibility.md](./accessibility.md) |
+See these topics in Storybook under "Foundations": Colors, Typography, Spacing, Radius,
+Elevation / shadow, Animation, Responsive, Accessibility, Styling.
 
 ## Principles
 
-1. **Tokens first** — dùng CSS variables / Tailwind theme colors (`bg-primary`, `text-muted-foreground`), không hard-code hex/oklch trong component.
-2. **Light only** — ERP shell nhúng mini app ở chế độ sáng. Không bật dark theme trừ khi roadmap long-term mở khóa.
-3. **One language** — stack visual lấy từ `miniapp-hr` (oklch, radius 0.7rem, primary blue-violet).
-4. **Icons** — dùng [lucide-react](https://lucide.dev); kích thước mặc định 16px trong button (`size-4`).
+1. **Tokens first** — use CSS variables / Tailwind theme colors (`bg-primary`, `text-muted-foreground`), never hard-code hex/oklch in a component.
+2. **Light only** — the ERP shell embeds mini apps in light mode. Dark theme stays off unless the long-term roadmap unlocks it.
+3. **One language** — the visual stack comes from `miniapp-hr` (oklch, 0.7rem radius, blue-violet primary).
+4. **Icons** — use [lucide-react](https://lucide.dev); default size 16px inside buttons (`size-4`).
 
 ## Consumer import
 

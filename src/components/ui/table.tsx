@@ -4,6 +4,11 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Styled `<table>` wrapper with a horizontal-scroll container. Compose with
+ * TableHeader/TableBody/TableFooter, TableRow, TableHead/TableCell, and
+ * optional TableCaption.
+ */
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div data-slot="table-container" className="relative w-full overflow-x-auto">

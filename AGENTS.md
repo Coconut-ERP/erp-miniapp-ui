@@ -9,21 +9,23 @@ For ERP SDK, CLI, schema, and mini-app backend rules, see the repo root [`AGENTS
 > **Developing this library?** → Follow the full "Before coding" workflow below.
 > **Using the library from another mini app?** → You do not need the maintainer sections.
 >   - Need an existing component → see [docs-site](./docs-site/) or import from `@erp/miniapp-ui` (barrel `src/index.ts`).
->   - Need custom shell/sidebar/app colors → read only [`.ai/skills/styling.md`](./.ai/skills/styling.md).
+>   - Need custom shell/sidebar/app colors → read only [`docs/foundations/colors.mdx`](./docs/foundations/colors.mdx).
 
 ## What this is
 
 | Path | Role |
 | --- | --- |
 | `src/` | Library source — primitives (`components/ui/`), patterns (`components/patterns/`), tokens |
-| `docs/` | Markdown docs — foundations, components, patterns, recipes, conventions |
-| `docs-site/` | Live showcase (Next.js) — demos in `docs-site/src/registry/` |
-| `.ai/skills/` | Agent skills — load before generating or reviewing UI |
+| `docs/` | MDX docs — `foundations/`, `patterns/` (component docs live as JSDoc + Storybook stories instead) |
+| `docs-site/` | Live showcase (Next.js) — demos in `docs-site/src/registry/`; being superseded by Storybook (see ADR-002) |
+| `.storybook/` | Storybook config — component stories + MDX docs, `@storybook/addon-mcp` for agent querying |
+| `.agent/skills/` | Agent skills (canonical) — load before generating or reviewing UI; `.claude/skills/` symlinks here for Claude Code |
 
 **Purpose (keep narrow):**
 
 1. One installable library every mini app imports — no forked `components/ui`.
-2. One docs site with live demos for foundations + components + patterns.
+2. One live component/docs surface for foundations + components + patterns — Storybook
+   going forward (see ADR-002); `docs-site` stays until the migration is complete.
 
 Do not reintroduce VitePress or a second parallel docs archive.
 
@@ -33,7 +35,7 @@ Do not reintroduce VitePress or a second parallel docs archive.
 2. Read [`TODO.md`](./TODO.md) — pick the next unchecked item (or long-term backlog).
 3. Read [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) — where files must live.
 4. Follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).
-5. Load the relevant skill from [`.ai/skills/`](./.ai/skills/README.md) before writing UI.
+5. Load the relevant skill from [`.agent/skills/`](./.agent/skills/) before writing UI.
 
 ## Agent rules
 
@@ -42,7 +44,7 @@ Do not reintroduce VitePress or a second parallel docs archive.
 - **After every phase:** update `ROADMAP.md`, check off `TODO.md`, append `CHANGELOG.md`.
 - **UI only.** No ERP API keys, schema, initData, or HR domain logic in this package.
 - **Mini app styling:** before shell/sidebar/custom colors in `examples/miniapp-*`, read
-  [`.ai/skills/styling.md`](./.ai/skills/styling.md) — semantic tokens for library
+  [`docs/foundations/colors.mdx`](./docs/foundations/colors.mdx) — semantic tokens for library
   components; Tailwind classes inline for app chrome (no `--app-*` CSS vars, no palette
   `const` objects).
 - **Extract from `examples/miniapp-hr`** for primitives (shadcn + Radix + Tailwind 4 + CVA),
@@ -57,18 +59,13 @@ Do not reintroduce VitePress or a second parallel docs archive.
 
 ## AI skills
 
-Load from [`.ai/skills/`](./.ai/skills/README.md):
+Canonical skills live at [`.agent/skills/`](./.agent/skills/); `.claude/skills/` symlinks
+into it for Claude Code's native discovery. Agents without native skill support (Codex,
+Cursor, …) should read `.agent/skills/` directly.
 
 | Skill | When |
 | --- | --- |
-| [styling.md](./.ai/skills/styling.md) | Shell, sidebar, canvas, or custom color in mini apps |
-| [component.md](./.ai/skills/component.md) | New feature/domain component |
-| [page.md](./.ai/skills/page.md) | New route / page orchestration |
-| [pattern.md](./.ai/skills/pattern.md) | Reusable pattern composition |
-| [recipe.md](./.ai/skills/recipe.md) | Full-page recipe docs |
-| [review.md](./.ai/skills/review.md) | Code review against library standards |
-
-Optional: `accessibility-review.md`, `performance-review.md`, `refactor.md`.
+| [component-docs](./.agent/skills/component-docs/SKILL.md) | New/changed component in `src/components/ui`, `patterns`, or `charts` — bring JSDoc + Storybook story up to date |
 
 ## Commands
 
@@ -80,7 +77,11 @@ npm run typecheck
 npm run build
 npm pack
 
-# docs showcase
+# Storybook
+npm run storybook        # http://localhost:6006, live /mcp endpoint
+npm run build-storybook  # static build (no /mcp — that's dev-server only)
+
+# docs showcase (Next.js, being superseded by Storybook)
 cd packages/miniapp-ui/docs-site
 npm install
 npm run dev          # http://localhost:5173
@@ -89,9 +90,10 @@ npm run dev          # http://localhost:5173
 ## Conventions
 
 - Component files: kebab-case (`alert-dialog.tsx`); exports: PascalCase (`AlertDialog`).
-- Doc files: `docs/components/<name>.md` matching the component.
+- Component docs: JSDoc on the exported component + `<name>.stories.tsx` (see
+  `component-docs` skill) — not `docs/components/*.md`, which no longer exists.
 - New library exports must be re-exported from `src/index.ts` and noted in `CHANGELOG.md`.
-- Component checklist: tokens from `globals.css`, CVA variants, a11y, doc page, barrel export.
+- Component checklist: tokens from `globals.css`, CVA variants, a11y, JSDoc + story, barrel export.
 
 ## What does not belong here
 

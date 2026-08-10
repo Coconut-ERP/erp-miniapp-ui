@@ -4,6 +4,14 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Menu of actions/options revealed by a trigger. Compose with
+ * DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, and
+ * DropdownMenuCheckboxItem/RadioItem/Sub for richer menus.
+ *
+ * A11y: full keyboard navigation (arrow keys, type-ahead, Escape to close)
+ * inherited from Radix; focus returns to the trigger on close.
+ */
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 }

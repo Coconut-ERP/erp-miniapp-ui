@@ -19,6 +19,15 @@ const alertVariants = cva(
   },
 );
 
+/**
+ * Static, inline banner for surfacing a status, warning, or error message
+ * near related content. Compose with AlertTitle/AlertDescription/AlertAction.
+ *
+ * A11y: rendered with `role="alert"` so screen readers announce it when it
+ * mounts.
+ *
+ * Don't: use this for transient success/error feedback — prefer Sonner (toast).
+ */
 function Alert({
   className,
   variant,

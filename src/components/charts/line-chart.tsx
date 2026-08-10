@@ -16,6 +16,13 @@ export type LineChartProps = {
   "aria-label"?: string;
 };
 
+/**
+ * Lightweight SVG sparkline/trend chart — a single-series polyline with an
+ * optional area fill, scaled to fit its viewBox.
+ *
+ * A11y: the SVG carries `role="img"`, `aria-label`, and an `aria-description`
+ * built from `categories` + `data` when both are provided.
+ */
 export function LineChart({
   data,
   categories,

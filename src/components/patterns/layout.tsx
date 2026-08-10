@@ -9,6 +9,10 @@ import {
 } from "../ui/card";
 import { cn } from "../../lib/utils";
 
+/**
+ * Page-level heading row: title + optional description on the left,
+ * action buttons on the right (stacks on mobile).
+ */
 export function PageHeader({
   title,
   description,
@@ -31,10 +35,15 @@ export function PageHeader({
   );
 }
 
+/** Vertical spacing wrapper for stacking Field/FieldGroup elements in a form. */
 export function FormStack({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="form-stack" className={cn("flex flex-col gap-4", className)} {...props} />;
 }
 
+/**
+ * Compact metric card: value, label, optional icon well, and a
+ * positive/negative trend badge (via `trend`, a signed percent).
+ */
 export function StatisticCard({
   label,
   value,
@@ -104,6 +113,10 @@ export function StatisticCard({
   );
 }
 
+/**
+ * Card composition for dashboard widgets: title/description/action
+ * header, optional body (`children`), and optional footer.
+ */
 export function DashboardCard({
   title,
   description,

@@ -1,0 +1,27 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundations/Responsive" />
+
+# Responsive
+
+## Purpose
+
+Library components run inside the ERP shell across both a desktop sidebar layout and a
+mobile webview, so they share one consistent breakpoint scale.
+
+## Breakpoints
+
+Uses Tailwind defaults:
+
+| Prefix | Min width | Typical |
+| --- | --- | --- |
+| (none) | 0 | Mobile webview |
+| `sm` | 640px | Large phone / small tablet |
+| `md` | 768px | Tablet / narrow desktop embed |
+| `lg` | 1024px | Desktop shell content |
+| `xl` | 1280px | Wide desktop |
+
+## Component defaults
+
+1. **Mobile first** — base styles for narrow; enhance at `md`/`lg`.
+2. **Touch targets** — controls ≥ 32px height (`h-8` library default); prefer larger on primary mobile CTAs when needed.

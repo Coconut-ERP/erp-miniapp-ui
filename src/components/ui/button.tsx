@@ -39,6 +39,16 @@ const buttonVariants = cva(
   },
 );
 
+/**
+ * Primary interactive control for actions and navigation.
+ *
+ * A11y: keyboard reachable with a visible focus-visible ring; icon-only
+ * triggers need an aria-label; pair form controls with Label/Field.
+ *
+ * Do: use design tokens (bg-primary, text-muted-foreground, …) and compose
+ * with other library primitives.
+ * Don't: hard-code colors, or bypass Radix for custom focus traps on overlays.
+ */
 function Button({
   className,
   variant = "default",

@@ -17,6 +17,11 @@ const ToggleGroupContext = React.createContext<
   spacing: 0,
 });
 
+/**
+ * Group of Toggle buttons for single or multiple selection (set `type` on
+ * the underlying Radix root: "single" | "multiple"). Compose with
+ * ToggleGroupItem; `variant`/`size` set on the group cascade to items.
+ */
 function ToggleGroup({
   className,
   variant,

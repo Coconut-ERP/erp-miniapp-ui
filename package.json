@@ -18,7 +18,10 @@
   "files": [
     "dist",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "llms.txt",
+    "docs/foundations",
+    "docs/patterns"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -38,9 +41,11 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsup && node ./scripts/copy-styles.mjs",
+    "build": "tsup && node ./scripts/copy-styles.mjs && node ./scripts/generate-llms-txt.mjs",
     "pack:check": "npm pack --dry-run",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -53,14 +58,21 @@
     "lucide-react": "^0.525.0",
     "radix-ui": "^1.6.7",
     "react-day-picker": "^9.13.0",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@storybook/addon-docs": "^10",
+    "@storybook/addon-mcp": "^0.7",
+    "@storybook/react-vite": "^10",
+    "@tailwindcss/vite": "^4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "storybook": "^10",
+    "tailwindcss": "^4",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4"
   },

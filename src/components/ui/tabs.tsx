@@ -6,6 +6,14 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Switches between panels of content under a shared set of triggers.
+ * Compose with TabsList (`variant`: "default" | "line"), TabsTrigger, and
+ * TabsContent — match each trigger's `value` to a content panel's `value`.
+ *
+ * A11y: arrow keys move focus/selection between triggers; the active panel
+ * is announced via `TabsPrimitive.Content`'s roving tabindex.
+ */
 function Tabs({
   className,
   orientation = "horizontal",

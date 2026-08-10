@@ -3,6 +3,14 @@ import type * as React from "react";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
 
+/**
+ * Page-number navigation for splitting long lists across pages. Compose
+ * with PaginationContent, PaginationItem, PaginationLink (mark the current
+ * page with `isActive`), PaginationPrevious/Next, and PaginationEllipsis.
+ *
+ * A11y: rendered in a `<nav aria-label="pagination">`; the active link gets
+ * `aria-current="page"`.
+ */
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav

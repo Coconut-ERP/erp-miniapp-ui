@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "../src/styles/globals.css";
+
+/* Scan library source directly (not dist) so story-only class names are generated too. */
+@source "../src/**/*.{ts,tsx}";

@@ -5,6 +5,17 @@ import type * as React from "react";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
 
+/**
+ * Modal dialog that interrupts the user to confirm a destructive or
+ * significant action before it proceeds. Compose with AlertDialogTrigger,
+ * AlertDialogContent, AlertDialogHeader/Footer, and AlertDialogAction/Cancel.
+ *
+ * A11y: traps focus while open, closes on Escape, and returns focus to the
+ * trigger on close (all via Radix).
+ *
+ * Do: always give the user an explicit cancel path via AlertDialogCancel.
+ * Don't: use this for non-destructive confirmations — prefer Dialog.
+ */
 function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
 }

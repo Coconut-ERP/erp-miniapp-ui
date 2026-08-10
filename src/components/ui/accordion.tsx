@@ -5,6 +5,13 @@ import { ChevronDownIcon } from "lucide-react";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Vertically stacked set of collapsible sections; compose with
+ * AccordionItem/AccordionTrigger/AccordionContent.
+ *
+ * A11y: trigger is a real button reachable by keyboard (Enter/Space toggles);
+ * arrow keys move focus between triggers when `type="single"` or `"multiple"`.
+ */
 function Accordion({ ...props }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
   return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
 }

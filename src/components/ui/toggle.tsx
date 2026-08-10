@@ -28,6 +28,11 @@ const toggleVariants = cva(
   },
 );
 
+/**
+ * Two-state (on/off) button, e.g. for a formatting option like bold/italic.
+ *
+ * A11y: exposes pressed state via `aria-pressed`/`data-state` (Radix).
+ */
 function Toggle({
   className,
   variant,

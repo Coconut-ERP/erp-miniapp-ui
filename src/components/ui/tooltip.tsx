@@ -11,6 +11,14 @@ function TooltipProvider({
   return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
 }
 
+/**
+ * Small text label shown on hover/focus of a trigger, for brief supplementary
+ * info (not for essential content). Compose with TooltipTrigger and
+ * TooltipContent; wrap the subtree in a single TooltipProvider once (it
+ * controls shared show/hide delay).
+ *
+ * A11y: shown on both hover and keyboard focus, unlike CSS-only tooltips.
+ */
 function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
 }

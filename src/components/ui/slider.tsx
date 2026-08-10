@@ -5,6 +5,12 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Drag control for selecting one value, or a range with two thumbs when
+ * `value`/`defaultValue` has two entries.
+ *
+ * A11y: thumbs are keyboard reachable and adjustable with arrow keys.
+ */
 function Slider({
   className,
   defaultValue,

@@ -2,6 +2,10 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Container for grouping related content and actions. Compose with
+ * CardHeader/CardTitle/CardDescription/CardAction/CardContent/CardFooter.
+ */
 function Card({
   className,
   size = "default",

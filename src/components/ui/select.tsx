@@ -5,6 +5,14 @@ import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 
+/**
+ * Dropdown for choosing one value from a list, styled to replace the native
+ * `<select>`. Compose with SelectTrigger/SelectValue, SelectContent, and
+ * SelectItem (optionally grouped with SelectGroup/SelectLabel).
+ *
+ * A11y: full keyboard navigation (arrow keys, type-ahead, Escape) inherited
+ * from Radix; selected item is announced via SelectItemIndicator.
+ */
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
 }

@@ -8,6 +8,14 @@ import type * as React from "react";
 import { Button } from "./button";
 import { cn } from "../../lib/utils";
 
+/**
+ * Panel that slides in from an edge of the screen (`side`: right/left/top/
+ * bottom) over the page content, for details or forms tied to the current
+ * context. Compose with SheetTrigger, SheetContent, SheetHeader/Footer.
+ *
+ * A11y: traps focus while open and closes on Escape/overlay click (Radix
+ * Dialog primitive under the hood).
+ */
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }

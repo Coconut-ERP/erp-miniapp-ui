@@ -5,6 +5,13 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Rich preview shown on hover/focus of a trigger (e.g. a user mention),
+ * without requiring a click. Compose with HoverCardTrigger/HoverCardContent.
+ *
+ * Don't: put essential or interactive-only content inside — hover doesn't
+ * work on touch devices.
+ */
 function HoverCard({ ...props }: React.ComponentProps<typeof HoverCardPrimitive.Root>) {
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />;
 }

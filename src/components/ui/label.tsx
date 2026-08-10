@@ -5,6 +5,10 @@ import type * as React from "react";
 
 import { cn } from "../../lib/utils";
 
+/**
+ * Accessible label for a form control. Clicking it focuses/activates the
+ * associated control (via `htmlFor` + matching `id`, or by wrapping it).
+ */
 function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   return (
     <LabelPrimitive.Root
