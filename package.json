@@ -45,6 +45,7 @@
     "pack:check": "npm pack --dry-run",
     "prepack": "npm run build",
     "storybook": "storybook dev -p 6006",
+    "storybook:serve": "storybook dev --host 0.0.0.0 --port \"${PORT:-6006}\" --ci --no-open",
     "build-storybook": "storybook build"
   },
   "peerDependencies": {
