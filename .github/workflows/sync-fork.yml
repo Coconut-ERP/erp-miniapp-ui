@@ -44,11 +44,12 @@ jobs:
         if: steps.check_committer.outputs.should_sync == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.FORK_SYNC_TOKEN }}
+          COMMIT_SUBJECT: ${{ steps.get_committer.outputs.commit_msg }}
+          COMMIT_AUTHOR: ${{ steps.get_committer.outputs.committer }}
         run: |
           git config user.name "infra-soulmate"
           git config user.email "infra@ivysoulmate.com"
-          COMMIT_MSG="Build: ${{ steps.get_committer.outputs.commit_msg }} by ${{ steps.get_committer.outputs.committer }}"
-          git commit --allow-empty -m "$COMMIT_MSG"
+          git commit --allow-empty -m "Build: ${COMMIT_SUBJECT} by ${COMMIT_AUTHOR}"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/Coconut-ERP/erp-miniapp-ui.git HEAD:${{ github.ref_name }}
 
       - name: Trigger fork sync
