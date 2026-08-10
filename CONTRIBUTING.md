@@ -32,7 +32,8 @@ For each new component:
 - [ ] Uses design tokens from `globals.css`
 - [ ] Typed props + variants via CVA when applicable
 - [ ] Accessibility: keyboard, focus ring, labels / `aria-*`
-- [ ] Doc at `docs/components/<name>.md` (Purpose, Import, Props, Variants, Sizes, A11y, Do/Don't, Example, API, Source)
+- [ ] JSDoc (Purpose / A11y / Do-Don't) + `<name>.stories.tsx` — run the `component-docs` skill
+      (`.agent/skills/component-docs/SKILL.md`)
 - [ ] Re-exported from `src/index.ts`
 - [ ] CHANGELOG `[Unreleased]` entry
 

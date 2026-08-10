@@ -17,7 +17,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Prose docs (`docs/foundations/`, most of `docs/patterns/`) migrated from `.md` to Storybook MDX docs pages; ship in the npm tarball
-- Conventions and recipes moved to `docs/_for-project-template/` (`.md`, not Storybook MDX); no longer ship in the npm tarball or `llms.txt` (ADR-003)
+- `docs/components/` (old per-component `.md`) removed — component docs now live as JSDoc + Storybook stories
+- Conventions and recipes reclassified as project-level docs and removed from this repo entirely; no longer ship in the npm tarball or `llms.txt` (ADR-003)
 
 ## [0.2.1] - 2026-08-07
 

@@ -1,6 +1,6 @@
 # ERP MiniApp UI — TODO
 
-Last updated: 2026-08-07
+Last updated: 2026-08-10
 
 ## Now
 
@@ -13,6 +13,7 @@ _v0.2.1 released._ Next work is iterative improvement (long-term backlog).
 
 ## Done
 
+- [x] Docs restructure round 2 (ADR-003): removed `docs/components/*.md`, reclassified and removed conventions/recipes as project-level docs, translated remaining docs to English
 - [x] Agent docs architecture (ADR-002): Storybook + `@storybook/addon-mcp`, JSDoc on all 50 components, generated `llms.txt`, prose docs migrated to MDX, `component-docs` skill
 - [x] Publish GitHub Release `v0.2.1` with tarball (`Calendar` / `DatePicker`)
 - [x] Publish GitHub Release `v0.2.0` with tarball

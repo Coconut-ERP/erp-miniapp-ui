@@ -13,28 +13,36 @@ packages/miniapp-ui/
 ├── package.json
 ├── tsconfig.json
 ├── tsup.config.ts
-├── docs-site/                 # Live docs / showcase (Next.js)
-├── .ai/
-│   └── skills/                # Phase 7 — AI coding skills
+├── docs-site/                 # Live docs / showcase (Next.js) — being superseded by Storybook
+├── .storybook/                 # Storybook config + MDX docs pages, @storybook/addon-mcp
+├── .agent/
+│   └── skills/                # Agent skills (canonical); .claude/skills/ symlinks here
 ├── docs/
-│   ├── foundations/           # Phase 2
-│   ├── components/            # Phase 3
-│   ├── patterns/              # Phase 4
-│   ├── recipes/               # Phase 5
-│   ├── conventions/           # Phase 6
-│   ├── release-pipeline.md    # Phase 10
+│   ├── foundations/           # Phase 2 (.mdx, Storybook docs pages)
+│   ├── patterns/               # Phase 4 (.mdx prose + .md code-backed pages)
 │   └── adr/                   # Architecture decision records (as needed)
+├── scripts/
+│   ├── copy-styles.mjs         # Copies globals.css into dist/ on build
+│   └── generate-llms-txt.mjs   # Generates llms.txt from JSDoc + docs/ on build
 ├── src/
 │   ├── index.ts               # Public barrel — only stable exports
 │   ├── components/
-│   │   ├── ui/                # Primitives (Button, Input, Sidebar, …)
+│   │   ├── ui/                # Primitives (Button, Input, Sidebar, …) — JSDoc + .stories.tsx
 │   │   └── patterns/          # Composed patterns (FormLayout, …) — Phase 4
 │   ├── hooks/                 # Shared hooks (useIsMobile, …)
 │   ├── lib/                   # cn(), shared helpers (no app domain)
 │   └── styles/
 │       └── globals.css        # Design tokens + base layers
+├── llms.txt                    # Generated LLM overview (build output, committed)
 └── dist/                      # Build output (gitignored)
 ```
+
+Component docs (Purpose, Import, Props, Variants, A11y, Do/Don't, Example) live as JSDoc on
+the exported component plus a `.stories.tsx` next to it — not as separate Markdown files.
+See `.agent/skills/component-docs/SKILL.md`.
+
+Conventions and recipes (project-level, not library docs) were removed from this repo — see
+[`docs/adr/003-conventions-recipes-are-project-docs.md`](./docs/adr/003-conventions-recipes-are-project-docs.md).
 
 ## Related repo paths (outside this package)
 
@@ -62,7 +70,7 @@ Do not deep-import `src/` paths from outside the package.
 | --- | --- | --- |
 | Component file | kebab-case | `alert-dialog.tsx` |
 | Component export | PascalCase | `AlertDialog` |
-| Doc file | kebab-case matching component | `docs/components/alert-dialog.md` |
+| Story file | kebab-case matching component | `alert-dialog.stories.tsx` |
 | CSS variables | `--token-name` | `--primary`, `--radius` |
 
 ## What does **not** belong here

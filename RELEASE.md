@@ -15,16 +15,16 @@ npm run build
 npm pack
 ```
 
-5. [ ] Confirm tarball contains `dist/index.js`, `dist/index.d.ts`, `dist/styles/globals.css`, `README.md`, `CHANGELOG.md`
+5. [ ] Confirm tarball contains `dist/index.js`, `dist/index.d.ts`, `dist/styles/globals.css`, `README.md`, `CHANGELOG.md`, `llms.txt`, `docs/foundations`, `docs/patterns`
 6. [ ] Smoke-install tarball into a throwaway Next app and import `cn` + CSS
 
 ## Tag & Release
 
-Suggested tag: `miniapp-ui-vX.Y.Z`
+Tag pattern (as used for `v0.1.0`–`v0.2.1`): `vX.Y.Z`
 
 ```bash
 # from repo root after pack
-gh release create miniapp-ui-v0.1.0 \
+gh release create v0.1.0 \
   packages/miniapp-ui/erp-miniapp-ui-0.1.0.tgz \
   --title "@erp/miniapp-ui v0.1.0" \
   --notes-file packages/miniapp-ui/CHANGELOG.md
