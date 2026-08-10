@@ -7,12 +7,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-10
+
 ### Added
 
 - Storybook 10 + `@storybook/addon-mcp` — live, queryable component docs (`npm run storybook`, `npm run build-storybook`)
 - JSDoc (Purpose / A11y / Do-Don't) on all 50 components, source of truth for component docs, ships in `dist/index.d.ts`
 - Generated `llms.txt` (one-file LLM overview of components, foundations, and patterns), shipped in the npm tarball
 - `component-docs` skill at `.agent/skills/` (symlinked to `.claude/skills/` for Claude Code) to keep JSDoc + Storybook stories in sync
+- `npm run storybook:serve` + `railway.json` — deploy a long-running Storybook instance (with a working `/mcp` endpoint) to Railway
 
 ### Changed
 
