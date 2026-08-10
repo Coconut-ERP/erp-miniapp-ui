@@ -71,7 +71,7 @@
 - app-sidebar — Dreams ERP–aligned application navigation. Pass a nav list (`items` + `activeId`) — the library owns spacing, section titles, and active styles so mini apps stay in sync.
 - confirmation — Irreversible or costly actions (delete, reject, revoke).
 - crud — List → create/edit/delete domain records.
-- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only (see chart-page recipe).
+- dashboard — Grid of `StatisticCard` + `DashboardCard` panels. Charts: `BarChart` / `DonutChart` / `LineChart` — pass data only.
 - date-picker — Pick a single date or a date range via Popover + Calendar (shadcn Date Picker composition). Pass `value` / `onChange`; the library handles trigger + calendar UI.
 - dialog — Short, focused tasks without leaving the page.
 - empty — `EmptyState` when the collection is legitimately empty (not an error).

@@ -66,10 +66,7 @@ Adjust the `@source` path if your CSS file lives elsewhere.
   readable with zero network access, e.g. via editor hover or `cat
   node_modules/@erp/miniapp-ui/dist/index.d.ts`.
 - `docs/foundations/` and `docs/patterns/` (shipped as `.mdx`) ship inside this package for
-  the same zero-network reason — these are the library's own docs. `docs/conventions/` and
-  `docs/recipes/` were project-level docs, not library docs; they've moved to
-  `docs/_for-project-template/` for manual migration into a separate project template and no
-  longer ship with this package.
+  the same zero-network reason — these are the library's own docs.
 - If this org has hosted a live Storybook instance for `@erp/miniapp-ui`, its `/mcp` endpoint
   gives richer, always-current querying (props, live examples, tests) — add it to your
   agent's MCP config. Ask your team for the URL; none is hard-coded here.
