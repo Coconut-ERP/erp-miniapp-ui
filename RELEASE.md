@@ -6,8 +6,8 @@ Use this for every GitHub Release (Phase 1 deliverable; expanded in Phase 10).
 
 1. [ ] Current ROADMAP phase Definition of Done is met (or release is explicitly a foundation cut)
 2. [ ] `CHANGELOG.md` — move `[Unreleased]` notes under a new version heading with date
-3. [ ] Bump `version` in `packages/miniapp-ui/package.json`
-4. [ ] From `packages/miniapp-ui`:
+3. [ ] Bump `version` in `package.json`
+4. [ ] From the repo root:
 
 ```bash
 npm run typecheck
@@ -25,9 +25,9 @@ Tag pattern (as used for `v0.1.0`–`v0.2.1`): `vX.Y.Z`
 ```bash
 # from repo root after pack
 gh release create v0.1.0 \
-  packages/miniapp-ui/erp-miniapp-ui-0.1.0.tgz \
+  erp-miniapp-ui-0.1.0.tgz \
   --title "@erp/miniapp-ui v0.1.0" \
-  --notes-file packages/miniapp-ui/CHANGELOG.md
+  --notes-file CHANGELOG.md
 ```
 
 Asset name should match README install URL.

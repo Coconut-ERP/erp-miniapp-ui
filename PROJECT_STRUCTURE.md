@@ -3,7 +3,7 @@
 Canonical layout for the UI library. Agents and humans must keep new files inside this map unless ROADMAP adds a phase that extends it.
 
 ```text
-packages/miniapp-ui/
+erp-miniapp-ui/                # repo root — standalone repo, not nested in a monorepo
 ├── ROADMAP.md                 # Phases, DoD, review criteria
 ├── TODO.md                    # Living task board
 ├── CHANGELOG.md               # Semver changelog
@@ -44,15 +44,6 @@ See `.agent/skills/component-docs/SKILL.md`.
 Conventions and recipes (project-level, not library docs) were removed from this repo — see
 [`docs/adr/003-conventions-recipes-are-project-docs.md`](./docs/adr/003-conventions-recipes-are-project-docs.md).
 
-## Related repo paths (outside this package)
-
-| Path | Role |
-| --- | --- |
-| `examples/miniapp-hr/` | **Source to extract from** for Phase 3; not a dependency at runtime |
-| `examples/miniapp-ui-kit/` | Phase 9 reference mini app (to be created) |
-| `skills/erp-miniapp/` | Existing ERP SDK skill — complementary, not a replacement |
-| Root `AGENTS.md` | Agent entrypoint; includes miniapp-ui section |
-
 ## Export surface
 
 Consumers should only import:
@@ -75,6 +66,4 @@ Do not deep-import `src/` paths from outside the package.
 
 ## What does **not** belong here
 
-- ERP schema, API routes, initData session logic → stay in mini apps / `erp-sdk`
-- HR domain components (`sections/*`, employee forms) → stay in `miniapp-hr` until generalized as recipes
 - Secrets, `.env`, workspace-specific display names

@@ -13,15 +13,18 @@ Published as a GitHub Release tarball (not on npm):
 npm install https://github.com/Coconut-ERP/erp-miniapp-ui/releases/download/v0.2.1/erp-miniapp-ui-0.2.1.tgz
 ```
 
-Local development:
+Local development (working on this library itself):
 
 ```bash
 npm install
+npm run storybook   # http://localhost:6006 — live component preview + docs
 npm run build
 npm pack
 # then in your mini app:
 # npm install ../path/to/erp-miniapp-ui-0.2.1.tgz
 ```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full workflow and [docs/adr/](./docs/adr/) for why the architecture looks the way it does.
 
 ## Peer requirements
 
@@ -82,8 +85,10 @@ Default visual language follows **Dreams ERP** component anatomy (spacing, radiu
 | Command | Purpose |
 | --- | --- |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run build` | ESM + CJS + d.ts + copy CSS |
-| `npm pack` | Produce installable `.tgz` |
+| `npm run build` | ESM + CJS + d.ts + copy CSS + regenerate `llms.txt` |
+| `npm pack` / `npm run pack:check` | Produce / dry-run the installable `.tgz` |
+| `npm run storybook` | Dev server with live component preview + docs + `/mcp` endpoint |
+| `npm run build-storybook` | Static Storybook build (no `/mcp` — dev-server only) |
 
 ## Project docs
 

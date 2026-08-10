@@ -10,7 +10,6 @@
 ## Workflow
 
 ```bash
-cd packages/miniapp-ui
 npm install          # or bun install
 npm run typecheck
 npm run build

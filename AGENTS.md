@@ -4,8 +4,6 @@ Guidance for coding agents touching `@erp/miniapp-ui` — whether maintaining th
 package or consuming it from a mini app. The sections below are scoped by audience; read
 the signpost below first.
 
-For ERP SDK, CLI, schema, and mini-app backend rules, see the repo root [`AGENTS.md`](../../AGENTS.md).
-
 > **Developing this library?** → Follow the full "Before coding" workflow below.
 > **Using the library from another mini app?** → You do not need the maintainer sections.
 >   - Need an existing component → see [docs-site](./docs-site/) or import from `@erp/miniapp-ui` (barrel `src/index.ts`).
@@ -43,18 +41,18 @@ Do not reintroduce VitePress or a second parallel docs archive.
   under `docs/adr/`.
 - **After every phase:** update `ROADMAP.md`, check off `TODO.md`, append `CHANGELOG.md`.
 - **UI only.** No ERP API keys, schema, initData, or HR domain logic in this package.
-- **Mini app styling:** before shell/sidebar/custom colors in `examples/miniapp-*`, read
+- **Mini app styling:** before shell/sidebar/custom colors in a consuming mini app, read
   [`docs/foundations/colors.mdx`](./docs/foundations/colors.mdx) — semantic tokens for library
   components; Tailwind classes inline for app chrome (no `--app-*` CSS vars, no palette
   `const` objects).
-- **Extract from `examples/miniapp-hr`** for primitives (shadcn + Radix + Tailwind 4 + CVA),
-  then generalize — do not invent a parallel design language.
+- **Primitive shape (locked):** shadcn + Radix + Tailwind 4 + CVA — do not invent a parallel
+  design language.
 - **Public API** only via `src/index.ts` and `./styles.css` export. No deep imports from
   outside the package.
 - **Stack (locked):** React 19, Tailwind CSS 4, Radix UI, CVA, lucide-react, light mode only.
-- **Current status:** Phases 1–10 complete for `0.1.0`. Prefer long-term backlog / TODOs
-  over re-scaffolding.
-- **Docs-site Tailwind:** keep `@source` pointing at `packages/miniapp-ui/src` so component
+- **Current status:** Phases 1–10 complete (see `ROADMAP.md`); current release is tracked in
+  `package.json` / `CHANGELOG.md`. Prefer long-term backlog / TODOs over re-scaffolding.
+- **Docs-site Tailwind:** keep `@source` pointing at this repo's `src/` so component
   classes generate correctly.
 
 ## AI skills
@@ -71,7 +69,6 @@ Cursor, …) should read `.agent/skills/` directly.
 
 ```bash
 # library
-cd packages/miniapp-ui
 npm install
 npm run typecheck
 npm run build
@@ -82,7 +79,7 @@ npm run storybook        # http://localhost:6006, live /mcp endpoint
 npm run build-storybook  # static build (no /mcp — that's dev-server only)
 
 # docs showcase (Next.js, being superseded by Storybook)
-cd packages/miniapp-ui/docs-site
+cd docs-site
 npm install
 npm run dev          # http://localhost:5173
 ```
@@ -97,6 +94,4 @@ npm run dev          # http://localhost:5173
 
 ## What does not belong here
 
-- ERP schema, API routes, initData session logic → mini apps / `erp-sdk`
-- HR domain components → `examples/miniapp-hr` until generalized as recipes
 - Secrets, `.env`, workspace-specific display names

@@ -1,7 +1,8 @@
 # ERP MiniApp UI — Roadmap
 
 Package: `@erp/miniapp-ui`  
-Source of truth for UI primitives: extract from `examples/miniapp-hr` (shadcn + Radix + Tailwind 4 + CVA).  
+Source of truth for UI primitives: originally extracted from a consuming mini app's
+`miniapp-hr` example (shadcn + Radix + Tailwind 4 + CVA), now generalized in this repo.  
 Status legend: `[ ]` pending · `[~]` in progress · `[x]` done
 
 ---
@@ -11,8 +12,8 @@ Status legend: `[ ]` pending · `[~]` in progress · `[x]` done
 | Decision | Choice | Rationale |
 | --- | --- | --- |
 | Stack | React 19 + Tailwind CSS 4 + Radix UI + CVA + lucide-react | Matches `miniapp-hr`; proven in production mini apps |
-| Package layout | `packages/miniapp-ui` inside `erp-sdk` repo | Ship UI with the same release channel as the SDK |
-| Publish | GitHub Release tarball (same as `erp-sdk`) | No private npm registry required yet |
+| Package layout | Standalone repo (`erp-miniapp-ui`) | Originally nested at `packages/miniapp-ui` inside `erp-sdk`; split out to its own repo |
+| Publish | GitHub Release tarball | No private npm registry required yet |
 | CSS | Ship `styles/globals.css` with design tokens; consumer imports it | Tokens stay versioned with components |
 | Dark mode | Out of scope (light-only, like ERP shell) | Long-term backlog |
 | Docs language | English | Standardized 2026-08-09; see docs restructure round 2 |
