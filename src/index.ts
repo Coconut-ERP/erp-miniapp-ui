@@ -221,6 +221,7 @@ export { useIsMobile } from "./hooks/use-mobile";
 
 export {
   AppSidebar,
+  Combobox,
   ConfirmDialog,
   DashboardCard,
   DatePicker,
@@ -240,6 +241,8 @@ export {
 export type {
   AppSidebarItem,
   AppSidebarProps,
+  ComboboxOption,
+  ComboboxProps,
   DatePickerProps,
   DateRangePickerProps,
   DateRange,

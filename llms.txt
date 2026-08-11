@@ -44,6 +44,7 @@
 
 ## Components (patterns)
 - app-sidebar — Dreams ERP–aligned application sidebar. Pass `items` (+ optional `type: "section"`) and `activeId`; spacing/active styles stay in the library.
+- combobox — Searchable single-select — Popover + filter input over an options list.
 - confirm-dialog — Ready-made AlertDialog for confirming an action, with an optional trigger and a destructive style for irreversible actions.
 - date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker pattern). Controlled via `value`/`onChange`, or uncontrolled via `defaultValue`.
 - layout — Page-level heading row: title + optional description on the left, action buttons on the right (stacks on mobile).

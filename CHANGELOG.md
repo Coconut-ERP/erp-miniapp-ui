@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-08-11
+
+### Added
+
+- `Combobox` pattern — searchable single-select (`options` + optional `onSearch` callback for consumer-owned / remote filtering, `loading`, `clearable`)
+
 ## [0.3.0] - 2026-08-10
 
 ### Added

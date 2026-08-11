@@ -18,6 +18,11 @@ export {
   type DateRange,
 } from "./date-picker";
 export {
+  Combobox,
+  type ComboboxOption,
+  type ComboboxProps,
+} from "./combobox";
+export {
   SortableList,
   type SortableDragHandleProps,
   type SortableListProps,
