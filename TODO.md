@@ -4,7 +4,7 @@ Last updated: 2026-08-10
 
 ## Now
 
-_v0.3.1 released._ Next work is iterative improvement (long-term backlog).
+_v0.3.2 released._ Next work is iterative improvement (long-term backlog).
 
 ## Up next (long-term)
 

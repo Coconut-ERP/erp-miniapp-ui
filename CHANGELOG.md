@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-08-11
+
+### Fixed
+
+- `Combobox` list scroll inside Dialog (manual wheel handling + `pointer-events-auto` on content)
+- `PopoverContent` optional `container` prop to portal into Dialog (scroll-lock friendly)
+
 ## [0.3.1] - 2026-08-11
 
 ### Added

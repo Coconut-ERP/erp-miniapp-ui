@@ -85,6 +85,7 @@ export function Combobox({
 
   const listId = React.useId();
   const searchRef = React.useRef<HTMLInputElement>(null);
+  const listRef = React.useRef<HTMLUListElement>(null);
   const value = valueProp !== undefined ? valueProp : uncontrolled;
 
   const selectedFromOptions = options.find((o) => o.value === value);
@@ -157,6 +158,17 @@ export function Combobox({
     }
   }
 
+  function onListWheel(event: React.WheelEvent<HTMLUListElement>) {
+    // Dialog scroll-lock (react-remove-scroll) preventDefaults wheel on portaled
+    // content outside the dialog — apply delta manually so the list still scrolls.
+    const el = listRef.current;
+    if (!el) return;
+    if (el.scrollHeight <= el.clientHeight) return;
+    event.preventDefault();
+    event.stopPropagation();
+    el.scrollTop += event.deltaY;
+  }
+
   return (
     <div data-slot="combobox" className={cn("w-full", className)}>
       <Popover open={open} onOpenChange={setOpen}>
@@ -194,7 +206,10 @@ export function Combobox({
             </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align={align}>
+        <PopoverContent
+          className="pointer-events-auto w-(--radix-popover-trigger-width) p-0"
+          align={align}
+        >
           <div className="border-b border-border p-2">
             <Input
               ref={searchRef}
@@ -210,10 +225,12 @@ export function Combobox({
             />
           </div>
           <ul
+            ref={listRef}
             id={listId}
             role="listbox"
             aria-label={ariaLabel ?? placeholder}
-            className="max-h-60 overflow-y-auto p-1"
+            className="max-h-60 overflow-y-auto overscroll-contain p-1"
+            onWheel={onListWheel}
           >
             {loading ? (
               <li
