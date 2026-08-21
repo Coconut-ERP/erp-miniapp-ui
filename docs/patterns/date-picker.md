@@ -7,7 +7,7 @@ Pick a single date or a date range via Popover + Calendar ([shadcn Date Picker](
 ## Import
 
 ```ts
-import { DatePicker, DateRangePicker, Calendar } from "@erp/miniapp-ui";
+import { DatePicker, DateRangePicker, MonthPicker, YearPicker } from "@erp/miniapp-ui";
 ```
 
 ## Usage
@@ -30,6 +30,14 @@ const [date, setDate] = React.useState<Date>();
 {/* Range */}
 const [range, setRange] = React.useState<{ from?: Date; to?: Date }>();
 <DateRangePicker value={range} onChange={setRange} />
+
+{/* Month — value "YYYY-MM" */}
+const [month, setMonth] = React.useState<string>();
+<MonthPicker value={month} onChange={setMonth} placeholder="Pick a month" />
+
+{/* Year — value "YYYY" */}
+const [year, setYear] = React.useState<string>();
+<YearPicker value={year} onChange={setYear} fromYear={2000} toYear={2030} />
 ```
 
 ## Do
@@ -37,6 +45,7 @@ const [range, setRange] = React.useState<{ from?: Date; to?: Date }>();
 - Use `DatePicker` / `DateRangePicker` for forms and filters
 - Use bare `Calendar` only when embedding in a custom surface
 - Keep `date-fns` formatting via `displayFormat` (default `PPP`)
+- Use `MonthPicker` / `YearPicker` when the form needs a period, not a day
 
 ## Don't
 

@@ -7,6 +7,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `MonthPicker` — Popover + month/year Selects; value `"YYYY-MM"`
+- `YearPicker` — Popover + year Select; value `"YYYY"`
+
 ## [0.3.3] - 2026-08-21
 
 ### Fixed
