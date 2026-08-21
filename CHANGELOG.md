@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-08-21
+
+### Fixed
+
+- `SelectContent` default `position` to `popper` so the menu aligns under the trigger (was `item-aligned`)
+
 ## [0.3.2] - 2026-08-11
 
 ### Fixed
