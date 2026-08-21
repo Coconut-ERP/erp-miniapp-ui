@@ -9,8 +9,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- `MonthPicker` — Popover + month/year Selects; value `"YYYY-MM"`
-- `YearPicker` — Popover + year Select; value `"YYYY"`
+- `MonthPicker` — Popover with year nav + 3×4 month grid; value `"YYYY-MM"`
+- `YearPicker` — Popover with decade nav + year grid; value `"YYYY"`
 
 ## [0.3.3] - 2026-08-21
 

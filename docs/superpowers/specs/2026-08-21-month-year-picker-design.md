@@ -15,7 +15,7 @@ Add two period pickers for ERP mini-app forms/filters: select a month or a year 
 | Location | Same file as DatePicker: `src/components/patterns/date-picker.tsx` |
 | Month value | `string \| undefined` — `"YYYY-MM"` (e.g. `"2026-03"`) |
 | Year value | `string \| undefined` — `"YYYY"` (e.g. `"2026"`) |
-| UI | Popover + Select dropdown(s) (not calendar month grid) |
+| UI | Popover + year prev/next + 3×4 month grid (Month); decade prev/next + year grid (Year) — not Select dropdowns |
 | Clearable | Out of scope for v1 |
 
 ## Public API
@@ -31,17 +31,16 @@ Add two period pickers for ERP mini-app forms/filters: select a month or a year 
 ### MonthPicker
 
 - `value`: `"YYYY-MM"` or `undefined`
-- Trigger label: human-readable month+year via `date-fns` (e.g. `MMM yyyy`); empty → placeholder
-- Popover body: month Select (01–12) + year Select (`fromYear`…`toYear`) side by side
-- Changing either Select updates the string immediately when both parts are known
-- Close Popover once a complete month+year is selected
+- Trigger: outline button, label left + calendar icon right; empty → `"Select a month"`
+- Popover: year header with prev/next chevrons; 3×4 grid of abbreviated months
+- Click a month → `onChange("YYYY-MM")` for the viewed year and close
 
 ### YearPicker
 
 - `value`: `"YYYY"` or `undefined`
-- Trigger label: the year string; empty → placeholder
-- Popover body: year Select only
-- On select → `onChange(year)` and close Popover
+- Trigger: same pattern; empty → `"Select a year"`
+- Popover: decade-range header with prev/next; 3×4 year grid
+- Click a year → `onChange("YYYY")` and close
 
 ### Non-goals (v1)
 
@@ -49,6 +48,7 @@ Add two period pickers for ERP mini-app forms/filters: select a month or a year 
 - `clearable` prop (consumers can call `onChange(undefined)`)
 - Locale prop beyond default `date-fns` / runtime locale for month names
 - Changing Calendar / DatePicker day selection behavior
+- Select-dropdown UI for month/year (rejected in favor of grid)
 
 ## Implementation sketch
 

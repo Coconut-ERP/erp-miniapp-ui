@@ -2,14 +2,13 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const MONTH_VALUES = [
   "01",
@@ -28,6 +27,8 @@ const MONTH_VALUES = [
 
 type MonthToken = (typeof MONTH_VALUES)[number];
 
+const YEAR_GRID_SIZE = 12;
+
 function currentYear() {
   return new Date().getFullYear();
 }
@@ -40,14 +41,14 @@ function defaultToYear() {
   return currentYear() + 10;
 }
 
-function yearOptions(fromYear: number, toYear: number): string[] {
+function clampYear(year: number, fromYear: number, toYear: number) {
   const start = Math.min(fromYear, toYear);
   const end = Math.max(fromYear, toYear);
-  const years: string[] = [];
-  for (let y = end; y >= start; y -= 1) {
-    years.push(String(y));
-  }
-  return years;
+  return Math.min(Math.max(year, start), end);
+}
+
+function decadeStart(year: number) {
+  return Math.floor(year / 10) * 10;
 }
 
 function isMonthValue(value: string | undefined): value is `${number}-${MonthToken}` {
@@ -64,7 +65,7 @@ function parseMonthValue(value: string | undefined): { year: string; month: Mont
   return { year, month };
 }
 
-function formatMonthValue(year: string, month: string): string {
+function formatMonthValue(year: number, month: MonthToken): string {
   return `${year}-${month}`;
 }
 
@@ -73,6 +74,10 @@ function monthTriggerLabel(value: string | undefined): string | null {
   if (!parsed) return null;
   const date = new Date(Number(parsed.year), Number(parsed.month) - 1, 1);
   return format(date, "MMM yyyy");
+}
+
+function monthShortLabel(month: MonthToken): string {
+  return format(new Date(2000, Number(month) - 1, 1), "MMM");
 }
 
 export type DatePickerProps = {
@@ -263,10 +268,11 @@ export type MonthPickerProps = {
 };
 
 /**
- * Month period picker — Popover with month + year Selects.
+ * Month period picker — Popover with year prev/next nav and a 3×4 month grid.
  * Value is `"YYYY-MM"` (e.g. `"2026-03"`), or `undefined` when empty.
  *
- * A11y: trigger button with `aria-label`; Selects provide listbox semantics.
+ * A11y: trigger button with `aria-label`; month cells are buttons in a grid;
+ * year nav has labeled previous/next controls.
  *
  * Do: use for filters/forms that need a calendar month, not a day.
  * Don't: use for day-level dates — use `DatePicker` instead.
@@ -275,7 +281,7 @@ export function MonthPicker({
   value: valueProp,
   defaultValue,
   onChange,
-  placeholder = "Pick a month",
+  placeholder = "Select a month",
   disabled,
   className,
   buttonClassName,
@@ -285,34 +291,30 @@ export function MonthPicker({
   id,
   "aria-label": ariaLabel,
 }: MonthPickerProps) {
+  const minYear = Math.min(fromYear, toYear);
+  const maxYear = Math.max(fromYear, toYear);
   const [open, setOpen] = React.useState(false);
   const [uncontrolled, setUncontrolled] = React.useState<string | undefined>(defaultValue);
   const value = valueProp !== undefined ? valueProp : uncontrolled;
   const parsed = parseMonthValue(value);
-
-  const [draftMonth, setDraftMonth] = React.useState<string | undefined>(parsed?.month);
-  const [draftYear, setDraftYear] = React.useState<string | undefined>(parsed?.year);
+  const [viewYear, setViewYear] = React.useState(() =>
+    clampYear(parsed ? Number(parsed.year) : currentYear(), minYear, maxYear),
+  );
 
   React.useEffect(() => {
     if (!open) return;
     const next = parseMonthValue(value);
-    setDraftMonth(next?.month);
-    setDraftYear(next?.year);
-  }, [open, value]);
+    setViewYear(clampYear(next ? Number(next.year) : currentYear(), minYear, maxYear));
+  }, [open, value, minYear, maxYear]);
 
   function setValue(next: string | undefined) {
     if (valueProp === undefined) setUncontrolled(next);
     onChange?.(next);
   }
 
-  function commitIfComplete(month: string | undefined, year: string | undefined) {
-    if (!month || !year) return;
-    setValue(formatMonthValue(year, month));
-    setOpen(false);
-  }
-
   const label = monthTriggerLabel(value);
-  const years = yearOptions(fromYear, toYear);
+  const canPrev = viewYear > minYear;
+  const canNext = viewYear < maxYear;
 
   return (
     <div data-slot="month-picker" className={cn("w-full", className)}>
@@ -326,55 +328,64 @@ export function MonthPicker({
             data-empty={!label}
             aria-label={ariaLabel ?? placeholder}
             className={cn(
-              "w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
+              "w-full justify-between font-normal data-[empty=true]:text-muted-foreground",
               buttonClassName,
             )}
           >
-            <CalendarIcon data-icon="inline-start" />
-            {label ?? <span>{placeholder}</span>}
+            <span className="truncate">{label ?? placeholder}</span>
+            <CalendarIcon data-icon="inline-end" className="text-muted-foreground" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-3" align={align}>
-          <div className="flex gap-2">
-            <Select
-              value={draftMonth}
-              onValueChange={(month) => {
-                setDraftMonth(month);
-                commitIfComplete(month, draftYear);
-              }}
+        <PopoverContent className="w-64 p-3" align={align}>
+          <div className="mb-2 flex items-center justify-between gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Previous year"
+              disabled={!canPrev}
+              onClick={() => setViewYear((y) => clampYear(y - 1, minYear, maxYear))}
             >
-              <SelectTrigger className="w-[8.5rem]" aria-label="Month">
-                <SelectValue placeholder="Month" />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTH_VALUES.map((month) => {
-                  const date = new Date(2000, Number(month) - 1, 1);
-                  return (
-                    <SelectItem key={month} value={month}>
-                      {format(date, "MMMM")}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            <Select
-              value={draftYear}
-              onValueChange={(year) => {
-                setDraftYear(year);
-                commitIfComplete(draftMonth, year);
-              }}
+              <ChevronLeftIcon />
+            </Button>
+            <div className="text-sm font-medium tabular-nums">{viewYear}</div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Next year"
+              disabled={!canNext}
+              onClick={() => setViewYear((y) => clampYear(y + 1, minYear, maxYear))}
             >
-              <SelectTrigger className="w-[6.5rem]" aria-label="Year">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <ChevronRightIcon />
+            </Button>
+          </div>
+          <div
+            role="listbox"
+            aria-label="Month"
+            className="grid grid-cols-4 gap-1"
+          >
+            {MONTH_VALUES.map((month) => {
+              const selected =
+                parsed?.year === String(viewYear) && parsed.month === month;
+              return (
+                <Button
+                  key={month}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  variant={selected ? "default" : "ghost"}
+                  size="sm"
+                  className="h-9 font-normal"
+                  onClick={() => {
+                    setValue(formatMonthValue(viewYear, month));
+                    setOpen(false);
+                  }}
+                >
+                  {monthShortLabel(month)}
+                </Button>
+              );
+            })}
           </div>
         </PopoverContent>
       </Popover>
@@ -398,10 +409,11 @@ export type YearPickerProps = {
 };
 
 /**
- * Year period picker — Popover with a year Select.
+ * Year period picker — Popover with decade prev/next nav and a year grid.
  * Value is `"YYYY"` (e.g. `"2026"`), or `undefined` when empty.
  *
- * A11y: trigger button with `aria-label`; Select provides listbox semantics.
+ * A11y: trigger button with `aria-label`; year cells are buttons in a grid;
+ * decade nav has labeled previous/next controls.
  *
  * Do: use for year-only filters (fiscal year, report year).
  * Don't: use for month or day selection — use `MonthPicker` / `DatePicker`.
@@ -410,7 +422,7 @@ export function YearPicker({
   value: valueProp,
   defaultValue,
   onChange,
-  placeholder = "Pick a year",
+  placeholder = "Select a year",
   disabled,
   className,
   buttonClassName,
@@ -420,16 +432,32 @@ export function YearPicker({
   id,
   "aria-label": ariaLabel,
 }: YearPickerProps) {
+  const minYear = Math.min(fromYear, toYear);
+  const maxYear = Math.max(fromYear, toYear);
   const [open, setOpen] = React.useState(false);
   const [uncontrolled, setUncontrolled] = React.useState<string | undefined>(defaultValue);
   const value = valueProp !== undefined ? valueProp : uncontrolled;
-  const label = isYearValue(value) ? value : null;
-  const years = yearOptions(fromYear, toYear);
+  const selectedYear = isYearValue(value) ? Number(value) : null;
+  const [viewStart, setViewStart] = React.useState(() =>
+    decadeStart(clampYear(selectedYear ?? currentYear(), minYear, maxYear)),
+  );
+
+  React.useEffect(() => {
+    if (!open) return;
+    const y = isYearValue(value) ? Number(value) : currentYear();
+    setViewStart(decadeStart(clampYear(y, minYear, maxYear)));
+  }, [open, value, minYear, maxYear]);
 
   function setValue(next: string | undefined) {
     if (valueProp === undefined) setUncontrolled(next);
     onChange?.(next);
   }
+
+  const label = selectedYear !== null ? String(selectedYear) : null;
+  const years = Array.from({ length: YEAR_GRID_SIZE }, (_, i) => viewStart + i);
+  const canPrev = viewStart > minYear;
+  const canNext = viewStart + YEAR_GRID_SIZE - 1 < maxYear;
+  const rangeLabel = `${Math.max(viewStart, minYear)} – ${Math.min(viewStart + YEAR_GRID_SIZE - 1, maxYear)}`;
 
   return (
     <div data-slot="year-picker" className={cn("w-full", className)}>
@@ -443,33 +471,66 @@ export function YearPicker({
             data-empty={!label}
             aria-label={ariaLabel ?? placeholder}
             className={cn(
-              "w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
+              "w-full justify-between font-normal data-[empty=true]:text-muted-foreground",
               buttonClassName,
             )}
           >
-            <CalendarIcon data-icon="inline-start" />
-            {label ?? <span>{placeholder}</span>}
+            <span className="truncate">{label ?? placeholder}</span>
+            <CalendarIcon data-icon="inline-end" className="text-muted-foreground" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-3" align={align}>
-          <Select
-            value={label ?? undefined}
-            onValueChange={(year) => {
-              setValue(year);
-              setOpen(false);
-            }}
-          >
-            <SelectTrigger className="w-[8rem]" aria-label="Year">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((year) => (
-                <SelectItem key={year} value={year}>
+        <PopoverContent className="w-64 p-3" align={align}>
+          <div className="mb-2 flex items-center justify-between gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Previous years"
+              disabled={!canPrev}
+              onClick={() => setViewStart((s) => Math.max(minYear, s - YEAR_GRID_SIZE))}
+            >
+              <ChevronLeftIcon />
+            </Button>
+            <div className="text-sm font-medium tabular-nums">{rangeLabel}</div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Next years"
+              disabled={!canNext}
+              onClick={() =>
+                setViewStart((s) =>
+                  Math.min(decadeStart(maxYear), s + YEAR_GRID_SIZE),
+                )
+              }
+            >
+              <ChevronRightIcon />
+            </Button>
+          </div>
+          <div role="listbox" aria-label="Year" className="grid grid-cols-4 gap-1">
+            {years.map((year) => {
+              const outOfRange = year < minYear || year > maxYear;
+              const selected = selectedYear === year;
+              return (
+                <Button
+                  key={year}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  variant={selected ? "default" : "ghost"}
+                  size="sm"
+                  disabled={outOfRange}
+                  className="h-9 font-normal tabular-nums"
+                  onClick={() => {
+                    setValue(String(year));
+                    setOpen(false);
+                  }}
+                >
                   {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                </Button>
+              );
+            })}
+          </div>
         </PopoverContent>
       </Popover>
     </div>
