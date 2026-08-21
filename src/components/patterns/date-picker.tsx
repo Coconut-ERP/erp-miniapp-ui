@@ -381,3 +381,97 @@ export function MonthPicker({
     </div>
   );
 }
+
+export type YearPickerProps = {
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string | undefined) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  buttonClassName?: string;
+  align?: React.ComponentProps<typeof PopoverContent>["align"];
+  fromYear?: number;
+  toYear?: number;
+  id?: string;
+  "aria-label"?: string;
+};
+
+/**
+ * Year period picker — Popover with a year Select.
+ * Value is `"YYYY"` (e.g. `"2026"`), or `undefined` when empty.
+ *
+ * A11y: trigger button with `aria-label`; Select provides listbox semantics.
+ *
+ * Do: use for year-only filters (fiscal year, report year).
+ * Don't: use for month or day selection — use `MonthPicker` / `DatePicker`.
+ */
+export function YearPicker({
+  value: valueProp,
+  defaultValue,
+  onChange,
+  placeholder = "Pick a year",
+  disabled,
+  className,
+  buttonClassName,
+  align = "start",
+  fromYear = defaultFromYear(),
+  toYear = defaultToYear(),
+  id,
+  "aria-label": ariaLabel,
+}: YearPickerProps) {
+  const [open, setOpen] = React.useState(false);
+  const [uncontrolled, setUncontrolled] = React.useState<string | undefined>(defaultValue);
+  const value = valueProp !== undefined ? valueProp : uncontrolled;
+  const label = isYearValue(value) ? value : null;
+  const years = yearOptions(fromYear, toYear);
+
+  function setValue(next: string | undefined) {
+    if (valueProp === undefined) setUncontrolled(next);
+    onChange?.(next);
+  }
+
+  return (
+    <div data-slot="year-picker" className={cn("w-full", className)}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            data-empty={!label}
+            aria-label={ariaLabel ?? placeholder}
+            className={cn(
+              "w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
+              buttonClassName,
+            )}
+          >
+            <CalendarIcon data-icon="inline-start" />
+            {label ?? <span>{placeholder}</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-3" align={align}>
+          <Select
+            value={label ?? undefined}
+            onValueChange={(year) => {
+              setValue(year);
+              setOpen(false);
+            }}
+          >
+            <SelectTrigger className="w-[8rem]" aria-label="Year">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
