@@ -226,6 +226,8 @@ export {
   DashboardCard,
   DatePicker,
   DateRangePicker,
+  MonthPicker,
+  YearPicker,
   EmptyState,
   ErrorState,
   FormStack,
@@ -246,6 +248,8 @@ export type {
   DatePickerProps,
   DateRangePickerProps,
   DateRange,
+  MonthPickerProps,
+  YearPickerProps,
   SortableDragHandleProps,
   SortableListProps,
 } from "./components/patterns";

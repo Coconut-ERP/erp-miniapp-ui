@@ -13,9 +13,13 @@ export { AppSidebar, type AppSidebarItem, type AppSidebarProps } from "./app-sid
 export {
   DatePicker,
   DateRangePicker,
+  MonthPicker,
+  YearPicker,
   type DatePickerProps,
   type DateRangePickerProps,
   type DateRange,
+  type MonthPickerProps,
+  type YearPickerProps,
 } from "./date-picker";
 export {
   Combobox,
