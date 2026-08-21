@@ -7,6 +7,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-08-21
+
 ### Added
 
 - `MonthPicker` — Popover with year nav + 3×4 month grid; value `"YYYY-MM"`

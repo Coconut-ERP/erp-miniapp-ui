@@ -10,7 +10,7 @@ Design system and UI library for ERP mini apps.
 Published as a GitHub Release tarball (not on npm):
 
 ```bash
-npm install https://github.com/Coconut-ERP/erp-miniapp-ui/releases/download/v0.3.3/erp-miniapp-ui-0.3.3.tgz
+npm install https://github.com/Coconut-ERP/erp-miniapp-ui/releases/download/v0.3.4/erp-miniapp-ui-0.3.4.tgz
 ```
 
 Local development (working on this library itself):
@@ -21,7 +21,7 @@ npm run storybook   # http://localhost:6006 — live component preview + docs
 npm run build
 npm pack
 # then in your mini app:
-# npm install ../path/to/erp-miniapp-ui-0.3.3.tgz
+# npm install ../path/to/erp-miniapp-ui-0.3.4.tgz
 ```
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full workflow and [docs/adr/](./docs/adr/) for why the architecture looks the way it does.
