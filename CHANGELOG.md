@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-09-17
+
+### Added
+
+- `Table` opt-in `stickyHeader` prop — pins `<thead>` while the body scrolls; the table container owns the vertical scroll (needs a height-bounded parent), combinable with `stickyHorizontalScrollbar`
+
 ## [0.3.5] - 2026-09-17
 
 ### Added
