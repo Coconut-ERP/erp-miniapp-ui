@@ -51,15 +51,16 @@ export const Default: Story = {
 };
 
 /**
- * Opt-in `stickyHorizontalScrollbar`: inside a fixed-height `overflow-y-auto`
- * parent the horizontal bar stays pinned to the bottom of the visible area, so
- * it is reachable at the top of the list as well as the bottom.
+ * `stickyHeader` keeps `<thead>` pinned while the body scrolls, and
+ * `stickyHorizontalScrollbar` keeps the horizontal bar at the bottom of the
+ * visible area — both reachable at any vertical scroll position. The parent
+ * only needs a bounded height; the table owns the scrolling.
  */
-export const StickyHorizontalScrollbar: Story = {
+export const StickyHeaderAndScrollbar: Story = {
   render: () => (
-    <div className="h-72 w-full overflow-y-auto rounded-md border">
-      <Table stickyHorizontalScrollbar>
-        <TableHeader className="sticky top-0 z-20 bg-background">
+    <div className="h-72 w-full rounded-md border">
+      <Table stickyHeader stickyHorizontalScrollbar>
+        <TableHeader>
           <TableRow>
             {wideColumns.map((column) => (
               <TableHead key={column} className="min-w-40">
@@ -82,7 +83,8 @@ export const StickyHorizontalScrollbar: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const viewport = canvas.getByRole("table").parentElement as HTMLElement;
+    const table = canvas.getByRole("table");
+    const viewport = table.parentElement as HTMLElement;
     const bar = canvasElement.querySelector<HTMLElement>(
       '[data-slot="table-sticky-scrollbar"]',
     ) as HTMLElement;
@@ -99,5 +101,18 @@ export const StickyHorizontalScrollbar: Story = {
     viewport.scrollLeft = 40;
     viewport.dispatchEvent(new Event("scroll", { bubbles: true }));
     await waitFor(() => expect(bar.scrollLeft).toBe(40));
+
+    // The header stays pinned: the table container owns the vertical scroll.
+    const thead = table.querySelector("thead") as HTMLElement;
+    expect(getComputedStyle(viewport).overflowY).toBe("auto");
+    expect(getComputedStyle(thead).position).toBe("sticky");
+
+    viewport.scrollTop = 400;
+    await waitFor(() =>
+      expect(thead.getBoundingClientRect().top).toBeCloseTo(
+        viewport.getBoundingClientRect().top,
+        0,
+      ),
+    );
   },
 };
