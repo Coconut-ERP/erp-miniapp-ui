@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-09-17
+
+### Changed
+
+- `Table` `stickyHeader` now styles `TableHeader` through context instead of a descendant selector, so a consumer `className` (e.g. `bg-card`) wins over the default sticky background
+
 ## [0.3.6] - 2026-09-17
 
 ### Added
