@@ -47,11 +47,15 @@ function Table({ className, stickyHeader, stickyHorizontalScrollbar, ...props }:
   }
 
   return (
-    <TableScrollContainer stickyHeader={stickyHeader} stickyScrollbar={stickyHorizontalScrollbar}>
-      {table}
-    </TableScrollContainer>
+    <StickyHeaderContext value={!!stickyHeader}>
+      <TableScrollContainer stickyHeader={stickyHeader} stickyScrollbar={stickyHorizontalScrollbar}>
+        {table}
+      </TableScrollContainer>
+    </StickyHeaderContext>
   );
 }
+
+const StickyHeaderContext = React.createContext(false);
 
 function TableScrollContainer({
   stickyHeader,
@@ -93,8 +97,7 @@ function TableScrollContainer({
         className={cn(
           "relative w-full overflow-x-auto outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           // Own the vertical scroll so `thead` has a scrolling ancestor to stick to.
-          stickyHeader &&
-            "min-h-0 flex-1 overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-background",
+          stickyHeader && "min-h-0 flex-1 overflow-y-auto",
           stickyScrollbar && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         )}
       >
@@ -117,7 +120,15 @@ function TableScrollContainer({
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={cn("[&_tr]:border-b", className)} {...props} />;
+  // `className` stays last so consumers can override the sticky background.
+  const sticky = React.use(StickyHeaderContext);
+  return (
+    <thead
+      data-slot="table-header"
+      className={cn("[&_tr]:border-b", sticky && "sticky top-0 z-10 bg-background", className)}
+      {...props}
+    />
+  );
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
