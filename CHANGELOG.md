@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-09-17
+
+### Added
+
+- `Table` opt-in `stickyHorizontalScrollbar` prop — keeps the horizontal scrollbar pinned to the bottom of the table's visible area inside a fixed-height `overflow-y-auto` parent (scroll position synced both ways; scroll container focusable for keyboard scrolling)
+
 ## [0.3.4] - 2026-08-21
 
 ### Added

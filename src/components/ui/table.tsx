@@ -1,22 +1,90 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 
 import { cn } from "../../lib/utils";
+
+type TableProps = React.ComponentProps<"table"> & {
+  /**
+   * Pin the horizontal scrollbar to the bottom of the table's visible area
+   * instead of the end of the table content. Opt-in; default `false`.
+   */
+  stickyHorizontalScrollbar?: boolean;
+};
 
 /**
  * Styled `<table>` wrapper with a horizontal-scroll container. Compose with
  * TableHeader/TableBody/TableFooter, TableRow, TableHead/TableCell, and
  * optional TableCaption.
+ *
+ * A11y: with `stickyHorizontalScrollbar`, the scroll container is focusable so
+ * the table can be scrolled with arrow/Home/End/Page keys; the sticky bar is a
+ * visual proxy and is hidden from assistive tech.
+ *
+ * Do: use `stickyHorizontalScrollbar` when the table sits in a fixed-height
+ * `overflow-y-auto` parent, so the bar stays reachable at any vertical scroll
+ * position. Don't wrap that variant in an `overflow-hidden` ancestor — sticky
+ * positioning needs the scrolling ancestor to see it.
  */
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({ className, stickyHorizontalScrollbar, ...props }: TableProps) {
+  const table = (
+    <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
+  );
+
+  if (!stickyHorizontalScrollbar) {
+    return (
+      <div data-slot="table-container" className="relative w-full overflow-x-auto">
+        {table}
+      </div>
+    );
+  }
+
+  return <StickyScrollbarTableContainer>{table}</StickyScrollbarTableContainer>;
+}
+
+function StickyScrollbarTableContainer({ children }: { children: React.ReactNode }) {
+  const viewportRef = React.useRef<HTMLDivElement>(null);
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const [size, setSize] = React.useState({ scrollWidth: 0, clientWidth: 0 });
+
+  React.useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const measure = () =>
+      setSize({ scrollWidth: viewport.scrollWidth, clientWidth: viewport.clientWidth });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    for (const child of Array.from(viewport.children)) observer.observe(child);
+    return () => observer.disconnect();
+  }, []);
+
+  // Two-way sync; the equality guard stops the scroll events from ping-ponging.
+  const sync = (from: HTMLDivElement | null, to: HTMLDivElement | null) => {
+    if (from && to && to.scrollLeft !== from.scrollLeft) to.scrollLeft = from.scrollLeft;
+  };
+
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+    <div className="relative w-full">
+      <div
+        ref={viewportRef}
+        data-slot="table-container"
+        tabIndex={0}
+        onScroll={() => sync(viewportRef.current, barRef.current)}
+        className="relative w-full overflow-x-auto outline-none [scrollbar-width:none] focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-scrollbar]:hidden"
+      >
+        {children}
+      </div>
+      <div
+        ref={barRef}
+        data-slot="table-sticky-scrollbar"
+        aria-hidden="true"
+        onScroll={() => sync(barRef.current, viewportRef.current)}
+        hidden={size.scrollWidth <= size.clientWidth}
+        className="sticky bottom-0 z-10 h-4 w-full overflow-x-scroll overscroll-x-contain"
+      >
+        <div style={{ width: size.scrollWidth, height: 1 }} />
+      </div>
     </div>
   );
 }
@@ -92,3 +160,4 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 }
 
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
+export type { TableProps };
