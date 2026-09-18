@@ -13,6 +13,22 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Radix state variants.
+ *
+ * Radix exposes state as `data-state="checked|open|active|…"` and orientation as
+ * `data-orientation="vertical|horizontal"`, but Tailwind's bare `data-*:` shorthand
+ * compiles to an attribute-presence selector (`[data-checked]`), which never matches.
+ * These variants map the shorthand onto the attributes Radix actually renders.
+ */
+@custom-variant data-checked (&[data-state="checked"]);
+@custom-variant data-unchecked (&[data-state="unchecked"]);
+@custom-variant data-open (&[data-state="open"]);
+@custom-variant data-closed (&[data-state="closed"]);
+@custom-variant data-active (&[data-state="active"]);
+@custom-variant data-vertical (&[data-orientation="vertical"]);
+@custom-variant data-horizontal (&[data-orientation="horizontal"]);
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans:

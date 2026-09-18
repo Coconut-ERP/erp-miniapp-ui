@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-09-17
+
+### Fixed
+
+- `Switch` (and `Checkbox`, `RadioGroup`, `Field`, `Tabs`, `Slider`, `Separator`, `ScrollArea`, and every dialog/menu/popover overlay) never reflected their Radix state visually — e.g. toggling a `Switch` fired `onCheckedChange` but the track stayed grey and the thumb never slid. Tailwind's bare `data-*:` shorthand compiles to an attribute-presence selector (`[data-checked]`), while Radix renders `data-state="checked"`, so the rules could not match. `styles.css` now declares `data-checked`, `data-unchecked`, `data-open`, `data-closed`, `data-active`, `data-vertical`, and `data-horizontal` as `@custom-variant`s targeting the attributes Radix actually emits
+
 ## [0.3.7] - 2026-09-17
 
 ### Changed
