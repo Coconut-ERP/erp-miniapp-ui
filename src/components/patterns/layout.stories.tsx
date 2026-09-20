@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { DollarSignIcon } from "lucide-react";
+import { TrendingUpIcon } from "lucide-react";
 
 import { DashboardCard, FormStack, PageHeader, StatisticCard } from "./layout";
 import { Button } from "../ui/button";
@@ -43,10 +43,11 @@ export const FormStackExample: Story = {
 export const StatisticCardExample: Story = {
   render: () => (
     <StatisticCard
-      label="Revenue"
-      value="$12,340"
-      trend={3.64}
-      icon={<DollarSignIcon />}
+      label="Visits"
+      value="2,301"
+      hint="Just now"
+      trend={35}
+      icon={<TrendingUpIcon />}
       className="w-64"
     />
   ),

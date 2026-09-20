@@ -7,6 +7,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- `StatisticCard` now places its label above the metric value, renders hints as text-only, and shows the existing optional `icon` beside its trend percentage.
+
 ## [0.3.8] - 2026-09-17
 
 ### Fixed

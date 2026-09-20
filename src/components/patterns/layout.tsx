@@ -41,7 +41,7 @@ export function FormStack({ className, ...props }: React.ComponentProps<"div">) 
 }
 
 /**
- * Compact metric card: value, label, optional icon well, and a
+ * Compact metric card: label, value, optional text hint, and a
  * positive/negative trend badge (via `trend`, a signed percent).
  */
 export function StatisticCard({
@@ -61,7 +61,7 @@ export function StatisticCard({
   trend?: number;
   trendLabel?: React.ReactNode;
   icon?: React.ReactNode;
-  /** Tinted icon well, e.g. `bg-emerald-50 text-emerald-700` */
+  /** Optional icon shown beside the trend percentage. */
   iconClassName?: string;
   className?: string;
 }) {
@@ -73,39 +73,28 @@ export function StatisticCard({
     <Card className={cn("shadow-sm", className)} size="sm">
       <CardHeader className="gap-3">
         <div className="flex items-start justify-between gap-2">
-          {icon ? (
-            <div
-              data-slot="statistic-card-icon"
-              className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-lg [&_svg]:size-5",
-                iconClassName ?? "bg-primary/10 text-primary",
-              )}
-            >
-              {icon}
-            </div>
-          ) : (
-            <span />
-          )}
+          <CardDescription className="text-sm font-medium">{label}</CardDescription>
           {trendBadge ? (
             <span
               data-slot="statistic-card-trend"
               className={cn(
-                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold [&_svg]:size-3.5",
                 trendPositive
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-rose-50 text-rose-700",
+                  ? "bg-success text-success-foreground"
+                  : "bg-destructive text-destructive-foreground",
+                iconClassName,
               )}
             >
               {trendBadge}
+              {icon ? <span data-slot="statistic-card-icon">{icon}</span> : null}
               {trendLabel ? <span className="sr-only"> {trendLabel}</span> : null}
             </span>
           ) : null}
         </div>
         <div className="space-y-1">
-          <CardTitle className="text-2xl font-bold tabular-nums tracking-tight text-foreground">
+          <CardTitle className="text-4xl font-bold tabular-nums tracking-tight text-foreground">
             {value}
           </CardTitle>
-          <CardDescription className="text-xs font-medium">{label}</CardDescription>
           {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
         </div>
       </CardHeader>

@@ -86,13 +86,13 @@ export const patternDocs: Record<string, DocSpec> = {
       {
         title: "Statistic cards",
         code: `<div className="grid w-full max-w-3xl gap-4 sm:grid-cols-3">
-  <StatisticCard label="Open" value={12} hint="This week" />
+  <StatisticCard label="Visits" value="2,301" hint="Just now" trend={35} />
   …
 </div>`,
         className: "items-stretch w-full",
         render: () => (
           <div className="grid w-full max-w-3xl gap-4 sm:grid-cols-3">
-            <StatisticCard label="Open" value={12} hint="This week" />
+            <StatisticCard label="Visits" value="2,301" hint="Just now" trend={35} />
             <StatisticCard label="Done" value={48} />
             <StatisticCard label="Blocked" value={3} hint="Needs review" />
           </div>
