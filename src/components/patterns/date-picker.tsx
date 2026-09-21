@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
+import { endOfISOWeek, format, isValid, parseISO, startOfISOWeek, startOfMonth } from "date-fns";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -53,6 +53,34 @@ function decadeStart(year: number) {
 
 function isMonthValue(value: string | undefined): value is `${number}-${MonthToken}` {
   return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+}
+
+const ISO_WEEK_PATTERN = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/;
+
+/** ISO week value for a date, e.g. `"2026-W12"` (ISO week-numbering year + week). */
+function formatWeekValue(date: Date): string {
+  return format(date, "RRRR-'W'II");
+}
+
+/** Parses `"YYYY-Www"` to the Monday of that week; `null` when malformed or non-existent (e.g. `"2025-W53"`). */
+function parseWeekValue(value: string | undefined): Date | null {
+  if (typeof value !== "string" || !ISO_WEEK_PATTERN.test(value)) return null;
+  const date = parseISO(value);
+  if (!isValid(date) || formatWeekValue(date) !== value) return null;
+  return startOfISOWeek(date);
+}
+
+/** `"Tuần 12, 16/03–22/03/2026"` — week number plus its Monday→Sunday span. */
+function weekTriggerLabel(value: string | undefined): string | null {
+  const date = parseWeekValue(value);
+  if (!date) return null;
+  return `Tuần ${format(date, "II")}, ${format(date, "dd/MM")}–${format(endOfISOWeek(date), "dd/MM/yyyy")}`;
+}
+
+function clampMonth(date: Date, fromYear: number, toYear: number) {
+  if (date.getFullYear() < fromYear) return new Date(fromYear, 0, 1);
+  if (date.getFullYear() > toYear) return new Date(toYear, 11, 1);
+  return startOfMonth(date);
 }
 
 function isYearValue(value: string | undefined): value is `${number}` {
@@ -387,6 +415,111 @@ export function MonthPicker({
               );
             })}
           </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+export type WeekPickerProps = {
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string | undefined) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  buttonClassName?: string;
+  align?: React.ComponentProps<typeof PopoverContent>["align"];
+  fromYear?: number;
+  toYear?: number;
+  id?: string;
+  "aria-label"?: string;
+};
+
+/**
+ * Week period picker — Popover with an ISO-week calendar; clicking any day
+ * selects its whole week (Monday → Sunday). Value is `"YYYY-Www"`
+ * (e.g. `"2026-W12"`), or `undefined` when empty.
+ *
+ * A11y: trigger button with `aria-label`; month/year dropdowns and day cells
+ * are keyboard operable, and the selected week renders as a highlighted range.
+ *
+ * Do: use for weekly timesheets, reports, and filters.
+ * Don't: use for a single day or an arbitrary span — use `DatePicker` /
+ * `DateRangePicker` instead.
+ */
+export function WeekPicker({
+  value: valueProp,
+  defaultValue,
+  onChange,
+  placeholder = "Chọn tuần",
+  disabled,
+  className,
+  buttonClassName,
+  align = "start",
+  fromYear = defaultFromYear(),
+  toYear = defaultToYear(),
+  id,
+  "aria-label": ariaLabel,
+}: WeekPickerProps) {
+  const minYear = Math.min(fromYear, toYear);
+  const maxYear = Math.max(fromYear, toYear);
+  const [open, setOpen] = React.useState(false);
+  const [uncontrolled, setUncontrolled] = React.useState<string | undefined>(defaultValue);
+  const value = valueProp !== undefined ? valueProp : uncontrolled;
+  const selected = parseWeekValue(value);
+  const [month, setMonth] = React.useState(() =>
+    clampMonth(selected ?? new Date(), minYear, maxYear),
+  );
+
+  React.useEffect(() => {
+    if (!open) return;
+    setMonth(clampMonth(parseWeekValue(value) ?? new Date(), minYear, maxYear));
+  }, [open, value, minYear, maxYear]);
+
+  function setValue(next: string | undefined) {
+    if (valueProp === undefined) setUncontrolled(next);
+    onChange?.(next);
+  }
+
+  const label = weekTriggerLabel(value);
+
+  return (
+    <div data-slot="week-picker" className={cn("w-full", className)}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            data-empty={!label}
+            aria-label={ariaLabel ?? placeholder}
+            className={cn(
+              "w-full justify-between font-normal data-[empty=true]:text-muted-foreground",
+              buttonClassName,
+            )}
+          >
+            <span className="truncate">{label ?? placeholder}</span>
+            <CalendarIcon data-icon="inline-end" className="text-muted-foreground" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align={align}>
+          <Calendar
+            mode="range"
+            ISOWeek
+            showWeekNumber
+            captionLayout="dropdown"
+            month={month}
+            onMonthChange={setMonth}
+            startMonth={new Date(minYear, 0, 1)}
+            endMonth={new Date(maxYear, 11, 1)}
+            selected={selected ? { from: selected, to: endOfISOWeek(selected) } : undefined}
+            onDayClick={(day) => {
+              setValue(formatWeekValue(day));
+              setOpen(false);
+            }}
+          />
         </PopoverContent>
       </Popover>
     </div>

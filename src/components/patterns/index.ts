@@ -14,11 +14,13 @@ export {
   DatePicker,
   DateRangePicker,
   MonthPicker,
+  WeekPicker,
   YearPicker,
   type DatePickerProps,
   type DateRangePickerProps,
   type DateRange,
   type MonthPickerProps,
+  type WeekPickerProps,
   type YearPickerProps,
 } from "./date-picker";
 export {

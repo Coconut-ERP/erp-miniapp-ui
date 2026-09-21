@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-21
+
+### Added
+
+- `WeekPicker` / `WeekPickerProps` — ISO week period picker (Popover + Calendar). Clicking any day selects its whole Monday→Sunday week; the value is a `"YYYY-Www"` string (e.g. `"2026-W12"`) and the trigger reads `Tuần 12, 16/03–22/03/2026`. Controlled/uncontrolled and `fromYear`/`toYear` behave as in `MonthPicker`
+- `vitest` + `@testing-library/react` test setup and an `npm test` script, covering `WeekPicker` value formatting/parsing, week selection, week-year boundaries, and controlled/uncontrolled state
+
 ## [0.3.9] - 2026-09-20
 
 ### Changed

@@ -20,6 +20,7 @@ import {
   DatePickerDemo,
   DatePickerDobDemo,
   DateRangePickerDemo,
+  WeekPickerDemo,
 } from "@/components/date-picker-demo";
 import type { DocSpec } from "@/lib/doc-types";
 
@@ -125,7 +126,7 @@ export const patternDocs: Record<string, DocSpec> = {
     title: "Date Picker",
     description:
       "Popover + Calendar — pass value/onChange; single date or range (shadcn composition).",
-    importLine: `import { DatePicker, DateRangePicker } from "@erp/miniapp-ui";`,
+    importLine: `import { DatePicker, DateRangePicker, WeekPicker } from "@erp/miniapp-ui";`,
     related: [
       { label: "Calendar", href: "/components/calendar" },
       { label: "Popover", href: "/components/popover" },
@@ -149,8 +150,22 @@ export const patternDocs: Record<string, DocSpec> = {
         className: "items-stretch w-full max-w-sm",
         render: () => <DateRangePickerDemo />,
       },
+      {
+        title: "Week (ISO `YYYY-Www`)",
+        code: `<WeekPicker value={week} onChange={setWeek} placeholder="Chọn tuần" />`,
+        className: "items-stretch w-full max-w-xs",
+        render: () => <WeekPickerDemo />,
+      },
     ],
-    api: ["DatePicker", "DateRangePicker", "DatePickerProps", "DateRangePickerProps", "DateRange"],
+    api: [
+      "DatePicker",
+      "DateRangePicker",
+      "WeekPicker",
+      "DatePickerProps",
+      "DateRangePickerProps",
+      "WeekPickerProps",
+      "DateRange",
+    ],
   },
 
   "page-header": {

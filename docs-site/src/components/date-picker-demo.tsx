@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, DatePicker, DateRangePicker, type DateRange } from "@erp/miniapp-ui";
+import { Calendar, DatePicker, DateRangePicker, WeekPicker, type DateRange } from "@erp/miniapp-ui";
 
 export function CalendarDemo() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -39,6 +39,13 @@ export function DatePickerDobDemo() {
       fromYear={1960}
       toYear={new Date().getFullYear()}
     />
+  );
+}
+
+export function WeekPickerDemo() {
+  const [week, setWeek] = React.useState<string | undefined>();
+  return (
+    <WeekPicker value={week} onChange={setWeek} className="max-w-xs" placeholder="Chọn tuần" />
   );
 }
 

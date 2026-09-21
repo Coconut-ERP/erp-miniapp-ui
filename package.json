@@ -1,6 +1,6 @@
 {
   "name": "@erp/miniapp-ui",
-  "version": "0.3.9",
+  "version": "0.4.0",
   "description": "Design system and UI library for ERP mini apps",
   "type": "module",
   "license": "UNLICENSED",
@@ -41,6 +41,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "build": "tsup && node ./scripts/copy-styles.mjs && node ./scripts/generate-llms-txt.mjs",
     "pack:check": "npm pack --dry-run",
     "prepack": "npm run build",
@@ -68,14 +69,19 @@
     "@storybook/addon-mcp": "^0.7",
     "@storybook/react-vite": "^10",
     "@tailwindcss/vite": "^4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "jsdom": "^30.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "storybook": "^10",
     "tailwindcss": "^4",
     "tsup": "^8.2.4",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^5.0.1"
   },
   "engines": {
     "node": ">=20"

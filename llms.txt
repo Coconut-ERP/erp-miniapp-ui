@@ -51,6 +51,7 @@
 - search-field — Text input pre-configured for search: `type="search"` with a leading search icon. Accepts all Input props.
 - sortable-list — Vertical sortable list — HTML5 drag-and-drop via a handle. Apps pass items + `onReorder`; no third-party DnD dependency.
 - states — Stack of skeleton placeholders for a loading list (`rows` count).
+- week-picker.test — react-day-picker tags each cell with `data-day="yyyy-MM-dd"` — a locale-stable handle.
 
 ## Components (charts)
 - bar-chart — Lightweight CSS/div-based bar chart for dashboards — one or more series (grouped bars) across shared `categories`, no charting dependency.
