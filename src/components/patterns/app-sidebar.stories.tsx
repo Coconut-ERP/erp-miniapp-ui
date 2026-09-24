@@ -41,3 +41,21 @@ export const WithActiveChild: Story = {
     </div>
   ),
 };
+
+/** Icon-only rail — click the header toggle to expand. */
+export const Collapsed: Story = {
+  render: () => (
+    <div className="h-96">
+      <AppSidebar items={items} activeId="home" defaultCollapsed />
+    </div>
+  ),
+};
+
+/** `collapsible={false}` hides the toggle for apps that own their own chrome. */
+export const NotCollapsible: Story = {
+  render: () => (
+    <div className="h-96">
+      <AppSidebar items={items} activeId="home" collapsible={false} />
+    </div>
+  ),
+};

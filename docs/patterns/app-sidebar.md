@@ -39,6 +39,20 @@ const items: AppSidebarItem[] = [
 />
 ```
 
+## Collapse
+
+The header renders a collapse toggle by default (`collapsible`), shrinking the sidebar to a
+`w-16` icon-only rail: labels go `sr-only`, section titles become dividers, submenus close, and
+the first click on a parent row re-expands the sidebar. Uncontrolled via `defaultCollapsed`, or
+controlled with `collapsed` + `onCollapsedChange` (e.g. to persist the choice). The root element
+exposes `data-collapsed` for shell-level styling.
+
+```tsx
+const [collapsed, setCollapsed] = React.useState(false);
+
+<AppSidebar items={items} activeId="hrm" collapsed={collapsed} onCollapsedChange={setCollapsed} />
+```
+
 Shell frame (kit, after library is ready): outer `p-3` (`--shell-inset`), sidebar width `--sidenav-width`, content panel `rounded-md border`, main `p-6 gap-4` — do **not** override these in page components.
 
 ## Do
@@ -50,6 +64,7 @@ Shell frame (kit, after library is ready): outer `p-3` (`--shell-inset`), sideba
 ## Don't
 
 - Re-style rows with one-off `className` on pages (breaks sync)
+- Rebuild a collapse toggle in the app — use `collapsible` / `collapsed`
 - Fork low-level `Sidebar*` for this chrome look
 - Hard-code hex colors — use semantic tokens
 

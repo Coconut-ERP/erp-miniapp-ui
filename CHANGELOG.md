@@ -7,6 +7,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-24
+
+### Added
+
+- `AppSidebar` collapse toggle — the header now renders a desktop collapse button that shrinks the sidebar to an icon-only rail (labels become `sr-only`, submenus close, icons keep a `title` tooltip). New props: `collapsible` (default `true`), `collapsed`, `defaultCollapsed`, `onCollapsedChange`; the root exposes `data-collapsed`
+
 ## [0.4.0] - 2026-09-21
 
 ### Added

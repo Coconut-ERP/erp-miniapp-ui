@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
 import { cn } from "../../lib/utils";
+import { Button } from "../ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -45,6 +46,13 @@ export type AppSidebarProps = {
   className?: string;
   /** Accessible name for the nav landmark. */
   navLabel?: string;
+  /** Show the desktop collapse toggle (icon-only rail). Defaults to `true`. */
+  collapsible?: boolean;
+  /** Controlled collapsed state. */
+  collapsed?: boolean;
+  /** Initial collapsed state when uncontrolled. */
+  defaultCollapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 };
 
 function itemOrChildIsActive(item: AppSidebarItem, activeId?: string): boolean {
@@ -124,10 +132,11 @@ function NavLink({
 }
 
 /** Dreams parent row: padding-block 6px / inline 10px, text 14px; active = dark fill + white */
-function parentClassName(isActive: boolean, disabled?: boolean) {
+function parentClassName(isActive: boolean, disabled?: boolean, collapsed?: boolean) {
   return cn(
     "relative flex w-full items-center rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors outline-none",
     "focus-visible:ring-2 focus-visible:ring-sidebar-ring/50",
+    collapsed && "justify-center px-0",
     disabled && "pointer-events-none opacity-50",
     isActive
       ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -152,19 +161,26 @@ function NavItemRow({
   activeId,
   onItemSelect,
   renderLink,
+  collapsed,
+  onExpand,
 }: {
   item: AppSidebarItem;
   activeId?: string;
   onItemSelect?: (item: AppSidebarItem) => void;
   renderLink?: AppSidebarProps["renderLink"];
+  collapsed?: boolean;
+  onExpand?: () => void;
 }) {
   if (item.type === "section") {
     return (
       <div
         data-slot="app-sidebar-section"
-        className="mt-4 mb-2 first:mt-0 px-2.5 text-[13px] font-semibold text-sidebar-foreground/80"
+        className={cn(
+          "mt-4 mb-2 first:mt-0 text-[13px] font-semibold text-sidebar-foreground/80",
+          collapsed ? "mx-2.5 border-t border-sidebar-border" : "px-2.5",
+        )}
       >
-        {item.label}
+        <span className={cn(collapsed && "sr-only")}>{item.label}</span>
       </div>
     );
   }
@@ -180,19 +196,34 @@ function NavItemRow({
 
   if (hasChildren) {
     return (
-      <Collapsible open={open} onOpenChange={setOpen} className="flex flex-col gap-0.5">
+      <Collapsible
+        open={!collapsed && open}
+        onOpenChange={setOpen}
+        className="flex flex-col gap-0.5"
+      >
         <CollapsibleTrigger
           disabled={item.disabled}
-          className={cn(parentClassName(branchActive, item.disabled), "group")}
+          title={collapsed ? item.label : undefined}
+          className={cn(parentClassName(branchActive, item.disabled, collapsed), "group")}
+          onClick={(event) => {
+            // Collapsed rail: first click re-opens the sidebar instead of the submenu.
+            if (collapsed) {
+              event.preventDefault();
+              onExpand?.();
+            }
+          }}
         >
           <span className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-4">
             {item.icon}
           </span>
-          <span className="ms-2 min-w-0 flex-1 truncate text-left">{item.label}</span>
+          <span className={cn("ms-2 min-w-0 flex-1 truncate text-left", collapsed && "sr-only")}>
+            {item.label}
+          </span>
           <ChevronDownIcon
             className={cn(
               "size-3.5 shrink-0 text-muted-foreground transition-transform",
               open && "rotate-180",
+              collapsed && "hidden",
             )}
           />
         </CollapsibleTrigger>
@@ -218,14 +249,19 @@ function NavItemRow({
     <NavLink
       item={item}
       isActive={isActive}
-      className={parentClassName(isActive, item.disabled)}
+      className={parentClassName(isActive, item.disabled, collapsed)}
       onItemSelect={onItemSelect}
       renderLink={renderLink}
     >
-      <span className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-4">
+      <span
+        title={collapsed ? item.label : undefined}
+        className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-4"
+      >
         {item.icon}
       </span>
-      <span className="ms-2 min-w-0 flex-1 truncate text-left">{item.label}</span>
+      <span className={cn("ms-2 min-w-0 flex-1 truncate text-left", collapsed && "sr-only")}>
+        {item.label}
+      </span>
     </NavLink>
   );
 }
@@ -233,6 +269,9 @@ function NavItemRow({
 /**
  * Dreams ERP–aligned application sidebar.
  * Pass `items` (+ optional `type: "section"`) and `activeId`; spacing/active styles stay in the library.
+ *
+ * Collapsible by default: the header toggle shrinks the sidebar to an icon-only rail
+ * (uncontrolled via `defaultCollapsed`, or controlled with `collapsed` + `onCollapsedChange`).
  */
 export function AppSidebar({
   items,
@@ -243,20 +282,51 @@ export function AppSidebar({
   footer,
   className,
   navLabel = "Main",
+  collapsible = true,
+  collapsed: collapsedProp,
+  defaultCollapsed = false,
+  onCollapsedChange,
 }: AppSidebarProps) {
+  const [uncontrolled, setUncontrolled] = React.useState(defaultCollapsed);
+  const collapsed = collapsible && (collapsedProp ?? uncontrolled);
+
+  const setCollapsed = (next: boolean) => {
+    if (collapsedProp === undefined) setUncontrolled(next);
+    onCollapsedChange?.(next);
+  };
+
   return (
     <aside
       data-slot="app-sidebar"
+      data-collapsed={collapsed || undefined}
       className={cn(
-        "flex h-full w-(--spacing-sidenav) shrink-0 flex-col overflow-hidden rounded-md border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm",
+        "flex h-full shrink-0 flex-col overflow-hidden rounded-md border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm transition-[width] duration-200",
+        collapsed ? "w-16" : "w-(--spacing-sidenav)",
         className,
       )}
     >
       <div
         data-slot="app-sidebar-logo"
-        className="flex h-(--spacing-topbar) shrink-0 items-center border-b border-sidebar-border px-4"
+        className={cn(
+          "flex h-(--spacing-topbar) shrink-0 items-center gap-2 border-b border-sidebar-border",
+          collapsed ? "justify-center px-2" : "px-4",
+        )}
       >
-        {logo ?? <DefaultLogo />}
+        {collapsed ? null : <div className="min-w-0 flex-1">{logo ?? <DefaultLogo />}</div>}
+        {collapsible ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="shrink-0 text-muted-foreground"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <PanelLeftOpenIcon /> : <PanelLeftCloseIcon />}
+          </Button>
+        ) : null}
       </div>
 
       <nav
@@ -271,6 +341,8 @@ export function AppSidebar({
             activeId={activeId}
             onItemSelect={onItemSelect}
             renderLink={renderLink}
+            collapsed={collapsed}
+            onExpand={() => setCollapsed(false)}
           />
         ))}
       </nav>
@@ -278,7 +350,10 @@ export function AppSidebar({
       {footer ? (
         <div
           data-slot="app-sidebar-footer"
-          className="mt-auto flex shrink-0 flex-col gap-2 border-t border-sidebar-border p-3"
+          className={cn(
+            "mt-auto flex shrink-0 flex-col gap-2 border-t border-sidebar-border p-3",
+            collapsed && "items-center px-2",
+          )}
         >
           {footer}
         </div>
