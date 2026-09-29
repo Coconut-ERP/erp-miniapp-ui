@@ -7,6 +7,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+> **Note on `v0.4.1`.** The `v0.4.1` tag was cut by mistake *after* `0.5.0`: it only lowered
+> `package.json` back to `0.4.1` and shipped the full 0.5.0 source (collapsible `AppSidebar`
+> included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
+> `v0.5.0` release.
+
 ## [0.5.0] - 2026-09-24
 
 ### Added
