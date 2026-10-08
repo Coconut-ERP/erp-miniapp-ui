@@ -103,7 +103,14 @@ export {
   TableHeader,
   TableRow,
 } from "./components/ui/table";
-export type { TableProps } from "./components/ui/table";
+export type {
+  TableCellProps,
+  TableHeadProps,
+  TableProps,
+  TableRowProps,
+  TableRowState,
+  TableSortDirection,
+} from "./components/ui/table";
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants } from "./components/ui/tabs";
 export { Textarea } from "./components/ui/textarea";
 export { Switch } from "./components/ui/switch";

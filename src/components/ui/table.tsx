@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
@@ -151,12 +152,30 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   );
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+type TableSortDirection = "asc" | "desc";
+
+type TableRowState = "warning" | "error" | "selected";
+
+/** Row tint per state — semantic tokens only, so every table flags rows the same way. */
+const ROW_STATE: Record<TableRowState, string> = {
+  warning: "bg-warning/10 hover:bg-warning/15",
+  error: "bg-destructive/10 hover:bg-destructive/15",
+  selected: "bg-muted",
+};
+
+type TableRowProps = React.ComponentProps<"tr"> & {
+  /** Tints the row (`warning`, `error`, `selected`). Colour is never the only signal: pair it with text. */
+  state?: TableRowState;
+};
+
+function TableRow({ className, state, ...props }: TableRowProps) {
   return (
     <tr
       data-slot="table-row"
+      data-row-state={state}
       className={cn(
         "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        state && ROW_STATE[state],
         className,
       )}
       {...props}
@@ -164,26 +183,135 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   );
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+type CellLayoutProps = {
+  /** Right-aligns and uses tabular figures — for numbers and money. */
+  numeric?: boolean;
+  /**
+   * Freezes the column to an edge while the table scrolls horizontally. Give
+   * every cell of the column (header and body) the same `pinned` + `pinOffset`.
+   */
+  pinned?: "left" | "right";
+  /** Distance from the pinned edge (px number or CSS length), e.g. the widths of columns pinned before this one. Default `0`. */
+  pinOffset?: number | string;
+};
+
+function pinProps({ pinned, pinOffset = 0 }: CellLayoutProps, style?: React.CSSProperties) {
+  if (!pinned) return { className: undefined, style };
+  return {
+    className: "sticky z-[5] bg-background",
+    style: { ...style, [pinned]: pinOffset } as React.CSSProperties,
+  };
+}
+
+type TableHeadProps = React.ComponentProps<"th"> &
+  CellLayoutProps & {
+    /** Makes the header a button that requests a sort. Sorting itself is the app's job (typically server-side). */
+    sortable?: boolean;
+    /** Current direction for this column; `null`/`undefined` = not the sorted column. */
+    sortDirection?: TableSortDirection | null;
+    /** Called when the header button is pressed. The app decides the cycle (asc → desc → none). */
+    onSortChange?: () => void;
+  };
+
+const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
+
+/**
+ * Column header. With `sortable` it renders a button and sets `aria-sort`.
+ * The library holds no sort state — pass `sortDirection` and handle `onSortChange`.
+ */
+function TableHead({
+  className,
+  children,
+  numeric,
+  pinned,
+  pinOffset,
+  sortable,
+  sortDirection,
+  onSortChange,
+  style,
+  ...props
+}: TableHeadProps) {
+  const pin = pinProps({ pinned, pinOffset }, style);
+  const Icon = sortDirection === "asc" ? ArrowUp : sortDirection === "desc" ? ArrowDown : ChevronsUpDown;
   return (
     <th
       data-slot="table-head"
+      aria-sort={sortable ? (sortDirection ? ARIA_SORT[sortDirection] : "none") : undefined}
       className={cn(
         "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        numeric && "text-right",
+        pin.className,
         className,
       )}
+      style={pin.style}
       {...props}
-    />
+    >
+      {sortable ? (
+        <button
+          type="button"
+          onClick={onSortChange}
+          className={cn(
+            "-mx-1 inline-flex items-center gap-1 rounded px-1 font-medium outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+            numeric && "flex-row-reverse",
+          )}
+        >
+          {children}
+          <Icon
+            aria-hidden="true"
+            className={cn("size-3.5 shrink-0", sortDirection ? "text-foreground" : "text-muted-foreground")}
+          />
+        </button>
+      ) : (
+        children
+      )}
+    </th>
   );
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+type TableCellProps = React.ComponentProps<"td"> &
+  CellLayoutProps & {
+    /** Shown instead of `null`, `undefined` or `""` (a real `0` still renders). Typically `"—"`. */
+    fallback?: React.ReactNode;
+    /** Clips long text to one line (`max-w-48`; override with `className`) and exposes the full text as `title`. */
+    truncate?: boolean;
+  };
+
+function isEmpty(node: React.ReactNode) {
+  return node === null || node === undefined || node === "" || node === false;
+}
+
+function TableCell({
+  className,
+  children,
+  numeric,
+  pinned,
+  pinOffset,
+  fallback,
+  truncate,
+  style,
+  title,
+  ...props
+}: TableCellProps) {
+  const pin = pinProps({ pinned, pinOffset }, style);
+  const empty = fallback !== undefined && isEmpty(children);
+  const content = empty ? fallback : children;
   return (
     <td
       data-slot="table-cell"
-      className={cn("p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", className)}
+      title={title ?? (truncate && typeof content === "string" ? content : undefined)}
+      className={cn(
+        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        numeric && "text-right tabular-nums",
+        truncate && "max-w-48 truncate",
+        empty && "text-muted-foreground",
+        pin.className,
+        className,
+      )}
+      style={pin.style}
       {...props}
-    />
+    >
+      {content}
+    </td>
   );
 }
 
@@ -198,4 +326,11 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 }
 
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
-export type { TableProps };
+export type {
+  TableCellProps,
+  TableHeadProps,
+  TableProps,
+  TableRowProps,
+  TableRowState,
+  TableSortDirection,
+};

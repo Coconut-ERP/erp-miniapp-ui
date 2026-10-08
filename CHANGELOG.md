@@ -12,6 +12,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.6.0] - 2026-09-25
+
+### Added
+
+- `TableHead` `sortable` / `sortDirection` / `onSortChange` — header becomes a button with a direction icon and `aria-sort`. Controlled: the library keeps no sort state, so sorting can be server-side
+- `TableHead` / `TableCell` `numeric` — right-aligns (cells also use tabular figures)
+- `TableHead` / `TableCell` `pinned` (`"left"` | `"right"`) + `pinOffset` — freeze a column while scrolling horizontally
+- `TableCell` `fallback` — renders a placeholder (e.g. `"—"`) for `null` / `undefined` / `""`; a real `0` still renders
+- `TableCell` `truncate` — single-line clip with the full text as `title`
+- `TableRow` `state` (`"warning"` | `"error"` | `"selected"`) — semantic-token row tint
+- Exported types `TableHeadProps`, `TableCellProps`, `TableRowProps`, `TableRowState`, `TableSortDirection`
+
+All additions are opt-in; existing tables render unchanged.
+
 ## [0.5.0] - 2026-09-24
 
 ### Added

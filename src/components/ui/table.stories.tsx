@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 import { expect, waitFor, within } from "storybook/test";
 
 import {
@@ -113,6 +114,40 @@ export const StickyHeaderAndScrollbar: Story = {
         viewport.getBoundingClientRect().top,
         0,
       ),
+    );
+  },
+};
+
+/** Controlled sorting + `numeric`, `fallback`, `truncate`, `pinned` and row `state`. */
+export const SortableAndSmartCells: Story = {
+  render: function Render() {
+    const [dir, setDir] = React.useState<"asc" | "desc" | null>("asc");
+    const data = [
+      { id: "1", name: "A very long product name that gets clipped", qty: 1200, note: null },
+      { id: "2", name: "Bob", qty: 0, note: "ok" },
+    ];
+    const sorted = dir === "desc" ? [...data].reverse() : data;
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead pinned="left">Name</TableHead>
+            <TableHead numeric sortable sortDirection={dir} onSortChange={() => setDir(dir === "asc" ? "desc" : "asc")}>
+              Qty
+            </TableHead>
+            <TableHead>Note</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((row) => (
+            <TableRow key={row.id} state={row.qty === 0 ? "warning" : undefined}>
+              <TableCell pinned="left" truncate>{row.name}</TableCell>
+              <TableCell numeric>{row.qty}</TableCell>
+              <TableCell fallback="—">{row.note}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     );
   },
 };

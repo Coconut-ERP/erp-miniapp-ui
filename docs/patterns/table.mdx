@@ -20,3 +20,23 @@ Dense tabular data with clear columns.
 ## Don't
 
 - Don't put primary navigation inside table cells without clear affordance.
+
+## Sorting
+
+`TableHead` is controlled: pass `sortable`, `sortDirection` (`"asc" | "desc" | null`) and
+`onSortChange`. The library keeps no state, so the app can sort on the server. Whitelist the
+sortable fields server-side — never put a client string into `ORDER BY`.
+
+```tsx
+<TableHead sortable sortDirection={sort.field === "date" ? sort.dir : null} onSortChange={() => onSort("date")}>
+  Ngày
+</TableHead>
+```
+
+## Cells and rows
+
+- `numeric` on `TableHead`/`TableCell` — right-aligned, tabular figures.
+- `fallback="—"` on `TableCell` — shown for `null`/`undefined`/`""` (not for `0`).
+- `truncate` on `TableCell` — one line, full text in `title`.
+- `pinned="left|right"` + `pinOffset` — freeze a column; set it on header and body cells alike.
+- `state="warning|error|selected"` on `TableRow` — flag a row; pair with text, not colour alone.

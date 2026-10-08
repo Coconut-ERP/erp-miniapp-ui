@@ -35,6 +35,7 @@
 - sonner — Toast notification host, styled to match library tokens. Mount once near the app root, then trigger toasts anywhere with `toast(...)` from the `sonner` package.
 - spinner — Indeterminate loading indicator (spinning icon). Size via `className` (`size-4` default).
 - switch — Binary on/off toggle, typically for an immediately-applied setting.
+- table.test — (no JSDoc yet — run the component-docs skill)
 - table — Styled `<table>` wrapper with a horizontal-scroll container. Compose with TableHeader/TableBody/TableFooter, TableRow, TableHead/TableCell, and optional TableCaption.
 - tabs — Switches between panels of content under a shared set of triggers. Compose with TabsList (`variant`: "default" | "line"), TabsTrigger, and TabsContent — match each trigger's `value` to a content panel's `value`.
 - textarea — Multi-line text input that grows with content (`field-sizing: content`). A thin styled wrapper around the native `<textarea>`.
