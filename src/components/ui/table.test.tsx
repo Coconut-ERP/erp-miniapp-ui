@@ -28,6 +28,18 @@ describe("TableHead sorting", () => {
   });
 });
 
+it("tints only the sorted column header", () => {
+  render(
+    <Table><TableHeader><TableRow>
+      <TableHead sortable sortDirection="asc">A</TableHead>
+      <TableHead sortable sortDirection={null}>B</TableHead>
+    </TableRow></TableHeader></Table>,
+  );
+  const [a, b] = screen.getAllByRole("columnheader");
+  expect(a).toHaveClass("bg-primary/10");
+  expect(b).not.toHaveClass("bg-primary/10");
+});
+
 describe("TableCell", () => {
   const cell = (props: React.ComponentProps<typeof TableCell>) => {
     render(<Table><TableBody><TableRow><TableCell {...props} /></TableRow></TableBody></Table>);

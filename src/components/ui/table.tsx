@@ -241,6 +241,8 @@ function TableHead({
         "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
         numeric && "text-right",
         pin.className,
+        // The sorted column is tinted, so it reads at a glance, not only by its icon.
+        sortable && sortDirection && "bg-primary/10",
         className,
       )}
       style={pin.style}

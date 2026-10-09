@@ -12,6 +12,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.6.1] - 2026-09-26
+
+### Changed
+
+- `TableHead` — the header of the sorted column (`sortable` with a `sortDirection`) is tinted `bg-primary/10`, so the active sort reads at a glance, not only by its icon
+
 ## [0.6.0] - 2026-09-25
 
 ### Added
