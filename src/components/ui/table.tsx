@@ -217,7 +217,7 @@ type CellLayoutProps = {
  */
 const PINNED_SURFACE = cn(
   "bg-background",
-  "[tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
+  "[tbody>tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
   "[tr[data-state=selected]>&]:bg-muted [tr[data-row-state=selected]>&]:bg-muted",
   "[tr[data-row-state=warning]>&]:bg-[color-mix(in_oklab,var(--warning)_10%,var(--background))]",
   "[tr[data-row-state=warning]:hover>&]:bg-[color-mix(in_oklab,var(--warning)_15%,var(--background))]",

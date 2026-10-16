@@ -265,6 +265,9 @@ export type {
   SortableListProps,
   DataTableColumnMeta,
   DataTableProps,
+  DataTableCellProps,
+  DataTableHeadProps,
+  DataTableRowProps,
 } from "./components/patterns";
 
 export { BarChart, DonutChart, LineChart } from "./components/charts";

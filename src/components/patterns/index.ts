@@ -32,6 +32,9 @@ export {
   DataTable,
   type DataTableColumnMeta,
   type DataTableProps,
+  type DataTableCellProps,
+  type DataTableHeadProps,
+  type DataTableRowProps,
 } from "./data-table";
 export {
   SortableList,

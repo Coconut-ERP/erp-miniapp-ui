@@ -1,6 +1,6 @@
 "use client";
 
-import type { Header, ReactTable, Row, RowData, TableFeatures } from "@tanstack/react-table";
+import type { Cell, Header, ReactTable, Row, RowData, TableFeatures } from "@tanstack/react-table";
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
@@ -12,6 +12,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  type TableCellProps,
+  type TableHeadProps,
   type TableProps,
   type TableRowProps,
 } from "../ui/table";
@@ -33,6 +35,19 @@ type DataTableColumnMeta = {
   cellClassName?: string;
 };
 
+/** `data-*` attributes, which typed object literals can't otherwise carry. */
+type DataAttributes = { [attribute: `data-${string}`]: string | number | boolean | undefined };
+/** `TableRow` props plus `data-*` attributes. */
+type DataTableRowProps = TableRowProps & DataAttributes;
+/** `TableCell` props plus `data-*` attributes. */
+type DataTableCellProps = TableCellProps & DataAttributes;
+/** `TableHead` props plus `data-*` attributes (sorting, sizing and pinning stay with the table). */
+type DataTableHeadProps = Omit<
+  TableHeadProps,
+  "sortable" | "sortDirection" | "onSortChange" | "resizable" | "width" | "onWidthChange" | "pinned" | "pinOffset"
+> &
+  DataAttributes;
+
 type DataTableProps<TFeatures extends TableFeatures, TData extends RowData> = Omit<
   TableProps,
   "children" | "layout"
@@ -42,7 +57,13 @@ type DataTableProps<TFeatures extends TableFeatures, TData extends RowData> = Om
   /** Rendered in a full-width row when there are no rows. Default `"No results."`. */
   empty?: React.ReactNode;
   /** Extra props per body row — `state`, `onClick`, `className`… */
-  getRowProps?: (row: Row<TFeatures, TData>) => TableRowProps;
+  getRowProps?: (row: Row<TFeatures, TData>) => DataTableRowProps;
+  /** Extra props per body cell — per-row/per-column backgrounds, `id`, `title`… `className` merges last. */
+  getCellProps?: (cell: Cell<TFeatures, TData, unknown>) => DataTableCellProps;
+  /** Extra props per header cell (group headers included). `className` merges last. */
+  getHeaderProps?: (header: Header<TFeatures, TData, unknown>) => DataTableHeadProps;
+  /** Extra props per footer cell. `className` merges last. */
+  getFooterProps?: (header: Header<TFeatures, TData, unknown>) => DataTableCellProps;
   /** Accessible name of a column's resize handle. Default `` name => `Resize ${name}` ``. */
   resizeLabel?: (columnName: string) => string;
 };
@@ -51,6 +72,7 @@ type DataTableProps<TFeatures extends TableFeatures, TData extends RowData> = Om
 // read through optional shapes instead of the feature-gated generic types.
 type LooseColumn = {
   id: string;
+  columns?: unknown[];
   columnDef: { header?: unknown; footer?: unknown; meta?: unknown; minSize?: number; maxSize?: number };
   getCanSort?: () => boolean;
   getIsSorted?: () => false | "asc" | "desc";
@@ -94,7 +116,10 @@ const defaultResizeLabel = (name: string) => `Resize ${name}`;
  * - `columnPinningFeature` (+ sizing) → `columnPinning: { start, end }` columns stick.
  * - `rowSelectionFeature` → selected rows are tinted; render the checkbox column yourself.
  *
- * Per-column presentation goes in `columnDef.meta` (`DataTableColumnMeta`).
+ * Per-column presentation goes in `columnDef.meta` (`DataTableColumnMeta`); anything
+ * that depends on the row or cell goes through `getRowProps` / `getCellProps` /
+ * `getHeaderProps` / `getFooterProps`. With grouped columns, a leaf column outside
+ * any group spans the header rows (`rowSpan`) instead of leaving empty cells above it.
  *
  * Do: keep `features`, `columns` and the `data` fallback stable (module scope or
  * memo). Don't mix it with hand-written `TableRow`s — use `Table` directly for that.
@@ -103,6 +128,9 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   table,
   empty = "No results.",
   getRowProps,
+  getCellProps,
+  getHeaderProps,
+  getFooterProps,
   resizeLabel = defaultResizeLabel,
   className,
   style,
@@ -115,24 +143,34 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   // Body cells follow the leaf headers, so pinned-first order and hidden columns match the header.
   const leafIds = (headerGroups.at(-1)?.headers ?? []).map((header) => header.column.id);
   const leafCount = Math.max(leafIds.length, 1);
-  const hasFooter = table
-    .getAllLeafColumns()
-    .some((column) => (column as unknown as LooseColumn).columnDef.footer !== undefined);
+  const hasFooterDef = (header: Header<TFeatures, TData, unknown>) =>
+    !header.isPlaceholder && (header.column as unknown as LooseColumn).columnDef.footer !== undefined;
+  // TanStack emits one footer row per header level; drop the levels with nothing to show.
+  const footerGroups = table.getFooterGroups().filter((group) => group.headers.some(hasFooterDef));
 
-  const renderHead = (header: Header<TFeatures, TData, unknown>) => {
+  const renderHead = (header: Header<TFeatures, TData, unknown>, rowSpan?: number) => {
     const column = header.column as unknown as LooseColumn;
     const m = meta(column);
     const leaf = header.subHeaders.length === 0;
     const sortable = leaf && !header.isPlaceholder && !!column.getCanSort?.();
     const resizable = leaf && sized && !!column.getCanResize?.();
     const name = typeof column.columnDef.header === "string" ? column.columnDef.header : column.id;
+    const extra = getHeaderProps?.(header) ?? {};
+    const spans = rowSpan !== undefined && rowSpan > 1;
     return (
       <TableHead
         key={header.id}
         colSpan={header.colSpan > 1 ? header.colSpan : undefined}
+        rowSpan={spans ? rowSpan : undefined}
         numeric={m.numeric}
+        {...extra}
         {...(leaf ? pinning(column) : {})}
-        className={cn(header.colSpan > 1 && "text-center", m.headClassName)}
+        className={cn(
+          header.colSpan > 1 && "text-center",
+          spans && "align-bottom",
+          m.headClassName,
+          extra.className,
+        )}
         sortable={sortable}
         sortDirection={sortable ? column.getIsSorted?.() || null : undefined}
         onSortChange={sortable ? () => column.toggleSorting?.() : undefined}
@@ -140,7 +178,8 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
         resizeLabel={resizeLabel(name)}
         width={sized && leaf ? column.getSize?.() : undefined}
         minWidth={column.columnDef.minSize}
-        maxWidth={column.columnDef.maxSize}
+        // TanStack defaults maxSize to MAX_SAFE_INTEGER — that means "no limit".
+        maxWidth={(column.columnDef.maxSize ?? Infinity) < Number.MAX_SAFE_INTEGER ? column.columnDef.maxSize : undefined}
         onWidthChange={
           resizable
             ? (width) => loose.setColumnSizing?.((old) => ({ ...old, [column.id]: width }))
@@ -152,6 +191,25 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
     );
   };
 
+  // A leaf column outside any group shows up as placeholders above its real header.
+  // Render the real header once, at the top, spanning those rows.
+  const leafHeaders = new Map(
+    (headerGroups.at(-1)?.headers ?? []).map((header) => [header.column.id, header]),
+  );
+  const spanned = new Set<string>();
+  const headerCells = (headers: Header<TFeatures, TData, unknown>[], depth: number) =>
+    headers.flatMap((header) => {
+      const id = header.column.id;
+      const leafColumn = !(header.column as unknown as LooseColumn).columns?.length;
+      if (leafColumn && spanned.has(id)) return [];
+      const leafHeader = leafHeaders.get(id);
+      if (header.isPlaceholder && leafColumn && leafHeader && depth < headerGroups.length - 1) {
+        spanned.add(id);
+        return [renderHead(leafHeader, headerGroups.length - depth)];
+      }
+      return [renderHead(header)];
+    });
+
   return (
     <Table
       layout={sized ? "fixed" : "auto"}
@@ -160,8 +218,11 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
       {...props}
     >
       <TableHeader>
-        {headerGroups.map((group) => (
-          <TableRow key={group.id}>{group.headers.map(renderHead)}</TableRow>
+        {headerGroups.map((group, depth) => (
+          // Header rows are labels, not data — no hover tint.
+          <TableRow key={group.id} className="hover:bg-transparent">
+            {headerCells(group.headers, depth)}
+          </TableRow>
         ))}
       </TableHeader>
       <TableBody>
@@ -190,14 +251,16 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
                   const column = cell.column as unknown as LooseColumn;
                   const m = meta(column);
                   const value = cell.getValue();
+                  const extra = getCellProps?.(cell) ?? {};
                   return (
                     <TableCell
                       key={cell.id}
                       numeric={m.numeric}
                       truncate={m.truncate}
                       title={m.truncate && typeof value === "string" ? value : undefined}
+                      {...extra}
                       {...pinning(column)}
-                      className={m.cellClassName}
+                      className={cn(m.cellClassName, extra.className)}
                     >
                       {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
                         <span className="text-muted-foreground">{m.fallback}</span>
@@ -212,18 +275,21 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
           })
         )}
       </TableBody>
-      {hasFooter ? (
+      {footerGroups.length > 0 ? (
         <TableFooter>
-          {table.getFooterGroups().map((group) => (
-            <TableRow key={group.id}>
+          {footerGroups.map((group) => (
+            <TableRow key={group.id} className="hover:bg-transparent">
               {group.headers.map((header) => {
                 const column = header.column as unknown as LooseColumn;
+                const extra = getFooterProps?.(header) ?? {};
                 return (
                   <TableCell
                     key={header.id}
                     colSpan={header.colSpan > 1 ? header.colSpan : undefined}
                     numeric={meta(column).numeric}
+                    {...extra}
                     {...(header.subHeaders.length === 0 ? pinning(column) : {})}
+                    className={extra.className}
                   >
                     {header.isPlaceholder ? null : <table.FlexRender footer={header} />}
                   </TableCell>
@@ -238,4 +304,10 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
 }
 
 export { DataTable };
-export type { DataTableColumnMeta, DataTableProps };
+export type {
+  DataTableCellProps,
+  DataTableColumnMeta,
+  DataTableHeadProps,
+  DataTableProps,
+  DataTableRowProps,
+};

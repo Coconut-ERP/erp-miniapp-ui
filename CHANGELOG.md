@@ -18,7 +18,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 - `DataTable` pattern — renders a TanStack Table v9 instance (`useTable` from `@tanstack/react-table`) with the `Table` primitives and picks up the registered features: sortable headers (`rowSortingFeature`), fixed layout + resize handles (`columnSizingFeature` / `columnResizingFeature`), sticky columns with computed offsets (`columnPinningFeature`), selected-row tint (`rowSelectionFeature`), footers, `empty` row, `getRowProps`, `resizeLabel`. Per-column `numeric` / `truncate` / `fallback` / class names via `columnDef.meta` (`DataTableColumnMeta`). See ADR-004
 - `@tanstack/react-table` `^9.2.4` as an **optional** peer dependency — only apps that use `DataTable` install it; the package has no runtime import of it
-- Exported types `DataTableProps`, `DataTableColumnMeta`
+- `DataTable` `getCellProps` / `getHeaderProps` / `getFooterProps` — per-cell props (backgrounds, `id`, `title`…; `className` merges last); with grouped columns an ungrouped leaf header spans the header rows (`rowSpan`) instead of leaving empty placeholder cells; footer levels with nothing to show are skipped; header and footer rows don't take the row hover tint
+- Exported types `DataTableProps`, `DataTableColumnMeta`, `DataTableRowProps`, `DataTableCellProps`, `DataTableHeadProps` (all accept `data-*` attributes)
 - `TableHead` `resizable` — drag handle on the header's right edge (`role="separator"`, keyboard ←/→, Shift for 50px steps). Width is uncontrolled (`defaultWidth`) or controlled (`width` + `onWidthChange`), clamped by `minWidth` (default `48`) / `maxWidth`
 - `Table` `layout` (`"auto"` | `"fixed"`) — `"fixed"` sizes columns from header widths and clips overflowing cell text with an ellipsis, so resized columns can shrink below their content
 - `TableHead` `resizeLabel` — accessible name of the resize handle (e.g. Vietnamese copy)
