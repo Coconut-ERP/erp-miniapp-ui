@@ -151,3 +151,53 @@ export const SortableAndSmartCells: Story = {
     );
   },
 };
+
+/**
+ * `resizable` headers: drag the right edge (or focus it and use ←/→, Shift
+ * for 50px steps). `layout="fixed"` lets a column shrink below its content and
+ * clips the overflow with an ellipsis. "Name" is controlled — the app owns the
+ * width and could persist it; the others are uncontrolled via `defaultWidth`.
+ */
+export const ResizableColumns: Story = {
+  render: function Render() {
+    const [nameWidth, setNameWidth] = React.useState(220);
+    const data = [
+      { id: "1", name: "A very long product name that gets clipped", sku: "SKU-0001", qty: 1200 },
+      { id: "2", name: "Bob", sku: "SKU-0002", qty: 0 },
+    ];
+    return (
+      <div className="space-y-2">
+        <Table layout="fixed">
+          <TableHeader>
+            <TableRow>
+              <TableHead resizable width={nameWidth} onWidthChange={setNameWidth} minWidth={80}>
+                Name
+              </TableHead>
+              <TableHead resizable defaultWidth={140}>SKU</TableHead>
+              <TableHead resizable defaultWidth={100} numeric>Qty</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell title={row.name}>{row.name}</TableCell>
+                <TableCell>{row.sku}</TableCell>
+                <TableCell numeric>{row.qty}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <p className="text-xs text-muted-foreground">Name width: {nameWidth}px</p>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const handle = canvas.getByRole("separator", { name: "Resize Name" });
+    handle.focus();
+    handle.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight", shiftKey: true }));
+    // Spare table width is shared across columns, so assert the requested width, not pixels.
+    await waitFor(() => expect(handle).toHaveAttribute("aria-valuenow", "270"));
+    expect(canvas.getByText("Name width: 270px")).toBeInTheDocument();
+  },
+};

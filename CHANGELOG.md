@@ -12,6 +12,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.7.0] - 2026-10-16
+
+### Added
+
+- `DataTable` pattern — renders a TanStack Table v9 instance (`useTable` from `@tanstack/react-table`) with the `Table` primitives and picks up the registered features: sortable headers (`rowSortingFeature`), fixed layout + resize handles (`columnSizingFeature` / `columnResizingFeature`), sticky columns with computed offsets (`columnPinningFeature`), selected-row tint (`rowSelectionFeature`), footers, `empty` row, `getRowProps`, `resizeLabel`. Per-column `numeric` / `truncate` / `fallback` / class names via `columnDef.meta` (`DataTableColumnMeta`). See ADR-004
+- `@tanstack/react-table` `^9.2.4` as an **optional** peer dependency — only apps that use `DataTable` install it; the package has no runtime import of it
+- Exported types `DataTableProps`, `DataTableColumnMeta`
+- `TableHead` `resizable` — drag handle on the header's right edge (`role="separator"`, keyboard ←/→, Shift for 50px steps). Width is uncontrolled (`defaultWidth`) or controlled (`width` + `onWidthChange`), clamped by `minWidth` (default `48`) / `maxWidth`
+- `Table` `layout` (`"auto"` | `"fixed"`) — `"fixed"` sizes columns from header widths and clips overflowing cell text with an ellipsis, so resized columns can shrink below their content
+- `TableHead` `resizeLabel` — accessible name of the resize handle (e.g. Vietnamese copy)
+
+### Fixed
+
+- Pinned `TableHead` / `TableCell` repaint the row tint (hover, `selected`, `warning`, `error`) and the sorted-header tint as opaque token mixes, so pinned columns no longer stay white on tinted rows or show scrolled content through a sorted header
+
+All additions are opt-in; existing tables render unchanged.
+
 ## [0.6.1] - 2026-09-26
 
 ### Changed

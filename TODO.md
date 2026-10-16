@@ -9,9 +9,12 @@ _v0.5.0 released._ Next work is iterative improvement (long-term backlog).
 ## Up next (long-term)
 
 - [ ] Migrate `miniapp-hr` onto `@erp/miniapp-ui`
-- [ ] Data Grid / Command / i18n (see ROADMAP long-term)
+- [ ] Command / i18n (see ROADMAP long-term)
+- [ ] Migrate app tables onto `DataTable` (start with `vv3-luong-san-pham` `wage-matrix-table`)
 
 ## Done
+
+- [x] `DataTable` pattern on TanStack Table v9 (ADR-004) + `TableHead` column resizing
 
 - [x] Add `Combobox` pattern (`options` + optional `onSearch` callback)
 - [x] Docs restructure round 2 (ADR-003): removed `docs/components/*.md`, reclassified and removed conventions/recipes as project-level docs, translated remaining docs to English

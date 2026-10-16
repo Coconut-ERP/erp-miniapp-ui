@@ -29,6 +29,11 @@ export {
   type ComboboxProps,
 } from "./combobox";
 export {
+  DataTable,
+  type DataTableColumnMeta,
+  type DataTableProps,
+} from "./data-table";
+export {
   SortableList,
   type SortableDragHandleProps,
   type SortableListProps,

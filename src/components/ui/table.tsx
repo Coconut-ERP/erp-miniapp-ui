@@ -17,6 +17,13 @@ type TableProps = React.ComponentProps<"table"> & {
    * instead of the end of the table content. Opt-in; default `false`.
    */
   stickyHorizontalScrollbar?: boolean;
+  /**
+   * `"fixed"` sizes columns from the header widths (CSS `table-layout: fixed`)
+   * and clips overflowing cell text with an ellipsis, so a column can be
+   * resized narrower than its content. Use with `TableHead` `resizable`.
+   * Default `"auto"`.
+   */
+  layout?: "auto" | "fixed";
 };
 
 /**
@@ -34,9 +41,17 @@ type TableProps = React.ComponentProps<"table"> & {
  * variants in an `overflow-hidden` ancestor — sticky positioning needs the
  * scrolling ancestor to see it.
  */
-function Table({ className, stickyHeader, stickyHorizontalScrollbar, ...props }: TableProps) {
+function Table({ className, stickyHeader, stickyHorizontalScrollbar, layout, ...props }: TableProps) {
   const table = (
-    <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
+    <table
+      data-slot="table"
+      className={cn(
+        "w-full caption-bottom text-sm",
+        layout === "fixed" && "table-fixed [&_td]:overflow-hidden [&_td]:text-ellipsis",
+        className,
+      )}
+      {...props}
+    />
   );
 
   if (!stickyHeader && !stickyHorizontalScrollbar) {
@@ -195,10 +210,28 @@ type CellLayoutProps = {
   pinOffset?: number | string;
 };
 
+/**
+ * A pinned cell must be opaque (content scrolls under it), so the row's
+ * translucent tint can't show through. Repaint the same tint pre-mixed onto
+ * `--background`, from the semantic tokens, so pinned columns match the row.
+ */
+const PINNED_SURFACE = cn(
+  "bg-background",
+  "[tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
+  "[tr[data-state=selected]>&]:bg-muted [tr[data-row-state=selected]>&]:bg-muted",
+  "[tr[data-row-state=warning]>&]:bg-[color-mix(in_oklab,var(--warning)_10%,var(--background))]",
+  "[tr[data-row-state=warning]:hover>&]:bg-[color-mix(in_oklab,var(--warning)_15%,var(--background))]",
+  "[tr[data-row-state=error]>&]:bg-[color-mix(in_oklab,var(--destructive)_10%,var(--background))]",
+  "[tr[data-row-state=error]:hover>&]:bg-[color-mix(in_oklab,var(--destructive)_15%,var(--background))]",
+);
+
+/** Opaque twin of the sorted-header `bg-primary/10` tint, for pinned headers. */
+const PINNED_SORTED = "bg-[color-mix(in_oklab,var(--primary)_10%,var(--background))]";
+
 function pinProps({ pinned, pinOffset = 0 }: CellLayoutProps, style?: React.CSSProperties) {
   if (!pinned) return { className: undefined, style };
   return {
-    className: "sticky z-[5] bg-background",
+    className: cn("sticky z-[5]", PINNED_SURFACE),
     style: { ...style, [pinned]: pinOffset } as React.CSSProperties,
   };
 }
@@ -211,6 +244,24 @@ type TableHeadProps = React.ComponentProps<"th"> &
     sortDirection?: TableSortDirection | null;
     /** Called when the header button is pressed. The app decides the cycle (asc → desc → none). */
     onSortChange?: () => void;
+    /**
+     * Adds a drag handle on the header's right edge (also keyboard: focus it,
+     * then ←/→, Shift for bigger steps). To shrink a column below its content,
+     * set `layout="fixed"` on `Table`.
+     */
+    resizable?: boolean;
+    /** Accessible name of the resize handle. Default `Resize <header text>`. */
+    resizeLabel?: string;
+    /** Controlled column width in px. Pair with `onWidthChange`. */
+    width?: number;
+    /** Initial width in px when uncontrolled. Omit to start from the natural width. */
+    defaultWidth?: number;
+    /** Lower bound while resizing, px. Default `48`. */
+    minWidth?: number;
+    /** Upper bound while resizing, px. Default unbounded. */
+    maxWidth?: number;
+    /** Fires on every resize step with the new clamped width — persist it (debounced) if needed. */
+    onWidthChange?: (width: number) => void;
   };
 
 const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
@@ -218,6 +269,9 @@ const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
 /**
  * Column header. With `sortable` it renders a button and sets `aria-sort`.
  * The library holds no sort state — pass `sortDirection` and handle `onSortChange`.
+ *
+ * With `resizable` it gets a width handle; width is uncontrolled
+ * (`defaultWidth`) or controlled (`width` + `onWidthChange`).
  */
 function TableHead({
   className,
@@ -228,10 +282,25 @@ function TableHead({
   sortable,
   sortDirection,
   onSortChange,
+  resizable,
+  resizeLabel,
+  width: widthProp,
+  defaultWidth,
+  minWidth = 48,
+  maxWidth = Number.POSITIVE_INFINITY,
+  onWidthChange,
   style,
   ...props
 }: TableHeadProps) {
-  const pin = pinProps({ pinned, pinOffset }, style);
+  const [uncontrolledWidth, setUncontrolledWidth] = React.useState(defaultWidth);
+  const width = widthProp ?? uncontrolledWidth;
+  const resize = (next: number) => {
+    const clamped = Math.round(Math.min(maxWidth, Math.max(minWidth, next)));
+    if (clamped === width) return;
+    if (widthProp === undefined) setUncontrolledWidth(clamped);
+    onWidthChange?.(clamped);
+  };
+  const pin = pinProps({ pinned, pinOffset }, width === undefined ? style : { ...style, width });
   const Icon = sortDirection === "asc" ? ArrowUp : sortDirection === "desc" ? ArrowDown : ChevronsUpDown;
   return (
     <th
@@ -240,9 +309,11 @@ function TableHead({
       className={cn(
         "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
         numeric && "text-right",
+        // Anchors the resize handle; a pinned header's `sticky` (merged after) also anchors it.
+        resizable && "relative",
         pin.className,
         // The sorted column is tinted, so it reads at a glance, not only by its icon.
-        sortable && sortDirection && "bg-primary/10",
+        sortable && sortDirection && (pinned ? PINNED_SORTED : "bg-primary/10"),
         className,
       )}
       style={pin.style}
@@ -266,7 +337,74 @@ function TableHead({
       ) : (
         children
       )}
+      {resizable ? (
+        <ColumnResizeHandle
+          label={resizeLabel ?? (typeof children === "string" ? `Resize ${children}` : "Resize column")}
+          width={width}
+          minWidth={minWidth}
+          maxWidth={maxWidth}
+          onResize={resize}
+        />
+      ) : null}
     </th>
+  );
+}
+
+/** Drag/keyboard separator on a header's right edge. Measures the `<th>`, so it works before any width is set. */
+function ColumnResizeHandle({
+  label,
+  width,
+  minWidth,
+  maxWidth,
+  onResize,
+}: {
+  label: string;
+  width?: number;
+  minWidth: number;
+  maxWidth: number;
+  onResize: (width: number) => void;
+}) {
+  const drag = React.useRef<{ x: number; width: number } | null>(null);
+  const headWidth = (handle: HTMLElement) =>
+    (handle.parentElement as HTMLElement).getBoundingClientRect().width;
+  const stop = () => {
+    drag.current = null;
+  };
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label={label}
+      aria-valuenow={width}
+      aria-valuemin={minWidth}
+      aria-valuemax={Number.isFinite(maxWidth) ? maxWidth : undefined}
+      tabIndex={0}
+      data-slot="table-resize-handle"
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        drag.current = { x: event.clientX, width: headWidth(event.currentTarget) };
+      }}
+      onPointerMove={(event) => {
+        if (drag.current) onResize(drag.current.width + event.clientX - drag.current.x);
+      }}
+      onPointerUp={stop}
+      onPointerCancel={stop}
+      onKeyDown={(event) => {
+        const step = event.shiftKey ? 50 : 10;
+        const delta = event.key === "ArrowRight" ? step : event.key === "ArrowLeft" ? -step : 0;
+        if (!delta) return;
+        event.preventDefault();
+        onResize((width ?? headWidth(event.currentTarget)) + delta);
+      }}
+      className={cn(
+        "absolute inset-y-0 -right-1 z-[1] w-2 cursor-col-resize touch-none select-none outline-none",
+        "after:absolute after:inset-y-2 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-border",
+        "hover:after:w-0.5 hover:after:bg-primary focus-visible:after:w-0.5 focus-visible:after:bg-primary",
+      )}
+    />
   );
 }
 

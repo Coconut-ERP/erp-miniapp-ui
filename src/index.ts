@@ -248,6 +248,7 @@ export {
   SearchField,
   SortableList,
   StatisticCard,
+  DataTable,
 } from "./components/patterns";
 export type {
   AppSidebarItem,
@@ -262,6 +263,8 @@ export type {
   YearPickerProps,
   SortableDragHandleProps,
   SortableListProps,
+  DataTableColumnMeta,
+  DataTableProps,
 } from "./components/patterns";
 
 export { BarChart, DonutChart, LineChart } from "./components/charts";
