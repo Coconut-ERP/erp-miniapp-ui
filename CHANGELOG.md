@@ -12,6 +12,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.8.1] - 2026-10-18
+
+### Fixed
+
+- `DataTable` `virtualize` — server rendering a table above the threshold threw `ReferenceError: Element is not defined` (Next.js SSR). The viewport check no longer touches `Element` / `Window` before the browser has found the viewport. Covered by a Node-environment test
+
 ## [0.8.0] - 2026-10-18
 
 ### Added

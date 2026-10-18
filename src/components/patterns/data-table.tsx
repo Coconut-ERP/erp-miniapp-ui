@@ -285,7 +285,9 @@ function VirtualRows<TFeatures extends TableFeatures, TData extends RowData>(pro
     if (bodyRef.current) setViewport(scrollParent(bodyRef.current));
   }, []);
 
-  if (viewport instanceof Element) return <ElementRows {...props} viewport={viewport} />;
+  // `null` until the layout effect runs — always on the server, where `Element` and
+  // `Window` don't exist, so they are only touched once a viewport was found.
+  if (viewport && "nodeType" in viewport) return <ElementRows {...props} viewport={viewport} />;
   if (viewport) return <WindowRows {...props} />;
   const first = props.rows.slice(0, FIRST_ROWS);
   return (
