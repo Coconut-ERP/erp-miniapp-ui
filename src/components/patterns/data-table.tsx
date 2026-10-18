@@ -1,6 +1,7 @@
 "use client";
 
 import type { Cell, Header, ReactTable, Row, RowData, TableFeatures } from "@tanstack/react-table";
+import { useVirtualizer, useWindowVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 import * as React from "react";
 
 import { cn } from "../../lib/utils";
@@ -75,7 +76,33 @@ type DataTableProps<TFeatures extends TableFeatures, TData extends RowData> = Om
   getFooterProps?: (header: Header<TFeatures, TData, unknown>) => DataTableCellProps;
   /** Accessible name of a column's resize handle. Default `` name => `Resize ${name}` ``. */
   resizeLabel?: (columnName: string) => string;
+  /**
+   * Render only the rows near the viewport, with spacer rows standing in for the rest, once
+   * the table has more than `threshold` rows. For tables that reach thousands of rows. The
+   * nearest scrolling ancestor (or the window) is the viewport. Rows off screen are not in
+   * the DOM: reach them with `apiRef.current.scrollToRow`, not `getElementById`.
+   */
+  virtualize?: boolean | DataTableVirtualize;
+  /** Imperative handle — `scrollToRow` works with or without `virtualize`. */
+  apiRef?: React.Ref<DataTableApi>;
 };
+
+type DataTableVirtualize = {
+  /** Virtualize only above this many rows; smaller tables render every row. Default `100`. */
+  threshold?: number;
+  /** Row height guess in px until rows are measured. Default `37` (one line of `text-sm`). */
+  estimateRowHeight?: number;
+  /** Rows rendered beyond the viewport on each side. Default `10`. */
+  overscan?: number;
+};
+
+type DataTableApi = {
+  /** Scrolls the row with this id (`getRowId`) into view. `false` when the row model has no such row. */
+  scrollToRow: (rowId: string, options?: { align?: ScrollAlign }) => boolean;
+};
+
+type ScrollAlign = "start" | "center" | "end" | "auto";
+type RowScroller = (index: number, align: ScrollAlign) => void;
 
 // Feature APIs exist only when the app registers that feature, so they are
 // read through optional shapes instead of the feature-gated generic types.
@@ -126,6 +153,12 @@ type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
   getCellProps?: (cell: Cell<TFeatures, TData, unknown>) => DataTableCellProps;
   /** A column is being dragged: only the header widths move. */
   resizing: boolean;
+  /** Row count above which rows are virtualized; `Infinity` when off. */
+  threshold: number;
+  estimateRowHeight: number;
+  overscan: number;
+  /** Set by whichever body is mounted; backs `apiRef.scrollToRow`. */
+  scrollerRef: React.RefObject<RowScroller | null>;
 };
 
 /**
@@ -135,7 +168,16 @@ type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
  * `getCellProps`, which are picked up once the drag ends.
  */
 function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
-  if (prev.rows !== next.rows || prev.leafKey !== next.leafKey || prev.pinKey !== next.pinKey) return false;
+  if (
+    prev.rows !== next.rows ||
+    prev.leafKey !== next.leafKey ||
+    prev.pinKey !== next.pinKey ||
+    prev.threshold !== next.threshold ||
+    prev.estimateRowHeight !== next.estimateRowHeight ||
+    prev.overscan !== next.overscan
+  ) {
+    return false;
+  }
   if (next.resizing) return true;
   return (
     prev.table === next.table &&
@@ -145,65 +187,205 @@ function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
   );
 }
 
-function BodyRows<TFeatures extends TableFeatures, TData extends RowData>({
-  table,
-  rows,
-  leafIds,
-  pins,
-  empty,
-  getRowProps,
-  getCellProps,
-}: BodyProps<TFeatures, TData>) {
+/** One body row; `attrs` carries the virtualizer's `data-index` + measuring `ref`. */
+function renderRow<TFeatures extends TableFeatures, TData extends RowData>(
+  { table, leafIds, pins, getRowProps, getCellProps }: BodyProps<TFeatures, TData>,
+  row: Row<TFeatures, TData>,
+  attrs?: { "data-index": number; ref: (node: HTMLTableRowElement | null) => void },
+) {
+  const r = row as unknown as LooseRow;
+  const selected = !!r.getIsSelected?.();
+  const rowProps = getRowProps?.(row) ?? {};
+  const byId = row.getAllCellsByColumnId();
+  const cells = leafIds.flatMap((id) => byId[id] ?? []);
   return (
-    <TableBody>
-      {rows.length === 0 ? (
+    <TableRow
+      key={row.id}
+      data-state={selected ? "selected" : undefined}
+      aria-selected={r.getIsSelected ? selected : undefined}
+      {...rowProps}
+      {...attrs}
+      state={rowProps.state ?? (selected ? "selected" : undefined)}
+    >
+      {cells.map((cell) => {
+        const column = cell.column as unknown as LooseColumn;
+        const m = meta(column);
+        const value = cell.getValue();
+        const extra = getCellProps?.(cell) ?? {};
+        return (
+          <TableCell
+            key={cell.id}
+            numeric={m.numeric}
+            truncate={m.truncate}
+            title={m.truncate && typeof value === "string" ? value : undefined}
+            {...extra}
+            {...pinVar(pins, column.id)}
+            className={cn(m.cellClassName, extra.className)}
+          >
+            {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
+              <span className="text-muted-foreground">{m.fallback}</span>
+            ) : (
+              <table.FlexRender cell={cell} />
+            )}
+          </TableCell>
+        );
+      })}
+    </TableRow>
+  );
+}
+
+/** Stands in for the rows a virtualized body leaves out, so the scroll height stays right. */
+function Spacer({ height, colSpan }: { height: number; colSpan: number }) {
+  if (height <= 0) return null;
+  return (
+    <tr aria-hidden="true" data-slot="table-spacer">
+      <td colSpan={colSpan} style={{ height, padding: 0, border: 0 }} />
+    </tr>
+  );
+}
+
+function BodyRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+  const { rows, leafIds, empty, threshold } = props;
+  if (rows.length === 0) {
+    return (
+      <TableBody>
         <TableRow>
           <TableCell colSpan={Math.max(leafIds.length, 1)} className="h-24 text-center text-muted-foreground">
             {empty}
           </TableCell>
         </TableRow>
-      ) : (
-        rows.map((row) => {
-          const r = row as unknown as LooseRow;
-          const selected = !!r.getIsSelected?.();
-          const rowProps = getRowProps?.(row) ?? {};
-          const byId = row.getAllCellsByColumnId();
-          const cells = leafIds.flatMap((id) => byId[id] ?? []);
-          return (
-            <TableRow
-              key={row.id}
-              data-state={selected ? "selected" : undefined}
-              aria-selected={r.getIsSelected ? selected : undefined}
-              {...rowProps}
-              state={rowProps.state ?? (selected ? "selected" : undefined)}
-            >
-              {cells.map((cell) => {
-                const column = cell.column as unknown as LooseColumn;
-                const m = meta(column);
-                const value = cell.getValue();
-                const extra = getCellProps?.(cell) ?? {};
-                return (
-                  <TableCell
-                    key={cell.id}
-                    numeric={m.numeric}
-                    truncate={m.truncate}
-                    title={m.truncate && typeof value === "string" ? value : undefined}
-                    {...extra}
-                    {...pinVar(pins, column.id)}
-                    className={cn(m.cellClassName, extra.className)}
-                  >
-                    {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
-                      <span className="text-muted-foreground">{m.fallback}</span>
-                    ) : (
-                      <table.FlexRender cell={cell} />
-                    )}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          );
-        })
-      )}
+      </TableBody>
+    );
+  }
+  return rows.length > threshold ? <VirtualRows {...props} /> : <PlainRows {...props} />;
+}
+
+function PlainRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+  const bodyRef = React.useRef<HTMLTableSectionElement>(null);
+  const { scrollerRef } = props;
+  React.useLayoutEffect(() => {
+    scrollerRef.current = (index, align) =>
+      bodyRef.current?.rows[index]?.scrollIntoView({ block: align === "auto" ? "nearest" : align });
+  }, [scrollerRef]);
+  return <TableBody ref={bodyRef}>{props.rows.map((row) => renderRow(props, row))}</TableBody>;
+}
+
+/** Rows rendered before the viewport is known — on the server and for the first client render. */
+const FIRST_ROWS = 30;
+
+/**
+ * Finds the viewport, then hands over to the element or window virtualizer. Until then
+ * it renders the first rows plus a spacer of the estimated height, so the server HTML
+ * has content and the scroll container already overflows when it is looked for.
+ */
+function VirtualRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+  const bodyRef = React.useRef<HTMLTableSectionElement>(null);
+  const [viewport, setViewport] = React.useState<Element | Window | null>(null);
+  React.useLayoutEffect(() => {
+    if (bodyRef.current) setViewport(scrollParent(bodyRef.current));
+  }, []);
+
+  if (viewport instanceof Element) return <ElementRows {...props} viewport={viewport} />;
+  if (viewport) return <WindowRows {...props} />;
+  const first = props.rows.slice(0, FIRST_ROWS);
+  return (
+    <TableBody ref={bodyRef}>
+      {first.map((row) => renderRow(props, row))}
+      <Spacer
+        height={(props.rows.length - first.length) * props.estimateRowHeight}
+        colSpan={Math.max(props.leafIds.length, 1)}
+      />
+    </TableBody>
+  );
+}
+
+/** Nearest ancestor that scrolls vertically — preferring one that actually overflows — else the window. */
+function scrollParent(node: Element): Element | Window {
+  let fallback: Element | null = null;
+  for (let el = node.parentElement; el; el = el.parentElement) {
+    const { overflowY } = getComputedStyle(el);
+    if (overflowY !== "auto" && overflowY !== "scroll" && overflowY !== "overlay") continue;
+    if (el.scrollHeight > el.clientHeight) return el;
+    fallback ??= el;
+  }
+  return fallback ?? window;
+}
+
+function ElementRows<TFeatures extends TableFeatures, TData extends RowData>({
+  viewport,
+  ...props
+}: BodyProps<TFeatures, TData> & { viewport: Element }) {
+  const bodyRef = React.useRef<HTMLTableSectionElement>(null);
+  // Distance from the top of the viewport's content to the first row (header, toolbar…).
+  const margin = useOffset(bodyRef, () => {
+    const body = bodyRef.current;
+    return body ? body.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop : 0;
+  });
+  const virtualizer = useVirtualizer<Element, HTMLTableRowElement>({
+    count: props.rows.length,
+    getScrollElement: () => viewport,
+    estimateSize: () => props.estimateRowHeight,
+    overscan: props.overscan,
+    scrollMargin: margin,
+    getItemKey: (index) => props.rows[index]?.id ?? index,
+  });
+  return <VirtualBody props={props} bodyRef={bodyRef} virtualizer={virtualizer} />;
+}
+
+function WindowRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+  const bodyRef = React.useRef<HTMLTableSectionElement>(null);
+  const margin = useOffset(bodyRef, () => (bodyRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY);
+  const virtualizer = useWindowVirtualizer<HTMLTableRowElement>({
+    count: props.rows.length,
+    estimateSize: () => props.estimateRowHeight,
+    overscan: props.overscan,
+    scrollMargin: margin,
+    getItemKey: (index) => props.rows[index]?.id ?? index,
+  });
+  return <VirtualBody props={props} bodyRef={bodyRef} virtualizer={virtualizer} />;
+}
+
+/** Re-measured after every render (cheap), stored only when it moves — content above can reflow. */
+function useOffset(bodyRef: React.RefObject<HTMLTableSectionElement | null>, measure: () => number) {
+  const [offset, setOffset] = React.useState(0);
+  React.useLayoutEffect(() => {
+    if (!bodyRef.current) return;
+    const next = Math.round(measure());
+    if (next !== offset) setOffset(next);
+  });
+  return offset;
+}
+
+function VirtualBody<TFeatures extends TableFeatures, TData extends RowData>({
+  props,
+  bodyRef,
+  virtualizer,
+}: {
+  props: BodyProps<TFeatures, TData>;
+  bodyRef: React.RefObject<HTMLTableSectionElement | null>;
+  virtualizer: Virtualizer<any, HTMLTableRowElement>;
+}) {
+  const { scrollerRef } = props;
+  React.useLayoutEffect(() => {
+    scrollerRef.current = (index, align) => virtualizer.scrollToIndex(index, { align });
+  }, [scrollerRef, virtualizer]);
+
+  const items = virtualizer.getVirtualItems();
+  const margin = virtualizer.options.scrollMargin;
+  const total = virtualizer.getTotalSize();
+  const first = items[0];
+  const last = items.at(-1);
+  const colSpan = Math.max(props.leafIds.length, 1);
+  return (
+    <TableBody ref={bodyRef}>
+      <Spacer height={first ? first.start - margin : 0} colSpan={colSpan} />
+      {items.map((item) => {
+        const row = props.rows[item.index];
+        return row
+          ? renderRow(props, row, { "data-index": item.index, ref: virtualizer.measureElement })
+          : null;
+      })}
+      <Spacer height={last ? total - (last.end - margin) : total} colSpan={colSpan} />
     </TableBody>
   );
 }
@@ -251,6 +433,8 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   getHeaderProps,
   getFooterProps,
   resizeLabel = defaultResizeLabel,
+  virtualize,
+  apiRef,
   className,
   style,
   ...props
@@ -260,6 +444,20 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
   const [resizing, setResizing] = React.useState(false);
+  const virtual = virtualize === true ? {} : virtualize || undefined;
+  const scrollerRef = React.useRef<RowScroller | null>(null);
+  React.useImperativeHandle(
+    apiRef,
+    () => ({
+      scrollToRow: (rowId, options) => {
+        const index = table.getRowModel().rows.findIndex((row) => row.id === rowId);
+        if (index < 0 || !scrollerRef.current) return false;
+        scrollerRef.current(index, options?.align ?? "auto");
+        return true;
+      },
+    }),
+    [table],
+  );
   // Body cells follow the leaf headers, so pinned-first order and hidden columns match the header.
   const leaves = headerGroups.at(-1)?.headers ?? [];
   const leafIds = leaves.map((header) => header.column.id);
@@ -370,6 +568,10 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
         getRowProps={getRowProps}
         getCellProps={getCellProps}
         resizing={resizing}
+        threshold={virtual ? (virtual.threshold ?? 100) : Number.POSITIVE_INFINITY}
+        estimateRowHeight={virtual?.estimateRowHeight ?? 37}
+        overscan={virtual?.overscan ?? 10}
+        scrollerRef={scrollerRef}
       />
       {footerGroups.length > 0 ? (
         <TableFooter>
@@ -401,9 +603,11 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
 
 export { DataTable };
 export type {
+  DataTableApi,
   DataTableCellProps,
   DataTableColumnMeta,
   DataTableHeadProps,
   DataTableProps,
   DataTableRowProps,
+  DataTableVirtualize,
 };

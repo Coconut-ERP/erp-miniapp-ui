@@ -263,6 +263,8 @@ export type {
   YearPickerProps,
   SortableDragHandleProps,
   SortableListProps,
+  DataTableApi,
+  DataTableVirtualize,
   DataTableColumnMeta,
   DataTableProps,
   DataTableCellProps,

@@ -15,7 +15,8 @@ import {
 import * as React from "react";
 import { expect, userEvent, within } from "storybook/test";
 
-import { DataTable, type DataTableColumnMeta } from "./data-table";
+import { Button } from "../ui/button";
+import { DataTable, type DataTableApi, type DataTableColumnMeta } from "./data-table";
 
 const meta: Meta<typeof DataTable> = {
   title: "Patterns/DataTable",
@@ -181,5 +182,45 @@ export const Empty: Story = {
   render: function Render() {
     const table = useTable({ features: basicFeatures, columns: basicColumns, data: EMPTY, getRowId: (r) => r.id });
     return <DataTable table={table} empty="Chưa có sản phẩm" />;
+  },
+};
+
+const MANY: Product[] = Array.from({ length: 5000 }, (_, i) => ({
+  id: String(i + 1),
+  name: `Sản phẩm ${i + 1}`,
+  sku: `SP-${String(i + 1).padStart(4, "0")}`,
+  qty: (i * 37) % 500,
+  price: 100000 + ((i * 7919) % 50) * 10000,
+  note: i % 9 === 0 ? "Hàng mới" : null,
+}));
+
+/**
+ * 5,000 rows with `virtualize`: only the rows near the viewport are in the DOM, spacer
+ * rows keep the scroll height. `apiRef.scrollToRow` reaches rows that aren't rendered.
+ */
+export const Virtualized: Story = {
+  render: function Render() {
+    const api = React.useRef<DataTableApi>(null);
+    const table = useTable({
+      features: gridFeatures,
+      columns: gridColumns,
+      data: MANY,
+      getRowId: (r) => r.id,
+      initialState: { columnPinning: { start: ["select", "name"], end: [] } },
+    });
+    return (
+      <div className="flex h-[480px] flex-col gap-2">
+        <Button className="self-start" size="sm" onClick={() => api.current?.scrollToRow("4200", { align: "center" })}>
+          Tới dòng 4200
+        </Button>
+        <div className="min-h-0 flex-1 rounded-md border">
+          <DataTable table={table} stickyHeader virtualize apiRef={api} />
+        </div>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const rows = canvasElement.querySelectorAll("tbody tr[data-index]");
+    await expect(rows.length).toBeLessThan(100);
   },
 };

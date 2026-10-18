@@ -433,7 +433,7 @@ Phase 1 (minimum); full value after Phase 3+.
 - Design Token Generator / Figma tokens
 - Dark mode (if ERP shell supports)
 - Charts, Data Grid, Rich Editor
-- Virtual Table, i18n
+- ~~Virtual Table~~ (rows: `DataTable` `virtualize`, v0.8.0), i18n
 - A11y audit, performance benchmarks
 - Migration guide, `create-miniapp` CLI
 

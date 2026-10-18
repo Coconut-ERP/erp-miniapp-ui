@@ -30,6 +30,8 @@ export {
 } from "./combobox";
 export {
   DataTable,
+  type DataTableApi,
+  type DataTableVirtualize,
   type DataTableColumnMeta,
   type DataTableProps,
   type DataTableCellProps,

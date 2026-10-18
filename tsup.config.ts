@@ -23,5 +23,6 @@ export default defineConfig({
     "clsx",
     "tailwind-merge",
     "@tanstack/react-table",
+    "@tanstack/react-virtual",
   ],
 });

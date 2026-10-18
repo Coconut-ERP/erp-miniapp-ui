@@ -10,11 +10,12 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { createRef } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DataTable, type DataTableColumnMeta } from "./data-table";
+import { DataTable, type DataTableApi, type DataTableColumnMeta } from "./data-table";
 
 type Person = { id: string; name: string; qty: number; note: string | null };
 const DATA: Person[] = [
@@ -195,5 +196,80 @@ describe("DataTable grouped columns", () => {
     expect(footRows).toHaveLength(1);
     expect(footRows[0]).toHaveTextContent("Sum12");
     expect(footRows[0]?.querySelector("td")).toHaveClass("foot");
+  });
+});
+
+describe("DataTable virtualize", () => {
+  const plain = tableFeatures({});
+  const v = createColumnHelper<typeof plain, Person>();
+  const cols = v.columns([v.accessor("name", { header: "Name" }), v.accessor("qty", { header: "Qty" })]);
+  const many: Person[] = Array.from({ length: 1000 }, (_, i) => ({ id: String(i), name: `P${i}`, qty: i, note: null }));
+
+  // jsdom has no layout: give the marked viewport a 370px window over a tall content,
+  // and every row a 37px box, so the virtualizer has something to measure.
+  const scrollTo = vi.fn();
+  beforeEach(() => {
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    const isViewport = (el: HTMLElement) => el.dataset.viewport !== undefined;
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return isViewport(this) ? 370 : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return isViewport(this) ? 37_000 : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.tagName === "TR" ? 37 : 0;
+    });
+    HTMLElement.prototype.scrollTo = scrollTo as typeof HTMLElement.prototype.scrollTo;
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    scrollTo.mockReset();
+  });
+
+  function Many({ data = many, api }: { data?: Person[]; api?: React.Ref<DataTableApi> }) {
+    const table = useTable({ features: plain, columns: cols, data, getRowId: (row) => row.id });
+    return (
+      <div data-viewport="" style={{ overflowY: "auto" }}>
+        <DataTable table={table} virtualize apiRef={api} />
+      </div>
+    );
+  }
+
+  it("renders only the rows near the viewport, with spacers for the rest", () => {
+    const { container } = render(<Many />);
+    const rendered = container.querySelectorAll("tbody tr[data-index]").length;
+    expect(rendered).toBeGreaterThan(0);
+    expect(rendered).toBeLessThan(40);
+    expect(screen.getByText("P0")).toBeInTheDocument();
+    expect(screen.queryByText("P999")).toBeNull();
+    const spacer = container.querySelector<HTMLElement>("[data-slot=table-spacer] td");
+    expect(Number.parseFloat(spacer?.style.height ?? "0")).toBeGreaterThan(30_000);
+  });
+
+  it("renders every row under the threshold", () => {
+    const { container } = render(<Many data={many.slice(0, 50)} />);
+    expect(container.querySelectorAll("tbody tr")).toHaveLength(50);
+    expect(container.querySelector("[data-slot=table-spacer]")).toBeNull();
+  });
+
+  it("scrolls to a row that isn't rendered through apiRef", async () => {
+    const api = createRef<DataTableApi>();
+    render(<Many api={api} />);
+    expect(api.current?.scrollToRow("missing")).toBe(false);
+    act(() => {
+      expect(api.current?.scrollToRow("900", { align: "start" })).toBe(true);
+    });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
+    const top = (scrollTo.mock.calls.at(-1)?.[0] as ScrollToOptions).top ?? 0;
+    expect(top).toBeGreaterThan(899 * 37);
   });
 });

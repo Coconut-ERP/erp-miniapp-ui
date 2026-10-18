@@ -12,6 +12,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.8.0] - 2026-10-18
+
+### Added
+
+- `DataTable` `virtualize` (`true` or `{ threshold, estimateRowHeight, overscan }`) — above `threshold` rows (default `100`) only the rows near the viewport are rendered, with spacer rows for the rest, so tables of thousands of rows paint and scroll smoothly. The viewport is the nearest scrolling ancestor, else the window; rows are measured as they render. Server HTML carries the first 30 rows. Smaller tables render every row as before
+- `DataTable` `apiRef` → `DataTableApi.scrollToRow(rowId, { align })` — scrolls to a row by its `getRowId` id, rendered or not (works without `virtualize` too)
+- Exported types `DataTableApi`, `DataTableVirtualize`
+- `@tanstack/react-virtual` `^3.14.21` as a dependency (used only by `DataTable` `virtualize`)
+
 ## [0.7.1] - 2026-10-18
 
 ### Fixed

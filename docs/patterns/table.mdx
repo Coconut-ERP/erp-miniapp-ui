@@ -40,3 +40,23 @@ sortable fields server-side — never put a client string into `ORDER BY`.
 - `truncate` on `TableCell` — one line, full text in `title`.
 - `pinned="left|right"` + `pinOffset` — freeze a column; set it on header and body cells alike.
 - `state="warning|error|selected"` on `TableRow` — flag a row; pair with text, not colour alone.
+
+## Large tables (`DataTable`)
+
+From about 1,000 rows, rendering every row makes first paint and scrolling sluggish —
+worse with many columns. Pass `virtualize` to `DataTable`: above `threshold` rows
+(default `100`) only the rows near the viewport are in the DOM and spacer rows keep the
+scroll height. The viewport is the nearest scrolling ancestor (the `stickyHeader`
+container when its height is bounded), else the window.
+
+```tsx
+const api = useRef<DataTableApi>(null);
+<DataTable table={table} stickyHeader virtualize={{ estimateRowHeight: 33 }} apiRef={api} />;
+api.current?.scrollToRow(rowId, { align: "center" });
+```
+
+- Rows off screen aren't in the DOM: browser find (Ctrl+F) and `getElementById` don't
+  reach them — offer a search field, and scroll with `apiRef.scrollToRow` first.
+- Rows are measured as they render, so mixed heights work; a close `estimateRowHeight`
+  keeps the scrollbar steady.
+- Keep `columns` and `data` stable (module scope or `useMemo`), as for resizing.
