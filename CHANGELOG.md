@@ -12,6 +12,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.9.0] - 2026-10-18
+
+### Changed
+
+- `DataTable` `virtualize` — scrolling a virtualized table no longer re-renders every visible row on each range change: rows are memoised, so only the rows entering the viewport mount. The first-row offset is measured on mount and when the header / viewport resizes or the row count changes, instead of after every render (which forced a layout of the whole table while scrolling)
+
+### Added
+
+- `DataTable` `virtualize.columnThreshold` (default `40`) — with `columnSizingFeature`, tables with more unpinned columns than this render only the unpinned columns near the container's visible width (plus 3 either side) in body rows; the rest collapse into `colSpan` spacer cells, so the fixed layout stays aligned. Pinned columns, header and footer render in full
+
 ## [0.8.1] - 2026-10-18
 
 ### Fixed

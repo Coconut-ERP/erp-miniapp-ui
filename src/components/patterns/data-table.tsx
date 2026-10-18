@@ -94,6 +94,11 @@ type DataTableVirtualize = {
   estimateRowHeight?: number;
   /** Rows rendered beyond the viewport on each side. Default `10`. */
   overscan?: number;
+  /**
+   * Also render only the unpinned columns near the visible width once there are more
+   * than this many (needs `columnSizingFeature`). Default `40`.
+   */
+  columnThreshold?: number;
 };
 
 type DataTableApi = {
@@ -140,14 +145,21 @@ const defaultResizeLabel = (name: string) => `Resize ${name}`;
 /** Pinned side + the CSS variable on `<table>` holding the column's offset. */
 type Pin = { pinned: "left" | "right"; offsetVar: string };
 
+/** Leaf column ids by pinning. Only `center` is windowed horizontally. */
+type Layout = { start: string[]; center: string[]; end: string[] };
+
 type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
   table: ReactTable<TFeatures, TData, any>;
   rows: Row<TFeatures, TData>[];
-  leafIds: string[];
-  /** `leafIds` joined — compared instead of the array, which is rebuilt every render. */
-  leafKey: string;
+  /** Memoised on the column ids and pinning, so it is stable across renders. */
+  layout: Layout;
+  /** Memoised with `layout`. */
   pins: Map<string, Pin>;
-  pinKey: string;
+  /** Widths of the `center` columns, and of the pinned-start columns before them. */
+  centerWidths: number[];
+  /** `centerWidths` + `startWidth` joined — compared instead of the array. */
+  widthsKey: string;
+  startWidth: number;
   empty: React.ReactNode;
   getRowProps?: (row: Row<TFeatures, TData>) => DataTableRowProps;
   getCellProps?: (cell: Cell<TFeatures, TData, unknown>) => DataTableCellProps;
@@ -155,8 +167,11 @@ type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
   resizing: boolean;
   /** Row count above which rows are virtualized; `Infinity` when off. */
   threshold: number;
+  /** Unpinned column count above which columns are windowed; `Infinity` when off. */
+  columnThreshold: number;
   estimateRowHeight: number;
   overscan: number;
+  tableRef: React.RefObject<HTMLTableElement | null>;
   /** Set by whichever body is mounted; backs `apiRef.scrollToRow`. */
   scrollerRef: React.RefObject<RowScroller | null>;
 };
@@ -170,9 +185,9 @@ type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
 function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
   if (
     prev.rows !== next.rows ||
-    prev.leafKey !== next.leafKey ||
-    prev.pinKey !== next.pinKey ||
+    prev.layout !== next.layout ||
     prev.threshold !== next.threshold ||
+    prev.columnThreshold !== next.columnThreshold ||
     prev.estimateRowHeight !== next.estimateRowHeight ||
     prev.overscan !== next.overscan
   ) {
@@ -180,6 +195,7 @@ function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
   }
   if (next.resizing) return true;
   return (
+    prev.widthsKey === next.widthsKey &&
     prev.table === next.table &&
     prev.empty === next.empty &&
     prev.getRowProps === next.getRowProps &&
@@ -187,52 +203,89 @@ function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
   );
 }
 
-/** One body row; `attrs` carries the virtualizer's `data-index` + measuring `ref`. */
-function renderRow<TFeatures extends TableFeatures, TData extends RowData>(
-  { table, leafIds, pins, getRowProps, getCellProps }: BodyProps<TFeatures, TData>,
-  row: Row<TFeatures, TData>,
-  attrs?: { "data-index": number; ref: (node: HTMLTableRowElement | null) => void },
-) {
+type RowProps<TFeatures extends TableFeatures, TData extends RowData> = {
+  table: ReactTable<TFeatures, TData, any>;
+  row: Row<TFeatures, TData>;
+  layout: Layout;
+  pins: Map<string, Pin>;
+  /** Rendered slice of `layout.center`, `[from, to)`. */
+  from: number;
+  to: number;
+  getRowProps?: (row: Row<TFeatures, TData>) => DataTableRowProps;
+  getCellProps?: (cell: Cell<TFeatures, TData, unknown>) => DataTableCellProps;
+  /** Virtualizer index + measuring ref, when rows are virtualized. */
+  index?: number;
+  measure?: (node: HTMLTableRowElement | null) => void;
+};
+
+/**
+ * One body row, memoised: scrolling mounts the rows entering the viewport and leaves
+ * the others alone. Columns outside `[from, to)` collapse into a spacer cell whose
+ * `colSpan` keeps the fixed layout aligned with the header.
+ */
+function BodyRowView<TFeatures extends TableFeatures, TData extends RowData>({
+  table,
+  row,
+  layout,
+  pins,
+  from,
+  to,
+  getRowProps,
+  getCellProps,
+  index,
+  measure,
+}: RowProps<TFeatures, TData>) {
   const r = row as unknown as LooseRow;
   const selected = !!r.getIsSelected?.();
   const rowProps = getRowProps?.(row) ?? {};
   const byId = row.getAllCellsByColumnId();
-  const cells = leafIds.flatMap((id) => byId[id] ?? []);
+  const renderCell = (id: string) => {
+    const cell = byId[id];
+    if (!cell) return null;
+    const column = cell.column as unknown as LooseColumn;
+    const m = meta(column);
+    const value = cell.getValue();
+    const extra = getCellProps?.(cell) ?? {};
+    return (
+      <TableCell
+        key={cell.id}
+        numeric={m.numeric}
+        truncate={m.truncate}
+        title={m.truncate && typeof value === "string" ? value : undefined}
+        {...extra}
+        {...pinVar(pins, column.id)}
+        className={cn(m.cellClassName, extra.className)}
+      >
+        {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
+          <span className="text-muted-foreground">{m.fallback}</span>
+        ) : (
+          <table.FlexRender cell={cell} />
+        )}
+      </TableCell>
+    );
+  };
+  const before = from;
+  const after = layout.center.length - to;
   return (
     <TableRow
-      key={row.id}
       data-state={selected ? "selected" : undefined}
       aria-selected={r.getIsSelected ? selected : undefined}
       {...rowProps}
-      {...attrs}
+      data-index={index}
+      ref={measure}
       state={rowProps.state ?? (selected ? "selected" : undefined)}
     >
-      {cells.map((cell) => {
-        const column = cell.column as unknown as LooseColumn;
-        const m = meta(column);
-        const value = cell.getValue();
-        const extra = getCellProps?.(cell) ?? {};
-        return (
-          <TableCell
-            key={cell.id}
-            numeric={m.numeric}
-            truncate={m.truncate}
-            title={m.truncate && typeof value === "string" ? value : undefined}
-            {...extra}
-            {...pinVar(pins, column.id)}
-            className={cn(m.cellClassName, extra.className)}
-          >
-            {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
-              <span className="text-muted-foreground">{m.fallback}</span>
-            ) : (
-              <table.FlexRender cell={cell} />
-            )}
-          </TableCell>
-        );
-      })}
+      {layout.start.map(renderCell)}
+      {before > 0 ? <td aria-hidden="true" colSpan={before} style={{ padding: 0 }} /> : null}
+      {layout.center.slice(from, to).map(renderCell)}
+      {after > 0 ? <td aria-hidden="true" colSpan={after} style={{ padding: 0 }} /> : null}
+      {layout.end.map(renderCell)}
     </TableRow>
   );
 }
+
+// `memo` drops the generics; the cast restores them.
+const BodyRow = React.memo(BodyRowView as React.FC<RowProps<any, any>>) as typeof BodyRowView;
 
 /** Stands in for the rows a virtualized body leaves out, so the scroll height stays right. */
 function Spacer({ height, colSpan }: { height: number; colSpan: number }) {
@@ -244,30 +297,128 @@ function Spacer({ height, colSpan }: { height: number; colSpan: number }) {
   );
 }
 
+const leafCount = (layout: Layout) => Math.max(layout.start.length + layout.center.length + layout.end.length, 1);
+
 function BodyRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
-  const { rows, leafIds, empty, threshold } = props;
+  const { rows, layout, empty, threshold } = props;
+  const slice = useColumnWindow(props);
   if (rows.length === 0) {
     return (
       <TableBody>
         <TableRow>
-          <TableCell colSpan={Math.max(leafIds.length, 1)} className="h-24 text-center text-muted-foreground">
+          <TableCell colSpan={leafCount(layout)} className="h-24 text-center text-muted-foreground">
             {empty}
           </TableCell>
         </TableRow>
       </TableBody>
     );
   }
-  return rows.length > threshold ? <VirtualRows {...props} /> : <PlainRows {...props} />;
+  return rows.length > threshold ? (
+    <VirtualRows {...props} slice={slice} />
+  ) : (
+    <PlainRows {...props} slice={slice} />
+  );
 }
 
-function PlainRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+/** Rendered slice of the unpinned columns, `[from, to)`. */
+type ColumnWindow = { from: number; to: number };
+
+/** Unpinned columns rendered on each side of the visible ones. */
+const OVERSCAN_COLUMNS = 3;
+/** Unpinned columns rendered before the container is measured — server HTML, first paint. */
+const FIRST_COLUMNS = 20;
+
+/**
+ * The unpinned columns that intersect the table container's visible width, plus a few
+ * either side. All of them when windowing is off. Updated at most once per frame while
+ * scrolling, and only when the slice actually changes.
+ */
+function useColumnWindow({
+  layout,
+  centerWidths,
+  startWidth,
+  columnThreshold,
+  tableRef,
+}: BodyProps<any, any>): ColumnWindow {
+  const count = layout.center.length;
+  const enabled = count > columnThreshold;
+  const [slice, setSlice] = React.useState<ColumnWindow>({ from: 0, to: Math.min(count, FIRST_COLUMNS) });
+
+  // A passive effect: the <table> ref is attached after the body's layout effects run.
+  React.useEffect(() => {
+    const table = tableRef.current;
+    if (!enabled || !table) return;
+    const container = (table.closest("[data-slot=table-container]") as HTMLElement | null) ?? table.parentElement;
+    if (!container) return;
+    const starts: number[] = [];
+    let x = startWidth;
+    for (const width of centerWidths) {
+      starts.push(x);
+      x += width;
+    }
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const left = container.scrollLeft;
+      const right = left + container.clientWidth;
+      let from = 0;
+      while (from < count && (starts[from] ?? 0) + (centerWidths[from] ?? 0) <= left) from++;
+      let to = from;
+      while (to < count && (starts[to] ?? 0) < right) to++;
+      const next = { from: Math.max(0, from - OVERSCAN_COLUMNS), to: Math.min(count, to + OVERSCAN_COLUMNS) };
+      setSlice((prev) => (prev.from === next.from && prev.to === next.to ? prev : next));
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    container.addEventListener("scroll", schedule, { passive: true });
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
+    observer?.observe(container);
+    return () => {
+      container.removeEventListener("scroll", schedule);
+      observer?.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [enabled, tableRef, count, centerWidths, startWidth]);
+
+  return enabled ? slice : { from: 0, to: count };
+}
+
+type WindowedProps<TFeatures extends TableFeatures, TData extends RowData> = BodyProps<TFeatures, TData> & {
+  slice: ColumnWindow;
+};
+
+function rowProps<TFeatures extends TableFeatures, TData extends RowData>(
+  props: WindowedProps<TFeatures, TData>,
+  row: Row<TFeatures, TData>,
+): RowProps<TFeatures, TData> {
+  return {
+    table: props.table,
+    row,
+    layout: props.layout,
+    pins: props.pins,
+    from: props.slice.from,
+    to: props.slice.to,
+    getRowProps: props.getRowProps,
+    getCellProps: props.getCellProps,
+  };
+}
+
+function PlainRows<TFeatures extends TableFeatures, TData extends RowData>(props: WindowedProps<TFeatures, TData>) {
   const bodyRef = React.useRef<HTMLTableSectionElement>(null);
   const { scrollerRef } = props;
   React.useLayoutEffect(() => {
     scrollerRef.current = (index, align) =>
       bodyRef.current?.rows[index]?.scrollIntoView({ block: align === "auto" ? "nearest" : align });
   }, [scrollerRef]);
-  return <TableBody ref={bodyRef}>{props.rows.map((row) => renderRow(props, row))}</TableBody>;
+  return (
+    <TableBody ref={bodyRef}>
+      {props.rows.map((row) => (
+        <BodyRow key={row.id} {...rowProps(props, row)} />
+      ))}
+    </TableBody>
+  );
 }
 
 /** Rows rendered before the viewport is known — on the server and for the first client render. */
@@ -278,7 +429,7 @@ const FIRST_ROWS = 30;
  * it renders the first rows plus a spacer of the estimated height, so the server HTML
  * has content and the scroll container already overflows when it is looked for.
  */
-function VirtualRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+function VirtualRows<TFeatures extends TableFeatures, TData extends RowData>(props: WindowedProps<TFeatures, TData>) {
   const bodyRef = React.useRef<HTMLTableSectionElement>(null);
   const [viewport, setViewport] = React.useState<Element | Window | null>(null);
   React.useLayoutEffect(() => {
@@ -292,10 +443,12 @@ function VirtualRows<TFeatures extends TableFeatures, TData extends RowData>(pro
   const first = props.rows.slice(0, FIRST_ROWS);
   return (
     <TableBody ref={bodyRef}>
-      {first.map((row) => renderRow(props, row))}
+      {first.map((row) => (
+        <BodyRow key={row.id} {...rowProps(props, row)} />
+      ))}
       <Spacer
         height={(props.rows.length - first.length) * props.estimateRowHeight}
-        colSpan={Math.max(props.leafIds.length, 1)}
+        colSpan={leafCount(props.layout)}
       />
     </TableBody>
   );
@@ -316,13 +469,18 @@ function scrollParent(node: Element): Element | Window {
 function ElementRows<TFeatures extends TableFeatures, TData extends RowData>({
   viewport,
   ...props
-}: BodyProps<TFeatures, TData> & { viewport: Element }) {
+}: WindowedProps<TFeatures, TData> & { viewport: Element }) {
   const bodyRef = React.useRef<HTMLTableSectionElement>(null);
   // Distance from the top of the viewport's content to the first row (header, toolbar…).
-  const margin = useOffset(bodyRef, () => {
-    const body = bodyRef.current;
-    return body ? body.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop : 0;
-  });
+  const margin = useOffset(
+    bodyRef,
+    () => {
+      const body = bodyRef.current;
+      return body ? body.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop : 0;
+    },
+    viewport,
+    props.rows.length,
+  );
   const virtualizer = useVirtualizer<Element, HTMLTableRowElement>({
     count: props.rows.length,
     getScrollElement: () => viewport,
@@ -334,9 +492,14 @@ function ElementRows<TFeatures extends TableFeatures, TData extends RowData>({
   return <VirtualBody props={props} bodyRef={bodyRef} virtualizer={virtualizer} />;
 }
 
-function WindowRows<TFeatures extends TableFeatures, TData extends RowData>(props: BodyProps<TFeatures, TData>) {
+function WindowRows<TFeatures extends TableFeatures, TData extends RowData>(props: WindowedProps<TFeatures, TData>) {
   const bodyRef = React.useRef<HTMLTableSectionElement>(null);
-  const margin = useOffset(bodyRef, () => (bodyRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY);
+  const margin = useOffset(
+    bodyRef,
+    () => (bodyRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY,
+    null,
+    props.rows.length,
+  );
   const virtualizer = useWindowVirtualizer<HTMLTableRowElement>({
     count: props.rows.length,
     estimateSize: () => props.estimateRowHeight,
@@ -347,14 +510,34 @@ function WindowRows<TFeatures extends TableFeatures, TData extends RowData>(prop
   return <VirtualBody props={props} bodyRef={bodyRef} virtualizer={virtualizer} />;
 }
 
-/** Re-measured after every render (cheap), stored only when it moves — content above can reflow. */
-function useOffset(bodyRef: React.RefObject<HTMLTableSectionElement | null>, measure: () => number) {
+/**
+ * Where the first row sits in the viewport's content. Measuring forces a layout of the
+ * whole table, so it is read once, then only when the header or viewport resizes or the
+ * row count changes — never on scroll.
+ */
+function useOffset(
+  bodyRef: React.RefObject<HTMLTableSectionElement | null>,
+  measure: () => number,
+  viewport: Element | null,
+  rowCount: number,
+) {
   const [offset, setOffset] = React.useState(0);
+  const measureRef = React.useRef(measure);
   React.useLayoutEffect(() => {
-    if (!bodyRef.current) return;
-    const next = Math.round(measure());
-    if (next !== offset) setOffset(next);
+    measureRef.current = measure;
   });
+  React.useLayoutEffect(() => {
+    const body = bodyRef.current;
+    if (!body) return;
+    const update = () => setOffset(Math.round(measureRef.current()));
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    const head = body.closest("table")?.tHead;
+    if (head) observer.observe(head);
+    if (viewport) observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [bodyRef, viewport, rowCount]);
   return offset;
 }
 
@@ -363,7 +546,7 @@ function VirtualBody<TFeatures extends TableFeatures, TData extends RowData>({
   bodyRef,
   virtualizer,
 }: {
-  props: BodyProps<TFeatures, TData>;
+  props: WindowedProps<TFeatures, TData>;
   bodyRef: React.RefObject<HTMLTableSectionElement | null>;
   virtualizer: Virtualizer<any, HTMLTableRowElement>;
 }) {
@@ -377,15 +560,20 @@ function VirtualBody<TFeatures extends TableFeatures, TData extends RowData>({
   const total = virtualizer.getTotalSize();
   const first = items[0];
   const last = items.at(-1);
-  const colSpan = Math.max(props.leafIds.length, 1);
+  const colSpan = leafCount(props.layout);
   return (
     <TableBody ref={bodyRef}>
       <Spacer height={first ? first.start - margin : 0} colSpan={colSpan} />
       {items.map((item) => {
         const row = props.rows[item.index];
-        return row
-          ? renderRow(props, row, { "data-index": item.index, ref: virtualizer.measureElement })
-          : null;
+        return row ? (
+          <BodyRow
+            key={row.id}
+            {...rowProps(props, row)}
+            index={item.index}
+            measure={virtualizer.measureElement}
+          />
+        ) : null;
       })}
       <Spacer height={last ? total - (last.end - margin) : total} colSpan={colSpan} />
     </TableBody>
@@ -463,6 +651,7 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   // Body cells follow the leaf headers, so pinned-first order and hidden columns match the header.
   const leaves = headerGroups.at(-1)?.headers ?? [];
   const leafIds = leaves.map((header) => header.column.id);
+  const leafHeaders = new Map(leaves.map((header) => [header.column.id, header]));
   // Body and footer cells read pinned offsets from variables on `<table>`, so a resize
   // changes one style there instead of every pinned cell.
   const pins = new Map<string, Pin>();
@@ -474,7 +663,24 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
     pins.set(header.column.id, { pinned: pin.pinned, offsetVar });
     pinOffsets[offsetVar] = `${pin.pinOffset}px`;
   });
-  const pinKey = [...pins].map(([id, pin]) => `${id}:${pin.pinned}:${pin.offsetVar}`).join("|");
+  // The body is memoised on these, so they are rebuilt only when the columns or their
+  // pinning change — not on every render, nor on every resize step.
+  const layoutKey = `${leafIds.join("\u0000")}|${[...pins].map(([id, pin]) => `${id}:${pin.pinned}`).join("|")}`;
+  const layout = React.useMemo(
+    () => ({
+      start: leafIds.filter((id) => pins.get(id)?.pinned === "left"),
+      center: leafIds.filter((id) => !pins.has(id)),
+      end: leafIds.filter((id) => pins.get(id)?.pinned === "right"),
+      pins,
+    }),
+    [layoutKey],
+  );
+  const sizeOf = (id: string) => (leafHeaders.get(id)?.column as unknown as LooseColumn | undefined)?.getSize?.() ?? 0;
+  const centerWidths = sized ? layout.center.map(sizeOf) : [];
+  const startWidth = sized ? layout.start.reduce((sum, id) => sum + sizeOf(id), 0) : 0;
+  const widthsKey = `${startWidth}|${centerWidths.join(",")}`;
+  const stableWidths = React.useMemo(() => centerWidths, [widthsKey]);
+  const tableRef = React.useRef<HTMLTableElement>(null);
   const hasFooterDef = (header: Header<TFeatures, TData, unknown>) =>
     !header.isPlaceholder && (header.column as unknown as LooseColumn).columnDef.footer !== undefined;
   // TanStack emits one footer row per header level; drop the levels with nothing to show.
@@ -527,9 +733,6 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
 
   // A leaf column outside any group shows up as placeholders above its real header.
   // Render the real header once, at the top, spanning those rows.
-  const leafHeaders = new Map(
-    (headerGroups.at(-1)?.headers ?? []).map((header) => [header.column.id, header]),
-  );
   const spanned = new Set<string>();
   const headerCells = (headers: Header<TFeatures, TData, unknown>[], depth: number) =>
     headers.flatMap((header) => {
@@ -546,6 +749,7 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
 
   return (
     <Table
+      ref={tableRef}
       layout={sized ? "fixed" : "auto"}
       className={className}
       style={{ ...pinOffsets, ...(sized ? { width: loose.getTotalSize?.() } : {}), ...style }}
@@ -562,15 +766,19 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
       <DataTableBody
         table={table}
         rows={rows}
-        leafIds={leafIds}
-        leafKey={leafIds.join("\u0000")}
-        pins={pins}
-        pinKey={pinKey}
+        layout={layout}
+        pins={layout.pins}
+        centerWidths={stableWidths}
+        widthsKey={widthsKey}
+        startWidth={startWidth}
         empty={empty}
         getRowProps={getRowProps}
         getCellProps={getCellProps}
         resizing={resizing}
         threshold={virtual ? (virtual.threshold ?? 100) : Number.POSITIVE_INFINITY}
+        // Windowing columns needs their widths, so only with `columnSizingFeature`.
+        columnThreshold={virtual && sized ? (virtual.columnThreshold ?? 40) : Number.POSITIVE_INFINITY}
+        tableRef={tableRef}
         estimateRowHeight={virtual?.estimateRowHeight ?? 37}
         overscan={virtual?.overscan ?? 10}
         scrollerRef={scrollerRef}

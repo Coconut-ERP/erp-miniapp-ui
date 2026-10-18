@@ -227,6 +227,10 @@ describe("DataTable virtualize", () => {
     vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) {
       return this.tagName === "TR" ? 37 : 0;
     });
+    // The table container shows 500px of width.
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === "table-container" ? 500 : 0;
+    });
     HTMLElement.prototype.scrollTo = scrollTo as typeof HTMLElement.prototype.scrollTo;
   });
   afterEach(() => {
@@ -259,6 +263,90 @@ describe("DataTable virtualize", () => {
     const { container } = render(<Many data={many.slice(0, 50)} />);
     expect(container.querySelectorAll("tbody tr")).toHaveLength(50);
     expect(container.querySelector("[data-slot=table-spacer]")).toBeNull();
+  });
+
+  it("mounts only the rows that enter the viewport while scrolling", async () => {
+    let renders = 0;
+    const counted = v.columns([
+      v.accessor("name", {
+        header: "Name",
+        cell: ({ getValue }) => {
+          renders += 1;
+          return getValue();
+        },
+      }),
+    ]);
+    function Counted() {
+      const table = useTable({ features: plain, columns: counted, data: many, getRowId: (row) => row.id });
+      // Fresh callbacks every render, as apps pass them.
+      return (
+        <div data-viewport="" style={{ overflowY: "auto" }}>
+          <DataTable table={table} virtualize getRowProps={(row) => ({ "data-id": row.id })} />
+        </div>
+      );
+    }
+    const { container } = render(<Counted />);
+    const viewport = container.querySelector<HTMLElement>("[data-viewport]");
+    if (!viewport) throw new Error("no viewport");
+    const before = renders;
+
+    // One row down: one row enters, the others stay mounted and untouched.
+    act(() => {
+      viewport.scrollTop = 37 * 15;
+      fireEvent.scroll(viewport);
+    });
+    await waitFor(() => expect(screen.queryByText("P0")).toBeNull());
+    expect(renders - before).toBeLessThanOrEqual(20);
+  });
+
+  it("renders only the unpinned columns near the visible width", async () => {
+    type Wide = { id: string } & Record<string, string>;
+    const sized = tableFeatures({ columnSizingFeature, columnPinningFeature });
+    const w = createColumnHelper<typeof sized, Wide>();
+    const wide = w.columns([
+      w.accessor("id", { header: "Id", size: 80 }),
+      ...Array.from({ length: 100 }, (_, i) =>
+        w.accessor((row) => row[`c${i}`] ?? "", { id: `c${i}`, header: `C${i}`, size: 50 }),
+      ),
+    ]);
+    const rows: Wide[] = Array.from({ length: 5 }, (_, r) => ({
+      id: String(r),
+      ...Object.fromEntries(Array.from({ length: 100 }, (_, i) => [`c${i}`, `r${r}c${i}`])),
+    }));
+    function WideTable() {
+      const table = useTable({
+        features: sized,
+        columns: wide,
+        data: rows,
+        getRowId: (row) => row.id,
+        initialState: { columnPinning: { start: ["id"], end: [] } },
+      });
+      return <DataTable table={table} stickyHeader virtualize />;
+    }
+    const { container } = render(<WideTable />);
+    const container0 = container.querySelector<HTMLElement>("[data-slot=table-container]");
+    if (!container0) throw new Error("no container");
+
+    // Header keeps every column; the body only the pinned one plus those in view.
+    expect(screen.getAllByRole("columnheader")).toHaveLength(101);
+    const cells = () => container.querySelectorAll('tbody tr:first-child td:not([aria-hidden="true"])').length;
+    // 500px visible, C0 starting after the 80px pinned column → C0..C8 in view, plus 3 overscan.
+    expect(cells()).toBe(1 + 12);
+    expect(screen.getByText("r0c0")).toBeInTheDocument();
+    expect(screen.queryByText("r0c50")).toBeNull();
+
+    act(() => {
+      container0.scrollLeft = 2_500;
+      fireEvent.scroll(container0);
+    });
+    await waitFor(() => expect(screen.getByText("r0c50")).toBeInTheDocument());
+    expect(screen.queryByText("r0c0")).toBeNull();
+    // The skipped columns collapse into spacer cells, so the row still spans 101 columns.
+    const spans = [...container.querySelectorAll<HTMLTableCellElement>('tbody tr:first-child td')].reduce(
+      (sum, td) => sum + td.colSpan,
+      0,
+    );
+    expect(spans).toBe(101);
   });
 
   it("scrolls to a row that isn't rendered through apiRef", async () => {

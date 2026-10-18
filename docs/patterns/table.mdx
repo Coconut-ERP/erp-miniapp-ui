@@ -47,7 +47,13 @@ From about 1,000 rows, rendering every row makes first paint and scrolling slugg
 worse with many columns. Pass `virtualize` to `DataTable`: above `threshold` rows
 (default `100`) only the rows near the viewport are in the DOM and spacer rows keep the
 scroll height. The viewport is the nearest scrolling ancestor (the `stickyHeader`
-container when its height is bounded), else the window.
+container when its height is bounded), else the window. Each row is memoised, so
+scrolling only mounts the rows that come into view.
+
+Wide tables (more than `columnThreshold` unpinned columns, default `40`, with
+`columnSizingFeature`) also render only the unpinned columns near the visible width;
+the rest of each body row collapses into spacer cells. Header and footer keep every
+column, so their cells stay reachable.
 
 ```tsx
 const api = useRef<DataTableApi>(null);
@@ -57,6 +63,8 @@ api.current?.scrollToRow(rowId, { align: "center" });
 
 - Rows off screen aren't in the DOM: browser find (Ctrl+F) and `getElementById` don't
   reach them — offer a search field, and scroll with `apiRef.scrollToRow` first.
+- The same goes for body cells of columns scrolled out horizontally: scroll the column's
+  header into view first, then look the cell up on the next frame.
 - Rows are measured as they render, so mixed heights work; a close `estimateRowHeight`
   keeps the scrollbar steady.
 - Keep `columns` and `data` stable (module scope or `useMemo`), as for resizing.
