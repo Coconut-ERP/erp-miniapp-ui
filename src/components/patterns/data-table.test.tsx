@@ -10,7 +10,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -87,11 +87,48 @@ describe("DataTable", () => {
     expect(table.style.width).toBe("370px");
   });
 
+  it("keeps body cells still while a column is dragged", () => {
+    let renders = 0;
+    const counted = helper.columns([
+      helper.accessor("name", {
+        header: "Name",
+        size: 160,
+        cell: ({ getValue }) => {
+          renders += 1;
+          return getValue();
+        },
+      }),
+      helper.accessor("qty", { header: "Qty", size: 80 }),
+    ]);
+    function Drag() {
+      const table = useTable({ features, columns: counted, data: DATA, getRowId: (row) => row.id });
+      // A fresh callback every render, like most apps pass.
+      return <DataTable table={table} getRowProps={(row) => ({ "data-id": row.id })} />;
+    }
+    render(<Drag />);
+    expect(renders).toBe(2);
+
+    const handle = screen.getByRole("separator", { name: "Resize Name" });
+    fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientX: 150, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientX: 200, pointerId: 1 });
+    // jsdom measures the <th> as 0px wide, so the drag starts from 0.
+    expect(screen.getByRole("columnheader", { name: /^Name/ }).style.width).toBe("100px");
+    expect(renders).toBe(2);
+
+    // Released: the body renders once more to pick up the latest callbacks.
+    fireEvent.pointerUp(handle, { pointerId: 1 });
+    expect(renders).toBe(4);
+  });
+
   it("pins with offsets and tints selected rows", () => {
     render(<Demo selected={{ "2": true }} />);
     const note = screen.getByRole("columnheader", { name: /^Note/ });
     expect(note).toHaveClass("sticky");
     expect(note.style.left).toBe("0px");
+    // Body cells read the offset from a variable on <table>, so a resize doesn't touch them.
+    expect(screen.getByRole("table").style.getPropertyValue("--data-table-pin-0")).toBe("0px");
+    expect(screen.getByText("—").closest("td")?.style.left).toBe("var(--data-table-pin-0)");
     const alice = screen.getByRole("row", { selected: true });
     expect(alice).toHaveAttribute("data-row-state", "selected");
   });

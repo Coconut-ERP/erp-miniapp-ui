@@ -48,7 +48,7 @@
 - combobox — Searchable single-select — Popover + filter input over an options list.
 - confirm-dialog — Ready-made AlertDialog for confirming an action, with an optional trigger and a destructive style for irreversible actions.
 - data-table.test — (no JSDoc yet — run the component-docs skill)
-- data-table — Renders a TanStack Table v9 instance with the library's `Table` primitives, so app tables get sorting, column sizing/resizing, pinning and row selection without hand-wiring each header and cell. Headless split: the app owns the instance (`useTable` + `tableFeatures`), state and data fetching; this only renders. `@tanstack/react-table` v9 is an optional peer dependency — install it in the app that uses `DataTable`.
+- data-table — While a column is dragged, the body keeps its last render: widths come from the header (`table-fixed`) and pinned offsets from CSS variables, so no body cell changes. The app usually re-renders on every step with fresh `getRowProps` / `getCellProps`, which are picked up once the drag ends.
 - date-picker — Single-date picker — Popover + Calendar composition (shadcn Date Picker pattern). Controlled via `value`/`onChange`, or uncontrolled via `defaultValue`.
 - layout — Page-level heading row: title + optional description on the left, action buttons on the right (stacks on mobile).
 - search-field — Text input pre-configured for search: `type="search"` with a leading search icon. Accepts all Input props.

@@ -262,6 +262,10 @@ type TableHeadProps = React.ComponentProps<"th"> &
     maxWidth?: number;
     /** Fires on every resize step with the new clamped width — persist it (debounced) if needed. */
     onWidthChange?: (width: number) => void;
+    /** A pointer drag of the handle begins — keyboard steps don't fire it. */
+    onResizeStart?: () => void;
+    /** The pointer drag ends (released or cancelled). */
+    onResizeEnd?: () => void;
   };
 
 const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
@@ -289,6 +293,8 @@ function TableHead({
   minWidth = 48,
   maxWidth = Number.POSITIVE_INFINITY,
   onWidthChange,
+  onResizeStart,
+  onResizeEnd,
   style,
   ...props
 }: TableHeadProps) {
@@ -344,6 +350,8 @@ function TableHead({
           minWidth={minWidth}
           maxWidth={maxWidth}
           onResize={resize}
+          onResizeStart={onResizeStart}
+          onResizeEnd={onResizeEnd}
         />
       ) : null}
     </th>
@@ -357,18 +365,24 @@ function ColumnResizeHandle({
   minWidth,
   maxWidth,
   onResize,
+  onResizeStart,
+  onResizeEnd,
 }: {
   label: string;
   width?: number;
   minWidth: number;
   maxWidth: number;
   onResize: (width: number) => void;
+  onResizeStart?: () => void;
+  onResizeEnd?: () => void;
 }) {
   const drag = React.useRef<{ x: number; width: number } | null>(null);
   const headWidth = (handle: HTMLElement) =>
     (handle.parentElement as HTMLElement).getBoundingClientRect().width;
   const stop = () => {
+    if (!drag.current) return;
     drag.current = null;
+    onResizeEnd?.();
   };
 
   return (
@@ -386,6 +400,7 @@ function ColumnResizeHandle({
         event.preventDefault();
         event.currentTarget.setPointerCapture?.(event.pointerId);
         drag.current = { x: event.clientX, width: headWidth(event.currentTarget) };
+        onResizeStart?.();
       }}
       onPointerMove={(event) => {
         if (drag.current) onResize(drag.current.width + event.clientX - drag.current.x);

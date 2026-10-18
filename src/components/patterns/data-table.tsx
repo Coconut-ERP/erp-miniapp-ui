@@ -44,7 +44,16 @@ type DataTableCellProps = TableCellProps & DataAttributes;
 /** `TableHead` props plus `data-*` attributes (sorting, sizing and pinning stay with the table). */
 type DataTableHeadProps = Omit<
   TableHeadProps,
-  "sortable" | "sortDirection" | "onSortChange" | "resizable" | "width" | "onWidthChange" | "pinned" | "pinOffset"
+  | "sortable"
+  | "sortDirection"
+  | "onSortChange"
+  | "resizable"
+  | "width"
+  | "onWidthChange"
+  | "onResizeStart"
+  | "onResizeEnd"
+  | "pinned"
+  | "pinOffset"
 > &
   DataAttributes;
 
@@ -101,6 +110,112 @@ function pinning(column: LooseColumn) {
 
 const defaultResizeLabel = (name: string) => `Resize ${name}`;
 
+/** Pinned side + the CSS variable on `<table>` holding the column's offset. */
+type Pin = { pinned: "left" | "right"; offsetVar: string };
+
+type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
+  table: ReactTable<TFeatures, TData, any>;
+  rows: Row<TFeatures, TData>[];
+  leafIds: string[];
+  /** `leafIds` joined — compared instead of the array, which is rebuilt every render. */
+  leafKey: string;
+  pins: Map<string, Pin>;
+  pinKey: string;
+  empty: React.ReactNode;
+  getRowProps?: (row: Row<TFeatures, TData>) => DataTableRowProps;
+  getCellProps?: (cell: Cell<TFeatures, TData, unknown>) => DataTableCellProps;
+  /** A column is being dragged: only the header widths move. */
+  resizing: boolean;
+};
+
+/**
+ * While a column is dragged, the body keeps its last render: widths come from the
+ * header (`table-fixed`) and pinned offsets from CSS variables, so no body cell
+ * changes. The app usually re-renders on every step with fresh `getRowProps` /
+ * `getCellProps`, which are picked up once the drag ends.
+ */
+function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
+  if (prev.rows !== next.rows || prev.leafKey !== next.leafKey || prev.pinKey !== next.pinKey) return false;
+  if (next.resizing) return true;
+  return (
+    prev.table === next.table &&
+    prev.empty === next.empty &&
+    prev.getRowProps === next.getRowProps &&
+    prev.getCellProps === next.getCellProps
+  );
+}
+
+function BodyRows<TFeatures extends TableFeatures, TData extends RowData>({
+  table,
+  rows,
+  leafIds,
+  pins,
+  empty,
+  getRowProps,
+  getCellProps,
+}: BodyProps<TFeatures, TData>) {
+  return (
+    <TableBody>
+      {rows.length === 0 ? (
+        <TableRow>
+          <TableCell colSpan={Math.max(leafIds.length, 1)} className="h-24 text-center text-muted-foreground">
+            {empty}
+          </TableCell>
+        </TableRow>
+      ) : (
+        rows.map((row) => {
+          const r = row as unknown as LooseRow;
+          const selected = !!r.getIsSelected?.();
+          const rowProps = getRowProps?.(row) ?? {};
+          const byId = row.getAllCellsByColumnId();
+          const cells = leafIds.flatMap((id) => byId[id] ?? []);
+          return (
+            <TableRow
+              key={row.id}
+              data-state={selected ? "selected" : undefined}
+              aria-selected={r.getIsSelected ? selected : undefined}
+              {...rowProps}
+              state={rowProps.state ?? (selected ? "selected" : undefined)}
+            >
+              {cells.map((cell) => {
+                const column = cell.column as unknown as LooseColumn;
+                const m = meta(column);
+                const value = cell.getValue();
+                const extra = getCellProps?.(cell) ?? {};
+                return (
+                  <TableCell
+                    key={cell.id}
+                    numeric={m.numeric}
+                    truncate={m.truncate}
+                    title={m.truncate && typeof value === "string" ? value : undefined}
+                    {...extra}
+                    {...pinVar(pins, column.id)}
+                    className={cn(m.cellClassName, extra.className)}
+                  >
+                    {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
+                      <span className="text-muted-foreground">{m.fallback}</span>
+                    ) : (
+                      <table.FlexRender cell={cell} />
+                    )}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          );
+        })
+      )}
+    </TableBody>
+  );
+}
+
+// `memo` drops the generics; the cast restores them.
+const DataTableBody = React.memo(BodyRows as React.FC<BodyProps<any, any>>, sameBody) as typeof BodyRows;
+
+function pinVar(pins: Map<string, Pin>, columnId: string) {
+  const pin = pins.get(columnId);
+  return pin ? { pinned: pin.pinned, pinOffset: `var(${pin.offsetVar})` } : {};
+}
+
 /**
  * Renders a TanStack Table v9 instance with the library's `Table` primitives,
  * so app tables get sorting, column sizing/resizing, pinning and row selection
@@ -121,8 +236,12 @@ const defaultResizeLabel = (name: string) => `Resize ${name}`;
  * `getHeaderProps` / `getFooterProps`. With grouped columns, a leaf column outside
  * any group spans the header rows (`rowSpan`) instead of leaving empty cells above it.
  *
+ * While a column is dragged only the header re-renders; the body is skipped as long
+ * as the row model is unchanged, so large tables resize smoothly.
+ *
  * Do: keep `features`, `columns` and the `data` fallback stable (module scope or
- * memo). Don't mix it with hand-written `TableRow`s — use `Table` directly for that.
+ * memo) — otherwise the row model is rebuilt on every resize step and the body
+ * re-renders with it. Don't mix it with hand-written `TableRow`s — use `Table` directly for that.
  */
 function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   table,
@@ -140,9 +259,22 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   const sized = typeof loose.getTotalSize === "function";
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
+  const [resizing, setResizing] = React.useState(false);
   // Body cells follow the leaf headers, so pinned-first order and hidden columns match the header.
-  const leafIds = (headerGroups.at(-1)?.headers ?? []).map((header) => header.column.id);
-  const leafCount = Math.max(leafIds.length, 1);
+  const leaves = headerGroups.at(-1)?.headers ?? [];
+  const leafIds = leaves.map((header) => header.column.id);
+  // Body and footer cells read pinned offsets from variables on `<table>`, so a resize
+  // changes one style there instead of every pinned cell.
+  const pins = new Map<string, Pin>();
+  const pinOffsets: Record<string, string> = {};
+  leaves.forEach((header, index) => {
+    const pin = pinning(header.column as unknown as LooseColumn);
+    if (!pin.pinned) return;
+    const offsetVar = `--data-table-pin-${index}`;
+    pins.set(header.column.id, { pinned: pin.pinned, offsetVar });
+    pinOffsets[offsetVar] = `${pin.pinOffset}px`;
+  });
+  const pinKey = [...pins].map(([id, pin]) => `${id}:${pin.pinned}:${pin.offsetVar}`).join("|");
   const hasFooterDef = (header: Header<TFeatures, TData, unknown>) =>
     !header.isPlaceholder && (header.column as unknown as LooseColumn).columnDef.footer !== undefined;
   // TanStack emits one footer row per header level; drop the levels with nothing to show.
@@ -185,6 +317,8 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
             ? (width) => loose.setColumnSizing?.((old) => ({ ...old, [column.id]: width }))
             : undefined
         }
+        onResizeStart={resizable ? () => setResizing(true) : undefined}
+        onResizeEnd={resizable ? () => setResizing(false) : undefined}
       >
         {header.isPlaceholder ? null : <table.FlexRender header={header} />}
       </TableHead>
@@ -214,7 +348,7 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
     <Table
       layout={sized ? "fixed" : "auto"}
       className={className}
-      style={sized ? { width: loose.getTotalSize?.(), ...style } : style}
+      style={{ ...pinOffsets, ...(sized ? { width: loose.getTotalSize?.() } : {}), ...style }}
       {...props}
     >
       <TableHeader>
@@ -225,56 +359,18 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
           </TableRow>
         ))}
       </TableHeader>
-      <TableBody>
-        {rows.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={leafCount} className="h-24 text-center text-muted-foreground">
-              {empty}
-            </TableCell>
-          </TableRow>
-        ) : (
-          rows.map((row) => {
-            const r = row as unknown as LooseRow;
-            const selected = !!r.getIsSelected?.();
-            const rowProps = getRowProps?.(row) ?? {};
-            const byId = row.getAllCellsByColumnId();
-            const cells = leafIds.flatMap((id) => byId[id] ?? []);
-            return (
-              <TableRow
-                key={row.id}
-                data-state={selected ? "selected" : undefined}
-                aria-selected={r.getIsSelected ? selected : undefined}
-                {...rowProps}
-                state={rowProps.state ?? (selected ? "selected" : undefined)}
-              >
-                {cells.map((cell) => {
-                  const column = cell.column as unknown as LooseColumn;
-                  const m = meta(column);
-                  const value = cell.getValue();
-                  const extra = getCellProps?.(cell) ?? {};
-                  return (
-                    <TableCell
-                      key={cell.id}
-                      numeric={m.numeric}
-                      truncate={m.truncate}
-                      title={m.truncate && typeof value === "string" ? value : undefined}
-                      {...extra}
-                      {...pinning(column)}
-                      className={cn(m.cellClassName, extra.className)}
-                    >
-                      {m.fallback !== undefined && (value === null || value === undefined || value === "") ? (
-                        <span className="text-muted-foreground">{m.fallback}</span>
-                      ) : (
-                        <table.FlexRender cell={cell} />
-                      )}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })
-        )}
-      </TableBody>
+      <DataTableBody
+        table={table}
+        rows={rows}
+        leafIds={leafIds}
+        leafKey={leafIds.join("\u0000")}
+        pins={pins}
+        pinKey={pinKey}
+        empty={empty}
+        getRowProps={getRowProps}
+        getCellProps={getCellProps}
+        resizing={resizing}
+      />
       {footerGroups.length > 0 ? (
         <TableFooter>
           {footerGroups.map((group) => (
@@ -288,7 +384,7 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
                     colSpan={header.colSpan > 1 ? header.colSpan : undefined}
                     numeric={meta(column).numeric}
                     {...extra}
-                    {...(header.subHeaders.length === 0 ? pinning(column) : {})}
+                    {...(header.subHeaders.length === 0 ? pinVar(pins, column.id) : {})}
                     className={extra.className}
                   >
                     {header.isPlaceholder ? null : <table.FlexRender footer={header} />}

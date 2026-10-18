@@ -12,6 +12,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.7.1] - 2026-10-18
+
+### Fixed
+
+- `DataTable` — dragging a column's resize handle no longer re-renders every body cell on each pointer move. The body is memoised and skipped while a drag is in progress (it renders once more on release to pick up fresh `getRowProps` / `getCellProps`), and pinned body/footer cells read their offset from a CSS variable on `<table>` (`--data-table-pin-<index>`) instead of an inline number. On wide tables (hundreds of rows × columns) the drag used to lag seconds behind the pointer
+
+### Added
+
+- `TableHead` `onResizeStart` / `onResizeEnd` — fire when a pointer drag of the resize handle begins and ends (keyboard steps don't fire them)
+
 ## [0.7.0] - 2026-10-16
 
 ### Added
