@@ -216,3 +216,20 @@ it.each([
   expect(screen.getByRole("cell")).toHaveClass(height);
   expect(screen.getByRole("columnheader")).toHaveClass(height);
 });
+
+describe("stickyHorizontalScrollbar", () => {
+  const table = (props: React.ComponentProps<typeof Table>) =>
+    render(<Table {...props}><TableBody><TableRow><TableCell>x</TableCell></TableRow></TableBody></Table>);
+
+  it("keeps native scrollbars when the container scrolls vertically", () => {
+    const { container } = table({ stickyHeader: true, stickyHorizontalScrollbar: true });
+    expect(container.querySelector("[data-slot=table-sticky-scrollbar]")).toBeNull();
+    expect(container.querySelector("[data-slot=table-container]")!.className).not.toContain("scrollbar-width:none");
+  });
+
+  it("uses the proxy bar when the page scrolls", () => {
+    const { container } = table({ stickyHorizontalScrollbar: true });
+    expect(container.querySelector("[data-slot=table-sticky-scrollbar]")).not.toBeNull();
+    expect(container.querySelector("[data-slot=table-container]")!.className).toContain("scrollbar-width:none");
+  });
+});

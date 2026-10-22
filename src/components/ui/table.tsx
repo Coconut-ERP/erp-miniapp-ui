@@ -14,7 +14,9 @@ type TableProps = React.ComponentProps<"table"> & {
   stickyHeader?: boolean;
   /**
    * Pin the horizontal scrollbar to the bottom of the table's visible area
-   * instead of the end of the table content. Opt-in; default `false`.
+   * instead of the end of the table content. With `stickyHeader` / `stickyFooter`
+   * the container scrolls both ways and keeps its native scrollbars, which already
+   * sit at the visible bottom. Opt-in; default `false`.
    */
   stickyHorizontalScrollbar?: boolean;
   /**
@@ -154,6 +156,11 @@ function TableScrollContainer({
     return () => observer.disconnect();
   }, []);
 
+  // When the container owns vertical scrolling, its bottom edge is the visible bottom, so
+  // the native horizontal scrollbar is already pinned there. The proxy bar would need the
+  // native bars hidden — and `scrollbar-width: none` hides the vertical one too.
+  const proxy = stickyScrollbar && !stickyHeader;
+
   // Two-way sync; the equality guard stops the scroll events from ping-ponging.
   const sync = (from: HTMLDivElement | null, to: HTMLDivElement | null) => {
     if (from && to && to.scrollLeft !== from.scrollLeft) to.scrollLeft = from.scrollLeft;
@@ -170,12 +177,12 @@ function TableScrollContainer({
           "relative w-full overflow-x-auto outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           // Own the vertical scroll so `thead` has a scrolling ancestor to stick to.
           stickyHeader && "min-h-0 flex-1 overflow-y-auto",
-          stickyScrollbar && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          proxy && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         )}
       >
         {children}
       </div>
-      {stickyScrollbar ? (
+      {proxy ? (
         <div
           ref={barRef}
           data-slot="table-sticky-scrollbar"

@@ -12,6 +12,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.10.1] - 2026-10-22
+
+### Fixed
+
+- `Table` / `DataTable` `stickyHeader` (or `stickyFooter`) together with `stickyHorizontalScrollbar` showed no vertical scrollbar: the table container scrolls both ways, and hiding its native horizontal bar for the proxy (`scrollbar-width: none`) hid the vertical one too. The wheel still scrolled, but there was no bar to drag. When the container owns vertical scrolling it now keeps its native scrollbars (the horizontal one already sits at the visible bottom) and renders no proxy bar; the proxy is only used when the page scrolls
+
 ## [0.10.0] - 2026-10-22
 
 ### Added

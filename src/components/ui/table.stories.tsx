@@ -52,15 +52,70 @@ export const Default: Story = {
 };
 
 /**
- * `stickyHeader` keeps `<thead>` pinned while the body scrolls, and
- * `stickyHorizontalScrollbar` keeps the horizontal bar at the bottom of the
- * visible area — both reachable at any vertical scroll position. The parent
- * only needs a bounded height; the table owns the scrolling.
+ * `stickyHeader` keeps `<thead>` pinned while the body scrolls. The table
+ * container owns both scroll directions, so its native scrollbars — vertical,
+ * and horizontal at the bottom of the visible area — stay reachable at any
+ * scroll position (`stickyHorizontalScrollbar` adds nothing here). The parent
+ * only needs a bounded height.
  */
 export const StickyHeaderAndScrollbar: Story = {
   render: () => (
     <div className="h-72 w-full rounded-md border">
       <Table stickyHeader stickyHorizontalScrollbar>
+        <TableHeader>
+          <TableRow>
+            {wideColumns.map((column) => (
+              <TableHead key={column} className="min-w-40">
+                {column}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {manyRows.map((row) => (
+            <TableRow key={row}>
+              {wideColumns.map((column) => (
+                <TableCell key={column}>{`${column} – row ${row}`}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole("table");
+    const viewport = table.parentElement as HTMLElement;
+
+    // Native scrollbars stay: hiding them would hide the vertical one too.
+    expect(canvasElement.querySelector('[data-slot="table-sticky-scrollbar"]')).toBeNull();
+    expect(getComputedStyle(viewport).scrollbarWidth).not.toBe("none");
+
+    // The header stays pinned: the table container owns the vertical scroll.
+    const thead = table.querySelector("thead") as HTMLElement;
+    expect(getComputedStyle(viewport).overflowY).toBe("auto");
+    expect(getComputedStyle(thead).position).toBe("sticky");
+
+    viewport.scrollTop = 400;
+    await waitFor(() =>
+      expect(thead.getBoundingClientRect().top).toBeCloseTo(
+        viewport.getBoundingClientRect().top,
+        0,
+      ),
+    );
+  },
+};
+
+/**
+ * Without `stickyHeader` the page (here: a scrolling parent) scrolls vertically, and
+ * `stickyHorizontalScrollbar` keeps a proxy horizontal bar at the bottom of the
+ * visible area instead of the end of the table.
+ */
+export const StickyScrollbarInScrollingPage: Story = {
+  render: () => (
+    <div className="h-72 w-full overflow-y-auto rounded-md border">
+      <Table stickyHorizontalScrollbar>
         <TableHeader>
           <TableRow>
             {wideColumns.map((column) => (
@@ -102,19 +157,6 @@ export const StickyHeaderAndScrollbar: Story = {
     viewport.scrollLeft = 40;
     viewport.dispatchEvent(new Event("scroll", { bubbles: true }));
     await waitFor(() => expect(bar.scrollLeft).toBe(40));
-
-    // The header stays pinned: the table container owns the vertical scroll.
-    const thead = table.querySelector("thead") as HTMLElement;
-    expect(getComputedStyle(viewport).overflowY).toBe("auto");
-    expect(getComputedStyle(thead).position).toBe("sticky");
-
-    viewport.scrollTop = 400;
-    await waitFor(() =>
-      expect(thead.getBoundingClientRect().top).toBeCloseTo(
-        viewport.getBoundingClientRect().top,
-        0,
-      ),
-    );
   },
 };
 
