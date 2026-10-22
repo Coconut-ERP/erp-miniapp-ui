@@ -90,7 +90,7 @@ type DataTableProps<TFeatures extends TableFeatures, TData extends RowData> = Om
 type DataTableVirtualize = {
   /** Virtualize only above this many rows; smaller tables render every row. Default `100`. */
   threshold?: number;
-  /** Row height guess in px until rows are measured. Default `37` (one line of `text-sm`). */
+  /** Row height guess in px until rows are measured. Default `37` (one line of `text-sm`); `33` / `41` with `density` `"compact"` / `"default"`. */
   estimateRowHeight?: number;
   /** Rows rendered beyond the viewport on each side. Default `10`. */
   overscan?: number;
@@ -142,6 +142,9 @@ function pinning(column: LooseColumn) {
 
 const defaultResizeLabel = (name: string) => `Resize ${name}`;
 
+/** Row height guess per `density` (cell + 1px border), until rows are measured. */
+const ROW_HEIGHT = { auto: 37, compact: 33, default: 41 } as const;
+
 /** Pinned side + the CSS variable on `<table>` holding the column's offset. */
 type Pin = { pinned: "left" | "right"; offsetVar: string };
 
@@ -171,6 +174,8 @@ type BodyProps<TFeatures extends TableFeatures, TData extends RowData> = {
   columnThreshold: number;
   estimateRowHeight: number;
   overscan: number;
+  /** `division="zebra"`: odd rows get `striped`. */
+  zebra: boolean;
   tableRef: React.RefObject<HTMLTableElement | null>;
   /** Set by whichever body is mounted; backs `apiRef.scrollToRow`. */
   scrollerRef: React.RefObject<RowScroller | null>;
@@ -189,7 +194,8 @@ function sameBody(prev: BodyProps<any, any>, next: BodyProps<any, any>) {
     prev.threshold !== next.threshold ||
     prev.columnThreshold !== next.columnThreshold ||
     prev.estimateRowHeight !== next.estimateRowHeight ||
-    prev.overscan !== next.overscan
+    prev.overscan !== next.overscan ||
+    prev.zebra !== next.zebra
   ) {
     return false;
   }
@@ -213,6 +219,8 @@ type RowProps<TFeatures extends TableFeatures, TData extends RowData> = {
   to: number;
   getRowProps?: (row: Row<TFeatures, TData>) => DataTableRowProps;
   getCellProps?: (cell: Cell<TFeatures, TData, unknown>) => DataTableCellProps;
+  /** Zebra stripe — every other row by position in the row model, so it holds while virtualized. */
+  striped?: boolean;
   /** Virtualizer index + measuring ref, when rows are virtualized. */
   index?: number;
   measure?: (node: HTMLTableRowElement | null) => void;
@@ -232,6 +240,7 @@ function BodyRowView<TFeatures extends TableFeatures, TData extends RowData>({
   to,
   getRowProps,
   getCellProps,
+  striped,
   index,
   measure,
 }: RowProps<TFeatures, TData>) {
@@ -270,18 +279,24 @@ function BodyRowView<TFeatures extends TableFeatures, TData extends RowData>({
     <TableRow
       data-state={selected ? "selected" : undefined}
       aria-selected={r.getIsSelected ? selected : undefined}
+      striped={striped}
       {...rowProps}
       data-index={index}
       ref={measure}
       state={rowProps.state ?? (selected ? "selected" : undefined)}
     >
       {layout.start.map(renderCell)}
-      {before > 0 ? <td aria-hidden="true" colSpan={before} style={{ padding: 0 }} /> : null}
+      {before > 0 ? <ColumnSpacer colSpan={before} /> : null}
       {layout.center.slice(from, to).map(renderCell)}
-      {after > 0 ? <td aria-hidden="true" colSpan={after} style={{ padding: 0 }} /> : null}
+      {after > 0 ? <ColumnSpacer colSpan={after} /> : null}
       {layout.end.map(renderCell)}
     </TableRow>
   );
+}
+
+/** Stands in for the columns a windowed row leaves out; a `TableCell` so card rows stay painted. */
+function ColumnSpacer({ colSpan }: { colSpan: number }) {
+  return <TableCell aria-hidden="true" colSpan={colSpan} className="p-0" style={{ padding: 0 }} />;
 }
 
 // `memo` drops the generics; the cast restores them.
@@ -392,10 +407,12 @@ type WindowedProps<TFeatures extends TableFeatures, TData extends RowData> = Bod
 function rowProps<TFeatures extends TableFeatures, TData extends RowData>(
   props: WindowedProps<TFeatures, TData>,
   row: Row<TFeatures, TData>,
+  position: number,
 ): RowProps<TFeatures, TData> {
   return {
     table: props.table,
     row,
+    striped: props.zebra && position % 2 === 1,
     layout: props.layout,
     pins: props.pins,
     from: props.slice.from,
@@ -414,8 +431,8 @@ function PlainRows<TFeatures extends TableFeatures, TData extends RowData>(props
   }, [scrollerRef]);
   return (
     <TableBody ref={bodyRef}>
-      {props.rows.map((row) => (
-        <BodyRow key={row.id} {...rowProps(props, row)} />
+      {props.rows.map((row, position) => (
+        <BodyRow key={row.id} {...rowProps(props, row, position)} />
       ))}
     </TableBody>
   );
@@ -443,8 +460,8 @@ function VirtualRows<TFeatures extends TableFeatures, TData extends RowData>(pro
   const first = props.rows.slice(0, FIRST_ROWS);
   return (
     <TableBody ref={bodyRef}>
-      {first.map((row) => (
-        <BodyRow key={row.id} {...rowProps(props, row)} />
+      {first.map((row, position) => (
+        <BodyRow key={row.id} {...rowProps(props, row, position)} />
       ))}
       <Spacer
         height={(props.rows.length - first.length) * props.estimateRowHeight}
@@ -569,7 +586,7 @@ function VirtualBody<TFeatures extends TableFeatures, TData extends RowData>({
         return row ? (
           <BodyRow
             key={row.id}
-            {...rowProps(props, row)}
+            {...rowProps(props, row, item.index)}
             index={item.index}
             measure={virtualizer.measureElement}
           />
@@ -608,6 +625,11 @@ function pinVar(pins: Map<string, Pin>, columnId: string) {
  * `getHeaderProps` / `getFooterProps`. With grouped columns, a leaf column outside
  * any group spans the header rows (`rowSpan`) instead of leaving empty cells above it.
  *
+ * Row styling comes from `Table` props: `division` (`"zebra"` stripes by position, so it
+ * holds through sorting and `virtualize`), `density`, and `stickyFooter` for a totals row
+ * that stays in view. Flag rows with `getRowProps` → `state` rather than a background
+ * class — the state then beats the stripe and pinned cells repaint to match.
+ *
  * While a column is dragged only the header re-renders; the body is skipped as long
  * as the row model is unchanged, so large tables resize smoothly.
  *
@@ -625,6 +647,8 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
   resizeLabel = defaultResizeLabel,
   virtualize,
   apiRef,
+  division = "lines",
+  density,
   className,
   style,
   ...props
@@ -751,6 +775,8 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
     <Table
       ref={tableRef}
       layout={sized ? "fixed" : "auto"}
+      division={division}
+      density={density}
       className={className}
       style={{ ...pinOffsets, ...(sized ? { width: loose.getTotalSize?.() } : {}), ...style }}
       {...props}
@@ -779,8 +805,9 @@ function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
         // Windowing columns needs their widths, so only with `columnSizingFeature`.
         columnThreshold={virtual && sized ? (virtual.columnThreshold ?? 40) : Number.POSITIVE_INFINITY}
         tableRef={tableRef}
-        estimateRowHeight={virtual?.estimateRowHeight ?? 37}
+        estimateRowHeight={virtual?.estimateRowHeight ?? ROW_HEIGHT[density ?? "auto"]}
         overscan={virtual?.overscan ?? 10}
+        zebra={division === "zebra"}
         scrollerRef={scrollerRef}
       />
       {footerGroups.length > 0 ? (

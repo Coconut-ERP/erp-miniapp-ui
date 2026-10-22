@@ -12,6 +12,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.10.0] - 2026-10-22
+
+### Added
+
+- `Table` / `DataTable` `division` (`"lines"` default | `"zebra"` | `"cards"` | `"plain"`) — row separators. Zebra drops the borders, stripes every other row and hovers in primary; cards turn each row into a rounded card with a 4px gap on a muted backdrop; plain drops separators. Pinned cells repaint stripe, hover and card surface opaquely. `DataTable` stripes by position in the row model, so stripes hold through sorting and `virtualize`; with bare `Table`, set the new `TableRow` `striped` on every other body row
+- `Table` / `DataTable` `stickyFooter` — keeps `<tfoot>` (totals) at the bottom of the scroll area on an opaque surface; the table container owns vertical scrolling, as with `stickyHeader`
+- `Table` / `DataTable` `density` (`"compact"` 32px | `"default"` 40px rows, Carbon) on headers and cells. Omitted keeps today's padding-sized rows. `DataTable` `virtualize.estimateRowHeight` defaults to `33` / `41` to match
+- Exported types `TableDivision`, `TableDensity`
+
+### Changed
+
+- `TableRow` `state` (`warning` / `error` / `selected`) always wins over the zebra stripe: a flagged or selected row drops the stripe, and the zebra hover skips it, so the row and its pinned cells show the state colour only
+- `Table` `stickyHeader` / `stickyHorizontalScrollbar` no longer throw where `ResizeObserver` is missing (jsdom)
+
 ## [0.9.0] - 2026-10-18
 
 ### Changed

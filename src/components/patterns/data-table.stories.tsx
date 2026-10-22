@@ -224,3 +224,45 @@ export const Virtualized: Story = {
     await expect(rows.length).toBeLessThan(100);
   },
 };
+
+const ROWS: Product[] = MANY.slice(0, 40).map((row, i) => ({ ...row, qty: i % 7 === 3 ? 0 : row.qty }));
+
+/**
+ * `division`, `density` and `stickyFooter` (Table props). Out-of-stock rows use
+ * `getRowProps` → `state: "error"`: the state beats the zebra stripe, and the pinned
+ * columns repaint red with the row.
+ */
+export const RowStyles: Story = {
+  args: { division: "zebra", density: "compact", stickyFooter: true },
+  argTypes: {
+    division: { control: "inline-radio", options: ["lines", "zebra", "cards", "plain"] },
+    density: { control: "inline-radio", options: [undefined, "compact", "default"] },
+    stickyFooter: { control: "boolean" },
+  },
+  render: function Render({ division, density, stickyFooter }) {
+    const table = useTable({
+      features: gridFeatures,
+      columns: gridColumns,
+      data: ROWS,
+      getRowId: (r) => r.id,
+      initialState: { columnPinning: { start: ["select", "name"], end: [] } },
+    });
+    return (
+      <div className="h-[420px] rounded-md border">
+        <DataTable
+          table={table}
+          stickyHeader
+          stickyFooter={stickyFooter}
+          division={division}
+          density={density}
+          getRowProps={(row) => ({ state: row.original.qty === 0 ? "error" : undefined })}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const flagged = canvasElement.querySelector("tbody tr[data-row-state=error]");
+    await expect(flagged).not.toHaveAttribute("data-striped");
+    await expect(canvasElement.querySelector("tfoot")).toHaveClass("sticky");
+  },
+};

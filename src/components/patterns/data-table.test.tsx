@@ -149,6 +149,38 @@ describe("DataTable", () => {
     expect(first).toHaveAttribute("data-status", "Bob");
     expect(header).toHaveClass("hover:bg-transparent");
   });
+
+  it("zebra stripes by sorted position; a row state replaces the stripe", () => {
+    const data: Person[] = [
+      { id: "1", name: "Dan", qty: 1, note: null },
+      { id: "2", name: "Bob", qty: 1, note: null },
+      { id: "3", name: "Cat", qty: 1, note: null },
+      { id: "4", name: "Al", qty: 1, note: null },
+    ];
+    function Rows() {
+      const table = useTable({
+        features,
+        columns,
+        data,
+        getRowId: (row) => row.id,
+        initialState: { sorting: [{ id: "name", desc: false }] },
+      });
+      return (
+        <DataTable
+          table={table}
+          division="zebra"
+          stickyFooter
+          getRowProps={(row) => ({ state: row.original.name === "Dan" ? "error" : undefined })}
+        />
+      );
+    }
+    const { container } = render(<Rows />);
+    const body = [...container.querySelectorAll("tbody > tr")];
+    expect(body.map((row) => row.querySelector("td")?.textContent)).toEqual(["Al", "Bob", "Cat", "Dan"]);
+    expect(body.map((row) => row.hasAttribute("data-striped"))).toEqual([false, true, false, false]);
+    expect(body[3]).toHaveAttribute("data-row-state", "error");
+    expect(container.querySelector("tfoot")).toHaveClass("sticky", "bottom-0");
+  });
 });
 
 describe("DataTable grouped columns", () => {

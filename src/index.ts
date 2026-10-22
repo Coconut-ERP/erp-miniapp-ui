@@ -105,6 +105,8 @@ export {
 } from "./components/ui/table";
 export type {
   TableCellProps,
+  TableDensity,
+  TableDivision,
   TableHeadProps,
   TableProps,
   TableRowProps,

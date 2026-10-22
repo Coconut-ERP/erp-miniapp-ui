@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./table";
 
 describe("TableHead sorting", () => {
   it("is a plain header unless sortable", () => {
@@ -140,4 +140,79 @@ it("pinned cells repaint the row tint opaquely", () => {
   const head = screen.getByRole("columnheader");
   expect(head.className).toContain("bg-[color-mix(in_oklab,var(--primary)_10%,var(--background))]");
   expect(head).not.toHaveClass("bg-primary/10");
+});
+
+describe("Table division", () => {
+  const rows = (division: React.ComponentProps<typeof Table>["division"]) =>
+    render(
+      <Table division={division}><TableBody>
+        <TableRow><TableCell pinned="left">a</TableCell></TableRow>
+        <TableRow striped><TableCell pinned="left">b</TableCell></TableRow>
+        <TableRow striped state="error"><TableCell pinned="left">c</TableCell></TableRow>
+      </TableBody></Table>,
+    );
+
+  it("lines keeps the row border and ignores striped", () => {
+    rows("lines");
+    const [, b] = screen.getAllByRole("row");
+    expect(b).toHaveClass("border-b");
+    expect(b).not.toHaveAttribute("data-striped");
+  });
+
+  it("zebra stripes striped rows, but state wins over the stripe", () => {
+    rows("zebra");
+    const [a, b, c] = screen.getAllByRole("row");
+    expect(a).toHaveClass("border-0");
+    expect(a).not.toHaveAttribute("data-striped");
+    expect(b).toHaveAttribute("data-striped");
+    expect(b).toHaveClass("bg-muted/50");
+    expect(c).not.toHaveAttribute("data-striped");
+    expect(c).toHaveClass("bg-destructive/10");
+    expect(c).not.toHaveClass("bg-muted/50");
+    // Pinned cells repaint the stripe opaquely; the zebra hover skips flagged rows.
+    const pinned = screen.getAllByRole("cell")[0]!.className;
+    expect(pinned).toContain("[tbody>tr[data-striped]>&]:bg-[color-mix(");
+    expect(pinned).toContain("[tbody>tr:not([data-row-state]):hover>&]");
+    expect(pinned).toContain("[tr[data-row-state=error]>&]:bg-[color-mix(");
+  });
+
+  it("cards separates rows and paints every cell opaquely", () => {
+    render(
+      <Table division="cards"><TableBody><TableRow state="warning">
+        <TableCell>x</TableCell>
+      </TableRow></TableBody></Table>,
+    );
+    expect(screen.getByRole("table")).toHaveClass("border-separate", "border-spacing-y-1");
+    const cell = screen.getByRole("cell");
+    expect(cell).toHaveClass("bg-background", "first:rounded-l-md");
+    expect(cell.className).toContain("[tr[data-row-state=warning]>&]:bg-[color-mix(");
+  });
+
+  it("plain drops separators", () => {
+    rows("plain");
+    expect(screen.getAllByRole("row")[0]).toHaveClass("border-0");
+  });
+});
+
+it("stickyFooter pins an opaque tfoot and makes the container scroll", () => {
+  const { container } = render(
+    <Table stickyFooter><TableBody><TableRow><TableCell>x</TableCell></TableRow></TableBody>
+      <TableFooter><TableRow><TableCell>Σ</TableCell></TableRow></TableFooter></Table>,
+  );
+  const tfoot = container.querySelector("tfoot")!;
+  expect(tfoot).toHaveClass("sticky", "bottom-0");
+  expect(tfoot.className).toContain("bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]");
+  expect(container.querySelector("[data-slot=table-container]")).toHaveClass("overflow-y-auto");
+});
+
+it.each([
+  ["compact", "h-8"],
+  ["default", "h-10"],
+] as const)("density %s sets row height %s", (density, height) => {
+  render(
+    <Table density={density}><TableHeader><TableRow><TableHead>A</TableHead></TableRow></TableHeader>
+      <TableBody><TableRow><TableCell>x</TableCell></TableRow></TableBody></Table>,
+  );
+  expect(screen.getByRole("cell")).toHaveClass(height);
+  expect(screen.getByRole("columnheader")).toHaveClass(height);
 });

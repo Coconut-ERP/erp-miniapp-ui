@@ -40,6 +40,34 @@ sortable fields server-side — never put a client string into `ORDER BY`.
 - `truncate` on `TableCell` — one line, full text in `title`.
 - `pinned="left|right"` + `pinOffset` — freeze a column; set it on header and body cells alike.
 - `state="warning|error|selected"` on `TableRow` — flag a row; pair with text, not colour alone.
+  Prefer it over a `bg-*` class: pinned cells repaint with it and it beats the zebra stripe.
+
+## Row styles
+
+Set on `Table` or `DataTable` — the library paints rows and pinned cells, so don't
+stripe rows or make pinned cells opaque yourself.
+
+- `division="lines"` (default) — a border under each row. `"zebra"` — no borders,
+  every other row striped, hover in primary. `"cards"` — each row a rounded card with a
+  4px gap on a muted backdrop. `"plain"` — no separators.
+  `DataTable` stripes by position in the row model (holds through sorting and
+  `virtualize`); with bare `Table`, set `striped` on every other body `TableRow`.
+- `density="compact"` (32px rows) or `"default"` (40px), per Carbon. Omitted: rows are
+  sized by padding (about 37px with `text-sm`). Font size stays the app's choice.
+- `stickyFooter` — the totals row stays at the bottom of the scroll area. Like
+  `stickyHeader`, give the table a height-bounded parent. Don't add `sticky bottom-0`
+  to footer cells.
+
+```tsx
+<DataTable
+  table={table}
+  stickyHeader
+  stickyFooter
+  division="zebra"
+  density="compact"
+  getRowProps={(row) => ({ state: row.original.mismatch ? "error" : undefined })}
+/>
+```
 
 ## Large tables (`DataTable`)
 

@@ -24,7 +24,41 @@ type TableProps = React.ComponentProps<"table"> & {
    * Default `"auto"`.
    */
   layout?: "auto" | "fixed";
+  /**
+   * Keep `<tfoot>` (totals) pinned to the bottom while the body scrolls. Like
+   * `stickyHeader`, the table container then owns vertical scrolling — give it a
+   * height-bounded parent. Default `false`.
+   */
+  stickyFooter?: boolean;
+  /**
+   * How body rows are separated. `"lines"` (default) — a border under each row;
+   * `"zebra"` — no borders, every other `striped` row tinted; `"cards"` — each row
+   * is a card with a small gap on a muted backdrop; `"plain"` — no separators.
+   * Row `state` always wins over the stripe, pinned cells included.
+   */
+  division?: TableDivision;
+  /**
+   * Row height (Carbon): `"compact"` 32px, `"default"` 40px. Omit to keep the
+   * padding-sized rows (about 37px with `text-sm`).
+   */
+  density?: TableDensity;
 };
+
+type TableDivision = "lines" | "zebra" | "cards" | "plain";
+type TableDensity = "compact" | "default";
+
+type TableStyle = {
+  stickyHeader: boolean;
+  stickyFooter: boolean;
+  division: TableDivision;
+  density?: TableDensity;
+};
+
+const TableStyleContext = React.createContext<TableStyle>({
+  stickyHeader: false,
+  stickyFooter: false,
+  division: "lines",
+});
 
 /**
  * Styled `<table>` wrapper with a horizontal-scroll container. Compose with
@@ -41,43 +75,64 @@ type TableProps = React.ComponentProps<"table"> & {
  * variants in an `overflow-hidden` ancestor — sticky positioning needs the
  * scrolling ancestor to see it.
  */
-function Table({ className, stickyHeader, stickyHorizontalScrollbar, layout, ...props }: TableProps) {
+function Table({
+  className,
+  stickyHeader = false,
+  stickyHorizontalScrollbar,
+  stickyFooter = false,
+  layout,
+  division = "lines",
+  density,
+  ...props
+}: TableProps) {
+  // Memoised so rows and cells (which read it) don't re-render with every table render.
+  const style = React.useMemo(
+    () => ({ stickyHeader, stickyFooter, division, density }),
+    [stickyHeader, stickyFooter, division, density],
+  );
   const table = (
     <table
       data-slot="table"
+      data-division={division}
+      data-density={density}
       className={cn(
         "w-full caption-bottom text-sm",
         layout === "fixed" && "table-fixed [&_td]:overflow-hidden [&_td]:text-ellipsis",
+        division === "cards" && "border-separate border-spacing-y-1 bg-muted/60",
         className,
       )}
       {...props}
     />
   );
 
-  if (!stickyHeader && !stickyHorizontalScrollbar) {
+  if (!stickyHeader && !stickyFooter && !stickyHorizontalScrollbar) {
     return (
-      <div data-slot="table-container" className="relative w-full overflow-x-auto">
-        {table}
-      </div>
+      <TableStyleContext value={style}>
+        <div data-slot="table-container" className="relative w-full overflow-x-auto">
+          {table}
+        </div>
+      </TableStyleContext>
     );
   }
 
   return (
-    <StickyHeaderContext value={!!stickyHeader}>
-      <TableScrollContainer stickyHeader={stickyHeader} stickyScrollbar={stickyHorizontalScrollbar}>
+    <TableStyleContext value={style}>
+      <TableScrollContainer
+        stickyHeader={stickyHeader || stickyFooter}
+        stickyScrollbar={stickyHorizontalScrollbar}
+      >
         {table}
       </TableScrollContainer>
-    </StickyHeaderContext>
+    </TableStyleContext>
   );
 }
-
-const StickyHeaderContext = React.createContext(false);
 
 function TableScrollContainer({
   stickyHeader,
   stickyScrollbar,
   children,
 }: {
+  /** Header or footer is sticky: the container owns vertical scrolling. */
   stickyHeader?: boolean;
   stickyScrollbar?: boolean;
   children: React.ReactNode;
@@ -92,6 +147,7 @@ function TableScrollContainer({
     const measure = () =>
       setSize({ scrollWidth: viewport.scrollWidth, clientWidth: viewport.clientWidth });
     measure();
+    if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(measure);
     observer.observe(viewport);
     for (const child of Array.from(viewport.children)) observer.observe(child);
@@ -137,7 +193,7 @@ function TableScrollContainer({
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   // `className` stays last so consumers can override the sticky background.
-  const sticky = React.use(StickyHeaderContext);
+  const sticky = React.use(TableStyleContext).stickyHeader;
   return (
     <thead
       data-slot="table-header"
@@ -157,11 +213,20 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   );
 }
 
+/** Opaque twin of the footer's `bg-muted/50`, for a sticky footer the body scrolls under. */
+const FOOTER_SURFACE = "bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]";
+
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+  // `className` stays last so consumers can override the sticky background.
+  const sticky = React.use(TableStyleContext).stickyFooter;
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
+      className={cn(
+        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+        sticky && `sticky bottom-0 z-10 ${FOOTER_SURFACE}`,
+        className,
+      )}
       {...props}
     />
   );
@@ -178,18 +243,38 @@ const ROW_STATE: Record<TableRowState, string> = {
   selected: "bg-muted",
 };
 
+/** Row separators per `Table` `division`. Zebra hovers in primary so it stands out from the stripe. */
+const ROW_DIVISION: Record<TableDivision, string | undefined> = {
+  lines: undefined,
+  zebra: "border-0 hover:bg-primary/10",
+  cards: "border-0",
+  plain: "border-0",
+};
+
 type TableRowProps = React.ComponentProps<"tr"> & {
   /** Tints the row (`warning`, `error`, `selected`). Colour is never the only signal: pair it with text. */
   state?: TableRowState;
+  /**
+   * Takes the stripe when the table's `division` is `"zebra"` — set it on every other
+   * body row (`DataTable` does this itself). Ignored when the row has a `state`.
+   */
+  striped?: boolean;
 };
 
-function TableRow({ className, state, ...props }: TableRowProps) {
+function TableRow({ className, state, striped, ...props }: TableRowProps) {
+  const { division } = React.use(TableStyleContext);
+  // One tint per row: a flagged or selected row drops the stripe.
+  const selected = (props as { "data-state"?: string })["data-state"] === "selected";
+  const stripe = division === "zebra" && !!striped && !state && !selected;
   return (
     <tr
       data-slot="table-row"
       data-row-state={state}
+      data-striped={stripe || undefined}
       className={cn(
         "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        ROW_DIVISION[division],
+        stripe && "bg-muted/50",
         state && ROW_STATE[state],
         className,
       )}
@@ -214,10 +299,10 @@ type CellLayoutProps = {
  * A pinned cell must be opaque (content scrolls under it), so the row's
  * translucent tint can't show through. Repaint the same tint pre-mixed onto
  * `--background`, from the semantic tokens, so pinned columns match the row.
+ * Card rows paint every body cell this way (the row sits on a muted backdrop).
  */
-const PINNED_SURFACE = cn(
-  "bg-background",
-  "[tbody>tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
+const ROW_TINTS = cn(
+  "[tfoot>tr>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
   "[tr[data-state=selected]>&]:bg-muted [tr[data-row-state=selected]>&]:bg-muted",
   "[tr[data-row-state=warning]>&]:bg-[color-mix(in_oklab,var(--warning)_10%,var(--background))]",
   "[tr[data-row-state=warning]:hover>&]:bg-[color-mix(in_oklab,var(--warning)_15%,var(--background))]",
@@ -225,13 +310,43 @@ const PINNED_SURFACE = cn(
   "[tr[data-row-state=error]:hover>&]:bg-[color-mix(in_oklab,var(--destructive)_15%,var(--background))]",
 );
 
+const PINNED_SURFACE = cn(
+  "bg-background",
+  "[tbody>tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
+  ROW_TINTS,
+);
+
+/**
+ * Zebra: stripe and primary hover, opaque. The hover skips flagged rows and outranks the
+ * stripe; striped rows never carry a `state` (see `TableRow`), so `state` always wins.
+ */
+const ZEBRA_SURFACE = cn(
+  "bg-background",
+  "[tbody>tr[data-striped]>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--background))]",
+  "[tbody>tr:not([data-row-state]):hover>&]:bg-[color-mix(in_oklab,var(--primary)_10%,var(--background))]",
+  ROW_TINTS,
+);
+
+const surface = (division: TableDivision) => (division === "zebra" ? ZEBRA_SURFACE : PINNED_SURFACE);
+
+/** Card rows: rounded ends on each row's first and last cell. */
+const CARD_CELL = "first:rounded-l-md last:rounded-r-md";
+
+/** Header and cell heights per `density`. Fonts are left to the app (`text-xs`…). */
+const HEAD_DENSITY: Record<TableDensity, string> = { compact: "h-8", default: "h-10" };
+const CELL_DENSITY: Record<TableDensity, string> = { compact: "h-8 py-1", default: "h-10" };
+
 /** Opaque twin of the sorted-header `bg-primary/10` tint, for pinned headers. */
 const PINNED_SORTED = "bg-[color-mix(in_oklab,var(--primary)_10%,var(--background))]";
 
-function pinProps({ pinned, pinOffset = 0 }: CellLayoutProps, style?: React.CSSProperties) {
+function pinProps(
+  { pinned, pinOffset = 0 }: CellLayoutProps,
+  division: TableDivision,
+  style?: React.CSSProperties,
+) {
   if (!pinned) return { className: undefined, style };
   return {
-    className: cn("sticky z-[5]", PINNED_SURFACE),
+    className: cn("sticky z-[5]", surface(division)),
     style: { ...style, [pinned]: pinOffset } as React.CSSProperties,
   };
 }
@@ -306,7 +421,8 @@ function TableHead({
     if (widthProp === undefined) setUncontrolledWidth(clamped);
     onWidthChange?.(clamped);
   };
-  const pin = pinProps({ pinned, pinOffset }, width === undefined ? style : { ...style, width });
+  const { division, density } = React.use(TableStyleContext);
+  const pin = pinProps({ pinned, pinOffset }, division, width === undefined ? style : { ...style, width });
   const Icon = sortDirection === "asc" ? ArrowUp : sortDirection === "desc" ? ArrowDown : ChevronsUpDown;
   return (
     <th
@@ -314,6 +430,7 @@ function TableHead({
       aria-sort={sortable ? (sortDirection ? ARIA_SORT[sortDirection] : "none") : undefined}
       className={cn(
         "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        density && HEAD_DENSITY[density],
         numeric && "text-right",
         // Anchors the resize handle; a pinned header's `sticky` (merged after) also anchors it.
         resizable && "relative",
@@ -447,7 +564,8 @@ function TableCell({
   title,
   ...props
 }: TableCellProps) {
-  const pin = pinProps({ pinned, pinOffset }, style);
+  const { division, density } = React.use(TableStyleContext);
+  const pin = pinProps({ pinned, pinOffset }, division, style);
   const empty = fallback !== undefined && isEmpty(children);
   const content = empty ? fallback : children;
   return (
@@ -456,6 +574,9 @@ function TableCell({
       title={title ?? (truncate && typeof content === "string" ? content : undefined)}
       className={cn(
         "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        density && CELL_DENSITY[density],
+        // Cards: the row sits on a muted backdrop, so every cell paints the opaque row tint.
+        division === "cards" && cn(CARD_CELL, !pinned && surface(division)),
         numeric && "text-right tabular-nums",
         truncate && "max-w-48 truncate",
         empty && "text-muted-foreground",
@@ -483,6 +604,8 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
 export type {
   TableCellProps,
+  TableDensity,
+  TableDivision,
   TableHeadProps,
   TableProps,
   TableRowProps,
