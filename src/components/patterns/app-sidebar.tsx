@@ -148,7 +148,7 @@ function parentClassName(isActive: boolean, disabled?: boolean, collapsed?: bool
 function childClassName(isActive: boolean, disabled?: boolean) {
   return cn(
     "relative flex w-full items-center rounded-md py-1 pe-4 ps-11 text-[13px] font-medium transition-colors outline-none",
-    "focus-visible:ring-2 focus-visible:ring-sidebar-ring/50",
+    "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sidebar-ring/50",
     disabled && "pointer-events-none opacity-50",
     isActive
       ? "text-primary before:absolute before:start-6 before:top-1/2 before:size-1.5 before:-translate-y-1/2 before:rounded-full before:bg-primary"

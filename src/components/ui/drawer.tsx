@@ -39,7 +39,7 @@ function DrawerOverlay({
     <DialogPrimitive.Overlay
       data-slot="drawer-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-50 bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -48,7 +48,7 @@ function DrawerOverlay({
 }
 
 const drawerContentVariants = cva(
-  "fixed z-50 flex flex-col gap-4 bg-popover text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 outline-none transition ease-in-out data-open:animate-in data-closed:animate-out data-closed:duration-200 data-open:duration-300",
+  "fixed z-50 flex flex-col gap-4 bg-popover text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 outline-none ease-drawer data-open:animate-in data-closed:animate-out data-closed:duration-200 data-open:duration-400",
   {
     variants: {
       side: {

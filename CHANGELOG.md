@@ -12,6 +12,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+### Fixed
+
+- Overlay enter/exit animations (Dialog, AlertDialog, Sheet, Drawer, Popover, HoverCard, Tooltip, DropdownMenu, Select) and the Accordion expand/collapse never ran, because the `animate-in` / `fade-*` / `zoom-*` / `slide-*` / `accordion-*` utilities were never defined. `styles.css` now ships them, with no new dependency.
+- The Tooltip enter animation never fired: Radix sets `data-state="delayed-open"` / `"instant-open"`, never `"open"`. Tooltips now animate only on the first, delayed open; moving to a neighbouring tooltip shows it instantly.
+
+### Changed
+
+- Motion tokens: stronger `ease-out` / `ease-in-out` curves, a new `ease-drawer` (iOS sheet curve), and a 150ms strong ease-out default for every `transition-*` utility. `prefers-reduced-motion` keeps the fades but turns off slide and scale.
+- Button: presses scale to 0.97 instead of shifting down 1px, and the transition now lists exact properties instead of `transition-all`.
+- Dialog / AlertDialog: open in 200ms and close in 150ms (was 100ms). Sheet / Drawer: `ease-drawer`, open in 400ms and close in 200ms. Tooltip: 125ms. DropdownMenu now scales from its trigger.
+- Replaced `transition-all` on Tabs, Badge, Accordion, and Progress, and `ease-linear` on Sidebar.
+- Collapsible content now animates its height, including AppSidebar submenus (their focus ring is now inset so it isn't clipped). Checkbox and Radio indicators pop in. Popover, HoverCard, and DropdownMenu slide 8px in from the side they open on. Toggle gets the press scale. Input, Textarea, and Select focus rings fade in instead of snapping. Spinners rotate in 0.75s.
+
 ## [0.10.2] - 2026-11-05
 
 ### Changed

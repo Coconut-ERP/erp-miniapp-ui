@@ -78,6 +78,107 @@
 }
 
 /*
+ * Motion.
+ *
+ * Strong custom curves (built-in CSS easings are too weak), and every
+ * `transition-*` utility without an explicit `ease-*` gets the strong ease-out.
+ * `ease-drawer` = iOS sheet curve for Sheet / Drawer.
+ */
+@theme {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ease-out);
+  --animate-accordion-down: accordion-down 200ms var(--ease-out);
+  --animate-accordion-up: accordion-up 150ms var(--ease-out);
+  --animate-collapsible-down: collapsible-down 200ms var(--ease-out);
+  --animate-collapsible-up: collapsible-up 150ms var(--ease-out);
+
+  @keyframes accordion-down {
+    from { height: 0; opacity: 0; }
+    to { height: var(--radix-accordion-content-height); opacity: 1; }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); opacity: 1; }
+    to { height: 0; opacity: 0; }
+  }
+  @keyframes collapsible-down {
+    from { height: 0; opacity: 0; }
+    to { height: var(--radix-collapsible-content-height); opacity: 1; }
+  }
+  @keyframes collapsible-up {
+    from { height: var(--radix-collapsible-content-height); opacity: 1; }
+    to { height: 0; opacity: 0; }
+  }
+}
+
+/*
+ * Enter/exit animation utilities (`animate-in fade-in-0 zoom-in-95 slide-in-from-top-2`, …),
+ * the shadcn vocabulary. ponytail: hand-rolled subset of tw-animate-css, only the classes
+ * our components use; swap for the package if consumers need the full set.
+ * `duration-*` / `ease-*` utilities set --tw-duration / --tw-ease and override the defaults.
+ */
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0)
+      scale(var(--tw-enter-scale, 1));
+  }
+}
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity, 1);
+    transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0)
+      scale(var(--tw-exit-scale, 1));
+  }
+}
+@utility animate-in {
+  animation: enter var(--tw-duration, 150ms) var(--tw-ease, var(--ease-out));
+}
+@utility animate-out {
+  /* exits are faster than enters: the system is responding, not the user deciding */
+  animation: exit var(--tw-duration, 100ms) var(--tw-ease, var(--ease-out)) forwards;
+}
+@utility fade-in-* {
+  --tw-enter-opacity: calc(--value(integer) / 100);
+}
+@utility fade-out-* {
+  --tw-exit-opacity: calc(--value(integer) / 100);
+}
+@utility zoom-in-* {
+  --tw-enter-scale: calc(--value(integer) / 100);
+}
+@utility zoom-out-* {
+  --tw-exit-scale: calc(--value(integer) / 100);
+}
+@utility slide-in-from-top { --tw-enter-translate-y: -100%; }
+@utility slide-in-from-bottom { --tw-enter-translate-y: 100%; }
+@utility slide-in-from-left { --tw-enter-translate-x: -100%; }
+@utility slide-in-from-right { --tw-enter-translate-x: 100%; }
+@utility slide-out-to-top { --tw-exit-translate-y: -100%; }
+@utility slide-out-to-bottom { --tw-exit-translate-y: 100%; }
+@utility slide-out-to-left { --tw-exit-translate-x: -100%; }
+@utility slide-out-to-right { --tw-exit-translate-x: 100%; }
+@utility slide-in-from-top-* { --tw-enter-translate-y: calc(var(--spacing) * --value(integer) * -1); }
+@utility slide-in-from-bottom-* { --tw-enter-translate-y: calc(var(--spacing) * --value(integer)); }
+@utility slide-in-from-left-* { --tw-enter-translate-x: calc(var(--spacing) * --value(integer) * -1); }
+@utility slide-in-from-right-* { --tw-enter-translate-x: calc(var(--spacing) * --value(integer)); }
+
+/* Reduced motion: keep the fades (they aid comprehension), drop movement and scale. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .animate-out {
+    --tw-enter-scale: 1 !important;
+    --tw-exit-scale: 1 !important;
+    --tw-enter-translate-x: 0 !important;
+    --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important;
+    --tw-exit-translate-y: 0 !important;
+  }
+}
+
+/*
  * Brand primary = ocean blue (was Dreams teal #0f766e).
  * --sidenav-width: 242px
  * --topbar-height: 56px
