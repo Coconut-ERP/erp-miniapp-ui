@@ -12,6 +12,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.10.2] - 2026-11-05
+
+### Changed
+
+- Native scrollbars are now thin (default on; opt out with `<html data-scrollbar="native">`) with a transparent track and a subtle thumb that only appears while hovering/scrolling the area (Linear-style) in every consuming mini app, via a global rule in `styles.css`. No more white track on tables and scrolling pages.
+
 ## [0.10.1] - 2026-10-22
 
 ### Fixed

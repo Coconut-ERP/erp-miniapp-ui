@@ -165,6 +165,40 @@
     @apply border-border outline-ring/40;
   }
 
+  /*
+   * Linear-style scrollbar (default). Opt out per app with <html data-scrollbar="native">.
+   * Thin, transparent track, thumb only while hovering the scroller.
+   * :where() keeps specificity at 0 so app styles still win.
+   */
+  :where(html:not([data-scrollbar="native"])) * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  :where(html:not([data-scrollbar="native"])) *:hover {
+    scrollbar-color: color-mix(in srgb, var(--muted-foreground) 35%, transparent) transparent;
+  }
+
+  /* ponytail: webkit fallback for browsers without scrollbar-color (Safari < 18.2) */
+  @supports not (scrollbar-color: auto) {
+    :where(html:not([data-scrollbar="native"])) ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background: transparent;
+    }
+    :where(html:not([data-scrollbar="native"])) ::-webkit-scrollbar-track,
+    :where(html:not([data-scrollbar="native"])) ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+    :where(html:not([data-scrollbar="native"])) ::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 9999px;
+    }
+    :where(html:not([data-scrollbar="native"])) *:hover::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+    }
+  }
+
   html {
     @apply font-sans antialiased;
     color-scheme: light;
