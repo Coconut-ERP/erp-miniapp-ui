@@ -39,6 +39,28 @@ export const Clearable: Story = {
   },
 };
 
+const PEOPLE: ComboboxOption[] = Array.from({ length: 5000 }, (_, i) => ({
+  value: String(i),
+  label: `${String(i).padStart(6, "0")} - Person ${i}`,
+}));
+
+/** 5,000 options: above 100 the list is virtualized, so only the visible ones are in the DOM. */
+export const LongList: Story = {
+  render: (args) => {
+    const [value, setValue] = React.useState<string | undefined>();
+    return (
+      <Combobox
+        {...args}
+        options={PEOPLE}
+        value={value}
+        onValueChange={setValue}
+        placeholder="Select person…"
+        clearable
+      />
+    );
+  },
+};
+
 /** Consumer-owned search: parent filters (or would call an API) via `onSearch`. */
 export const WithSearchCallback: Story = {
   render: (args) => {

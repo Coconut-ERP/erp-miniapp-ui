@@ -1,5 +1,6 @@
 "use client";
 
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
 import * as React from "react";
 
@@ -55,6 +56,9 @@ export type ComboboxProps = {
  * `listbox` with arrow-key navigation and Enter to select. Pair with Label via
  * `id` / `aria-label`.
  *
+ * Lists longer than 100 options are virtualized: only the options near the
+ * visible window are in the DOM, so thousands of options open instantly.
+ *
  * Do: keep `options` in sync when using `onSearch` (parent owns the data).
  * Don't: put ERP/API logic inside the library — pass search as a callback.
  */
@@ -85,7 +89,7 @@ export function Combobox({
 
   const listId = React.useId();
   const searchRef = React.useRef<HTMLInputElement>(null);
-  const listRef = React.useRef<HTMLUListElement>(null);
+  const scrollToRef = React.useRef<((index: number) => void) | null>(null);
   const value = valueProp !== undefined ? valueProp : uncontrolled;
 
   const selectedFromOptions = options.find((o) => o.value === value);
@@ -141,13 +145,19 @@ export function Combobox({
     setValue(undefined);
   }
 
+  /** Keyboard only — following the pointer would scroll the list under it. */
+  function moveHighlight(next: number) {
+    setHighlight(next);
+    scrollToRef.current?.(next);
+  }
+
   function onSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlight((i) => Math.min(i + 1, Math.max(filtered.length - 1, 0)));
+      moveHighlight(Math.min(highlight + 1, Math.max(filtered.length - 1, 0)));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setHighlight((i) => Math.max(i - 1, 0));
+      moveHighlight(Math.max(highlight - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
       const option = filtered[highlight];
@@ -156,17 +166,6 @@ export function Combobox({
       e.preventDefault();
       setOpen(false);
     }
-  }
-
-  function onListWheel(event: React.WheelEvent<HTMLUListElement>) {
-    // Dialog scroll-lock (react-remove-scroll) preventDefaults wheel on portaled
-    // content outside the dialog — apply delta manually so the list still scrolls.
-    const el = listRef.current;
-    if (!el) return;
-    if (el.scrollHeight <= el.clientHeight) return;
-    event.preventDefault();
-    event.stopPropagation();
-    el.scrollTop += event.deltaY;
   }
 
   return (
@@ -224,61 +223,166 @@ export function Combobox({
               }
             />
           </div>
-          <ul
-            ref={listRef}
+          <ComboboxList
             id={listId}
-            role="listbox"
-            aria-label={ariaLabel ?? placeholder}
-            className="max-h-60 overflow-y-auto overscroll-contain p-1"
-            onWheel={onListWheel}
-          >
-            {loading ? (
-              <li
-                role="presentation"
-                className="flex items-center justify-center gap-2 px-2 py-6 text-sm text-muted-foreground"
-              >
-                <Spinner />
-                Loading…
-              </li>
-            ) : filtered.length === 0 ? (
-              <li
-                role="presentation"
-                className="px-2 py-6 text-center text-sm text-muted-foreground"
-              >
-                {emptyText}
-              </li>
-            ) : (
-              filtered.map((option, index) => {
-                const isSelected = option.value === value;
-                const isActive = index === highlight;
-                return (
-                  <li
-                    key={option.value}
-                    id={`${listId}-option-${option.value}`}
-                    role="option"
-                    aria-selected={isSelected}
-                    aria-disabled={option.disabled || undefined}
-                    data-highlighted={isActive || undefined}
-                    className={cn(
-                      "relative flex cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-sm outline-none select-none",
-                      isActive && "bg-accent text-accent-foreground",
-                      option.disabled && "pointer-events-none opacity-50",
-                    )}
-                    onMouseEnter={() => setHighlight(index)}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => selectOption(option)}
-                  >
-                    <span className="truncate">{option.label}</span>
-                    {isSelected ? (
-                      <CheckIcon className="pointer-events-none absolute right-2 size-4" />
-                    ) : null}
-                  </li>
-                );
-              })
-            )}
-          </ul>
+            label={ariaLabel ?? placeholder}
+            options={filtered}
+            value={value}
+            highlight={highlight}
+            onHighlight={setHighlight}
+            onSelect={selectOption}
+            loading={loading}
+            emptyText={emptyText}
+            scrollToRef={scrollToRef}
+          />
         </PopoverContent>
       </Popover>
     </div>
+  );
+}
+
+/** Above this many options only the ones near the visible window are mounted. */
+const VIRTUALIZE_ABOVE = 100;
+/** `py-1.5` + one `text-sm` line; rows are measured, this is only the first guess. */
+const OPTION_HEIGHT = 32;
+/** The list's `p-1`. */
+const LIST_PADDING = 4;
+
+/** Stands in for the options a virtualized list leaves out, so the scroll height stays right. */
+function Spacer({ height }: { height: number }) {
+  if (height <= 0) return null;
+  return <li role="presentation" aria-hidden="true" style={{ height }} />;
+}
+
+/**
+ * The listbox. Its own component so the virtualizer mounts with the scroll element —
+ * the popover content is portaled and mounts after `Combobox` renders.
+ */
+function ComboboxList({
+  id,
+  label,
+  options,
+  value,
+  highlight,
+  onHighlight,
+  onSelect,
+  loading,
+  emptyText,
+  scrollToRef,
+}: {
+  id: string;
+  label: string;
+  options: ComboboxOption[];
+  value: string | undefined;
+  highlight: number;
+  onHighlight: (index: number) => void;
+  onSelect: (option: ComboboxOption) => void;
+  loading: boolean;
+  emptyText: string;
+  scrollToRef: React.RefObject<((index: number) => void) | null>;
+}) {
+  const listRef = React.useRef<HTMLUListElement>(null);
+  const virtual = !loading && options.length > VIRTUALIZE_ABOVE;
+  const virtualizer = useVirtualizer<HTMLUListElement, HTMLLIElement>({
+    count: options.length,
+    enabled: virtual,
+    getScrollElement: () => listRef.current,
+    estimateSize: () => OPTION_HEIGHT,
+    overscan: 8,
+    scrollMargin: LIST_PADDING,
+    getItemKey: (index) => options[index]?.value ?? index,
+  });
+
+  React.useLayoutEffect(() => {
+    scrollToRef.current = virtual ? (index) => virtualizer.scrollToIndex(index) : null;
+    return () => {
+      scrollToRef.current = null;
+    };
+  }, [scrollToRef, virtual, virtualizer]);
+
+  function onWheel(event: React.WheelEvent<HTMLUListElement>) {
+    // Dialog scroll-lock (react-remove-scroll) preventDefaults wheel on portaled
+    // content outside the dialog — apply delta manually so the list still scrolls.
+    const el = listRef.current;
+    if (!el) return;
+    if (el.scrollHeight <= el.clientHeight) return;
+    event.preventDefault();
+    event.stopPropagation();
+    el.scrollTop += event.deltaY;
+  }
+
+  function renderOption(option: ComboboxOption, index: number) {
+    const isSelected = option.value === value;
+    const isActive = index === highlight;
+    return (
+      <li
+        key={option.value}
+        id={`${id}-option-${option.value}`}
+        role="option"
+        aria-selected={isSelected}
+        aria-disabled={option.disabled || undefined}
+        aria-setsize={virtual ? options.length : undefined}
+        aria-posinset={virtual ? index + 1 : undefined}
+        data-highlighted={isActive || undefined}
+        data-index={virtual ? index : undefined}
+        ref={virtual ? virtualizer.measureElement : undefined}
+        className={cn(
+          "relative flex cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-sm outline-none select-none",
+          isActive && "bg-accent text-accent-foreground",
+          option.disabled && "pointer-events-none opacity-50",
+        )}
+        onMouseEnter={() => onHighlight(index)}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onSelect(option)}
+      >
+        <span className="truncate">{option.label}</span>
+        {isSelected ? <CheckIcon className="pointer-events-none absolute right-2 size-4" /> : null}
+      </li>
+    );
+  }
+
+  function renderOptions() {
+    if (!virtual) return options.map(renderOption);
+    const items = virtualizer.getVirtualItems();
+    const total = virtualizer.getTotalSize();
+    const first = items[0];
+    const last = items.at(-1);
+    return (
+      <>
+        <Spacer height={first ? first.start - LIST_PADDING : 0} />
+        {items.map((item) => {
+          const option = options[item.index];
+          return option ? renderOption(option, item.index) : null;
+        })}
+        <Spacer height={last ? total - (last.end - LIST_PADDING) : total} />
+      </>
+    );
+  }
+
+  return (
+    <ul
+      ref={listRef}
+      id={id}
+      role="listbox"
+      aria-label={label}
+      className="max-h-60 overflow-y-auto overscroll-contain p-1"
+      onWheel={onWheel}
+    >
+      {loading ? (
+        <li
+          role="presentation"
+          className="flex items-center justify-center gap-2 px-2 py-6 text-sm text-muted-foreground"
+        >
+          <Spinner />
+          Loading…
+        </li>
+      ) : options.length === 0 ? (
+        <li role="presentation" className="px-2 py-6 text-center text-sm text-muted-foreground">
+          {emptyText}
+        </li>
+      ) : (
+        renderOptions()
+      )}
+    </ul>
   );
 }

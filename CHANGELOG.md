@@ -14,6 +14,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `Combobox` mounted every option, so a list of a few thousand (e.g. all staff of a workshop) froze low-end phones for seconds on open and on each keystroke. Lists longer than 100 options are now virtualized — only the options near the visible window are in the DOM. No API change; arrow keys scroll the highlighted option into view.
 - Overlay enter/exit animations (Dialog, AlertDialog, Sheet, Drawer, Popover, HoverCard, Tooltip, DropdownMenu, Select) and the Accordion expand/collapse never ran, because the `animate-in` / `fade-*` / `zoom-*` / `slide-*` / `accordion-*` utilities were never defined. `styles.css` now ships them, with no new dependency.
 - The Tooltip enter animation never fired: Radix sets `data-state="delayed-open"` / `"instant-open"`, never `"open"`. Tooltips now animate only on the first, delayed open; moving to a neighbouring tooltip shows it instantly.
 
