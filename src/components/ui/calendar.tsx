@@ -8,13 +8,21 @@ import {
   type DayButton,
   type DayPickerProps,
 } from "react-day-picker";
+import { vi } from "react-day-picker/locale";
 
 import { cn } from "../../lib/utils";
 import { Button, buttonVariants } from "./button";
 
+/** Indexed by `Date#getDay()` (0 = Sunday). */
+const VI_WEEKDAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+
 /**
  * Date picker grid built on `react-day-picker`. Supports `mode="single"`,
  * `"multiple"`, or `"range"` selection (see `DayPickerProps`).
+ *
+ * Locale: Vietnamese by default — "Tháng 11, 2026" caption, `T2…CN` weekday
+ * row, week starting on Monday. Pass `locale` (from `react-day-picker/locale`)
+ * to render another language, or `weekStartsOn={0}` for a Sunday-first week.
  *
  * A11y: full keyboard navigation (arrow keys move focus, Enter/Space
  * selects) inherited from react-day-picker.
@@ -27,6 +35,7 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  locale = vi,
   formatters,
   components,
   ...props
@@ -34,9 +43,13 @@ function Calendar({
   buttonVariant?: React.ComponentProps<typeof Button>["variant"];
 }) {
   const defaultClassNames = getDefaultClassNames();
+  // date-fns spells Vietnamese months out ("Tháng Mười Một") and pads weekdays
+  // ("Th 2"); ERP screens use the numeric month and the compact T2…CN row.
+  const isVietnamese = locale.code === "vi";
 
   return (
     <DayPicker
+      locale={locale}
       showOutsideDays={showOutsideDays}
       className={cn(
         "group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
@@ -46,7 +59,14 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) => date.toLocaleString("default", { month: "short" }),
+        formatMonthDropdown: (date) =>
+          isVietnamese
+            ? `Tháng ${date.getMonth() + 1}`
+            : date.toLocaleString(locale.code ?? "default", { month: "short" }),
+        ...(isVietnamese && {
+          formatCaption: (date: Date) => `Tháng ${date.getMonth() + 1}, ${date.getFullYear()}`,
+          formatWeekdayName: (date: Date) => VI_WEEKDAYS[date.getDay()] ?? "",
+        }),
         ...formatters,
       }}
       classNames={{

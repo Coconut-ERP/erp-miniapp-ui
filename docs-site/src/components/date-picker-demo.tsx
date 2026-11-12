@@ -22,7 +22,7 @@ export function DatePickerDemo() {
       value={date}
       onChange={setDate}
       className="max-w-xs"
-      placeholder="Pick a date"
+      placeholder="Chọn ngày"
     />
   );
 }

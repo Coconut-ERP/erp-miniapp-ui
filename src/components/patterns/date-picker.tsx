@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { endOfISOWeek, format, isValid, parseISO, startOfISOWeek, startOfMonth } from "date-fns";
+import { vi } from "date-fns/locale";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -100,12 +101,11 @@ function formatMonthValue(year: number, month: MonthToken): string {
 function monthTriggerLabel(value: string | undefined): string | null {
   const parsed = parseMonthValue(value);
   if (!parsed) return null;
-  const date = new Date(Number(parsed.year), Number(parsed.month) - 1, 1);
-  return format(date, "MMM yyyy");
+  return `Tháng ${Number(parsed.month)}/${parsed.year}`;
 }
 
 function monthShortLabel(month: MonthToken): string {
-  return format(new Date(2000, Number(month) - 1, 1), "MMM");
+  return `Thg ${Number(month)}`;
 }
 
 export type DatePickerProps = {
@@ -113,7 +113,7 @@ export type DatePickerProps = {
   defaultValue?: Date;
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
-  /** date-fns format string (default `PPP`) */
+  /** date-fns format string, rendered in Vietnamese (default `dd/MM/yyyy`) */
   displayFormat?: string;
   disabled?: boolean;
   className?: string;
@@ -131,13 +131,16 @@ export type DatePickerProps = {
  * Single-date picker — Popover + Calendar composition (shadcn Date Picker
  * pattern). Controlled via `value`/`onChange`, or uncontrolled via
  * `defaultValue`.
+ *
+ * Locale: Vietnamese — calendar, placeholder ("Chọn ngày") and the trigger
+ * label (`dd/MM/yyyy`) need no setup in the consuming app.
  */
 export function DatePicker({
   value: valueProp,
   defaultValue,
   onChange,
-  placeholder = "Pick a date",
-  displayFormat = "PPP",
+  placeholder = "Chọn ngày",
+  displayFormat = "dd/MM/yyyy",
   disabled,
   className,
   buttonClassName,
@@ -174,7 +177,7 @@ export function DatePicker({
             )}
           >
             <CalendarIcon data-icon="inline-start" />
-            {value ? format(value, displayFormat) : <span>{placeholder}</span>}
+            {value ? format(value, displayFormat, { locale: vi }) : <span>{placeholder}</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align={align}>
@@ -200,6 +203,7 @@ export type DateRangePickerProps = {
   defaultValue?: DateRange;
   onChange?: (range: DateRange | undefined) => void;
   placeholder?: string;
+  /** date-fns format string, rendered in Vietnamese (default `dd/MM/yyyy`) */
   displayFormat?: string;
   disabled?: boolean;
   className?: string;
@@ -215,13 +219,16 @@ export type { DateRange };
 /**
  * Date range picker — Popover + Calendar `mode="range"`. Controlled via
  * `value`/`onChange`, or uncontrolled via `defaultValue`.
+ *
+ * Locale: Vietnamese — calendar, placeholder ("Chọn khoảng ngày") and the
+ * trigger label (`dd/MM/yyyy – dd/MM/yyyy`).
  */
 export function DateRangePicker({
   value: valueProp,
   defaultValue,
   onChange,
-  placeholder = "Pick a date range",
-  displayFormat = "LLL dd, y",
+  placeholder = "Chọn khoảng ngày",
+  displayFormat = "dd/MM/yyyy",
   disabled,
   className,
   buttonClassName,
@@ -241,9 +248,9 @@ export function DateRangePicker({
 
   const label =
     value?.from && value.to
-      ? `${format(value.from, displayFormat)} – ${format(value.to, displayFormat)}`
+      ? `${format(value.from, displayFormat, { locale: vi })} – ${format(value.to, displayFormat, { locale: vi })}`
       : value?.from
-        ? format(value.from, displayFormat)
+        ? format(value.from, displayFormat, { locale: vi })
         : null;
 
   return (
@@ -309,7 +316,7 @@ export function MonthPicker({
   value: valueProp,
   defaultValue,
   onChange,
-  placeholder = "Select a month",
+  placeholder = "Chọn tháng",
   disabled,
   className,
   buttonClassName,
@@ -370,7 +377,7 @@ export function MonthPicker({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label="Previous year"
+              aria-label="Năm trước"
               disabled={!canPrev}
               onClick={() => setViewYear((y) => clampYear(y - 1, minYear, maxYear))}
             >
@@ -381,7 +388,7 @@ export function MonthPicker({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label="Next year"
+              aria-label="Năm sau"
               disabled={!canNext}
               onClick={() => setViewYear((y) => clampYear(y + 1, minYear, maxYear))}
             >
@@ -390,7 +397,7 @@ export function MonthPicker({
           </div>
           <div
             role="listbox"
-            aria-label="Month"
+            aria-label="Tháng"
             className="grid grid-cols-4 gap-1"
           >
             {MONTH_VALUES.map((month) => {
@@ -555,7 +562,7 @@ export function YearPicker({
   value: valueProp,
   defaultValue,
   onChange,
-  placeholder = "Select a year",
+  placeholder = "Chọn năm",
   disabled,
   className,
   buttonClassName,
@@ -618,7 +625,7 @@ export function YearPicker({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label="Previous years"
+              aria-label="Các năm trước"
               disabled={!canPrev}
               onClick={() => setViewStart((s) => Math.max(minYear, s - YEAR_GRID_SIZE))}
             >
@@ -629,7 +636,7 @@ export function YearPicker({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label="Next years"
+              aria-label="Các năm sau"
               disabled={!canNext}
               onClick={() =>
                 setViewStart((s) =>
@@ -640,7 +647,7 @@ export function YearPicker({
               <ChevronRightIcon />
             </Button>
           </div>
-          <div role="listbox" aria-label="Year" className="grid grid-cols-4 gap-1">
+          <div role="listbox" aria-label="Năm" className="grid grid-cols-4 gap-1">
             {years.map((year) => {
               const outOfRange = year < minYear || year > maxYear;
               const selected = selectedYear === year;

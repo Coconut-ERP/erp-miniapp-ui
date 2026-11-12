@@ -134,7 +134,7 @@ export const patternDocs: Record<string, DocSpec> = {
     demos: [
       {
         title: "Basic",
-        code: `<DatePicker value={date} onChange={setDate} placeholder="Pick a date" />`,
+        code: `<DatePicker value={date} onChange={setDate} placeholder="Chọn ngày" />`,
         className: "items-stretch w-full max-w-xs",
         render: () => <DatePickerDemo />,
       },

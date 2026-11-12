@@ -45,6 +45,7 @@
 
 ## Components (patterns)
 - app-sidebar — Dreams ERP–aligned application sidebar. Pass `items` (+ optional `type: "section"`) and `activeId`; spacing/active styles stay in the library.
+- combobox.test — (no JSDoc yet — run the component-docs skill)
 - combobox — Searchable single-select — Popover + filter input over an options list.
 - confirm-dialog — Ready-made AlertDialog for confirming an action, with an optional trigger and a destructive style for irreversible actions.
 - data-table.ssr.test — (no JSDoc yet — run the component-docs skill)

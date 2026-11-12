@@ -15,7 +15,7 @@ import { DatePicker, DateRangePicker, MonthPicker, WeekPicker, YearPicker } from
 ```tsx
 const [date, setDate] = React.useState<Date>();
 
-<DatePicker value={date} onChange={setDate} placeholder="Pick a date" />
+<DatePicker value={date} onChange={setDate} placeholder="Chọn ngày" />
 
 {/* Date of birth — month/year dropdowns */}
 <DatePicker
@@ -33,7 +33,7 @@ const [range, setRange] = React.useState<{ from?: Date; to?: Date }>();
 
 {/* Month — value "YYYY-MM"; year arrows + month grid */}
 const [month, setMonth] = React.useState<string>();
-<MonthPicker value={month} onChange={setMonth} placeholder="Select a month" />
+<MonthPicker value={month} onChange={setMonth} placeholder="Chọn tháng" />
 
 {/* Week — value "YYYY-Www" (ISO week); clicking any day picks its Mon→Sun week */}
 const [week, setWeek] = React.useState<string>(); // e.g. "2026-W12"
@@ -57,7 +57,8 @@ const [year, setYear] = React.useState<string>();
 
 - Use `DatePicker` / `DateRangePicker` for forms and filters
 - Use bare `Calendar` only when embedding in a custom surface
-- Keep `date-fns` formatting via `displayFormat` (default `PPP`)
+- Keep `date-fns` formatting via `displayFormat` (default `dd/MM/yyyy`, rendered with the Vietnamese locale)
+- Rely on the built-in Vietnamese locale — calendar captions, weekday row, placeholders and trigger labels are Vietnamese by default; pass `locale` to a bare `Calendar` only when another language is needed
 - Use `MonthPicker` / `WeekPicker` / `YearPicker` when the form needs a period, not a day
 - Store the `WeekPicker` value as-is (`"2026-W12"`) — it sorts and compares as a string
 

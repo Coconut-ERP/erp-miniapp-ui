@@ -120,7 +120,7 @@ describe("WeekPicker year boundaries", () => {
     render(<WeekPicker defaultValue="2026-W12" fromYear={2025} toYear={2027} />);
     await userEvent.setup().click(trigger());
 
-    const years = screen.getByRole("combobox", { name: /year/i });
+    const years = screen.getByRole("combobox", { name: /năm/i });
     expect([...years.querySelectorAll("option")].map((o) => o.textContent)).toEqual([
       "2025",
       "2026",
@@ -135,7 +135,7 @@ describe("WeekPicker year boundaries", () => {
     render(<WeekPicker defaultValue="2026-W03" onChange={onChange} fromYear={2025} toYear={2027} />);
 
     await user.click(trigger());
-    await user.click(screen.getByRole("button", { name: /previous/i }));
+    await user.click(screen.getByRole("button", { name: /tháng trước/i }));
     await user.click((await dayCell("2025-12-15")).querySelector("button")!);
     expect(onChange).toHaveBeenCalledWith("2025-W51");
   });
