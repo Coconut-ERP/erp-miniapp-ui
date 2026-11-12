@@ -12,6 +12,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 > included). There is no separate 0.4.1 feature set — treat that tag as 0.5.0 and prefer the
 > `v0.5.0` release.
 
+## [0.10.4] - 2026-11-12
+
+### Changed
+
+- `Calendar` and every date picker now render in Vietnamese by default — no setup in the consuming app. The calendar caption reads "Tháng 11, 2026", the weekday row is `T2 … CN`, and navigation / dropdown labels are Vietnamese. Pass `locale` (from `react-day-picker/locale`) to `Calendar` for another language.
+- **Behavior change:** the calendar week now starts on Monday (Vietnamese locale default). Pass `weekStartsOn={0}` to `Calendar` for a Sunday-first week.
+- **Behavior change:** `DatePicker` and `DateRangePicker` default `displayFormat` is now `dd/MM/yyyy` (was `PPP` / `LLL dd, y`), formatted with the Vietnamese locale. `MonthPicker` shows "Tháng 3/2026" and a `Thg 1 … Thg 12` grid.
+- Default placeholders are Vietnamese: "Chọn ngày", "Chọn khoảng ngày", "Chọn tháng", "Chọn năm" (`WeekPicker` already used "Chọn tuần"). Month / year navigation aria-labels are Vietnamese too.
+
+## [0.10.3] - 2026-11-12
+
 ### Fixed
 
 - `Combobox` mounted every option, so a list of a few thousand (e.g. all staff of a workshop) froze low-end phones for seconds on open and on each keystroke. Lists longer than 100 options are now virtualized — only the options near the visible window are in the DOM. No API change; arrow keys scroll the highlighted option into view.
@@ -20,10 +31,6 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- `Calendar` and every date picker now render in Vietnamese by default — no setup in the consuming app. The calendar caption reads "Tháng 11, 2026", the weekday row is `T2 … CN`, and navigation / dropdown labels are Vietnamese. Pass `locale` (from `react-day-picker/locale`) to `Calendar` for another language.
-- **Behavior change:** the calendar week now starts on Monday (Vietnamese locale default). Pass `weekStartsOn={0}` to `Calendar` for a Sunday-first week.
-- **Behavior change:** `DatePicker` and `DateRangePicker` default `displayFormat` is now `dd/MM/yyyy` (was `PPP` / `LLL dd, y`), formatted with the Vietnamese locale. `MonthPicker` shows "Tháng 3/2026" and a `Thg 1 … Thg 12` grid.
-- Default placeholders are Vietnamese: "Chọn ngày", "Chọn khoảng ngày", "Chọn tháng", "Chọn năm" (`WeekPicker` already used "Chọn tuần"). Month / year navigation aria-labels are Vietnamese too.
 - Motion tokens: stronger `ease-out` / `ease-in-out` curves, a new `ease-drawer` (iOS sheet curve), and a 150ms strong ease-out default for every `transition-*` utility. `prefers-reduced-motion` keeps the fades but turns off slide and scale.
 - Button: presses scale to 0.97 instead of shifting down 1px, and the transition now lists exact properties instead of `transition-all`.
 - Dialog / AlertDialog: open in 200ms and close in 150ms (was 100ms). Sheet / Drawer: `ease-drawer`, open in 400ms and close in 200ms. Tooltip: 125ms. DropdownMenu now scales from its trigger.
